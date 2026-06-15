@@ -11,9 +11,113 @@ datasource db {
   provider = "postgresql"
 }
 
-// Placeholder model to verify database connection works
+/// 1. USER MODEL
+/// Handles local auth, Google OAuth, customization settings, and network states.
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
+  id               String   @id @default(uuid())
+  email            String   @unique
+  username         String   @unique
+  displayName      String
+  passwordHash     String?  // Nullable to support Google OAuth
+  googleId         String?  @unique // Nullable to support Local Auth
+  avatarUrl        String?  
+  bio              String?  @db.Text
+  
+  // Dual-track design for user-specific override behavior
+  colorPalette     String   @default("default") // Options: "default", "emerald", "cyberpunk", "sunset"
+  colorScheme      String   @default("light")   // Options: "light", "dark"
+  
+  isOnline         Boolean  @default(false)
+  isGuest          Boolean  @default(false)   // Flags ephemeral recruiter accounts
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relationships
+  posts            Post[]
+  comments         Comment[]
+  postLikes        PostLike[]
+  commentLikes     CommentLike[]
+  sentFollows      Follow[]    @relation("FollowerRelation")
+  receivedFollows  Follow[]    @relation("FollowingRelation")
+}
+
+/// 2. FOLLOW MODEL
+/// Explicit join model to track follow requests (PENDING) vs active connections (ACCEPTED).
+model Follow {
+  id          String       @id @default(uuid())
+  followerId  String
+  followingId String
+  status      FollowStatus @default(PENDING) // Handles request workflow (Accept/Decline)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  follower    User         @relation("FollowerRelation", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User         @relation("FollowingRelation", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId]) // Prevents sending duplicate requests
+}
+
+enum FollowStatus {
+  PENDING
+  ACCEPTED
+}
+
+/// 3. POST MODEL
+/// Contains textual components and optional media structures prepared for future Cloudinary assets.
+model Post {
+  id        String     @id @default(uuid())
+  content   String     @db.Text
+  imageUrl  String?    // Nullable string to seamlessly store Cloudinary links later
+  authorId  String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments  Comment[]
+  likes     PostLike[]
+
+  @@index([createdAt(sort: Desc)]) // Optimizes chronological index querying
+}
+
+/// 4. COMMENT MODEL
+/// Users can add comments directly attached to posts and receive individual likes.
+model Comment {
+  id        String        @id @default(uuid())
+  content   String        @db.Text
+  postId    String
+  authorId  String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  post      Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  likes     CommentLike[]
+}
+
+/// 5. POST LIKE MODEL
+/// Explicit join model to handle unique, non-duplicable post liking profiles.
+model PostLike {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
   createdAt DateTime @default(now())
+
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId]) // Ensures a user can only like a post once
+}
+
+/// 6. COMMENT LIKE MODEL
+/// Explicit join model to handle unique comment liking maps.
+model CommentLike {
+  id        String   @id @default(uuid())
+  commentId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId]) // Ensures a user can only like a comment once
 }
