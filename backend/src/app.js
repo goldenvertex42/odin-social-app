@@ -2,6 +2,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import express from 'express';
+import './config/cloudinary.js';
 import cors from 'cors';
 import passport from './config/passport.js';
 import authRouter from './routes/auth/auth.routes.js';
