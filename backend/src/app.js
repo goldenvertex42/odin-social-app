@@ -5,6 +5,10 @@ import express from 'express';
 import cors from 'cors';
 import passport from './config/passport.js';
 import authRouter from './routes/auth/auth.routes.js';
+import userRouter from './routes/user/user.routes.js';
+import postRoutes from './routes/post/post.routes.js';
+import commentRoutes from './routes/comment/comment.routes.js';
+import likeRoutes from './routes/like/like.routes.js';
 import { prisma } from "../../db/src/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -36,6 +40,11 @@ app.use(passport.initialize());
 
 // --- Route Registrations ---
 app.use('/api/auth', authRouter); // Authentication routes (login, register, logout)
+app.use('/api/users', userRouter); // User-related routes (follow, unfollow, profile updates)
+app.use('/api/posts', postRoutes); // Post-related routes (create, read, update, delete)
+app.use('/api/comments', commentRoutes); // Comment-related routes (create, read, update, delete)
+app.use('/api/likes', likeRoutes); // Like-related routes (toggle likes on posts and comments)
+
 
 // Health check endpoint
 app.get('/api/test', (req, res) => {
