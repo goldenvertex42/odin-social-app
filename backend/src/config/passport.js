@@ -89,10 +89,14 @@ passport.use(
           return done(new Error('No email returned from Google'), null);
         }
 
-        let avatarUrl = profile.photos && profile.photos[0] ? profile.photos[0].value : null;
-        if (avatarUrl && avatarUrl.includes('=s96-c')) {
-          avatarUrl = avatarUrl.replace('=s96-c', '=s400-c');
+        // 1. Extract the high-res Google profile photo if it exists
+        let googleAvatarUrl = profile.photos && profile.photos[0] ? profile.photos[0].value : null;
+        if (googleAvatarUrl && googleAvatarUrl.includes('=s96-c')) {
+          googleAvatarUrl = googleAvatarUrl.replace('=s96-c', '=s400-c'); // Force higher resolution
         }
+
+        // 2. Determine final avatar choice (Google image vs. Gravatar fallback)
+        const finalAvatarUrl = googleAvatarUrl || getGravatarUrl(email);
 
         let user = await prisma.user.findFirst({
           where: {
@@ -103,16 +107,23 @@ passport.use(
           }
         });
 
+        // CASE A: User record already occupies a database row
         if (user) {
+          // If they are a local user linking Google for the first time
           if (!user.googleId) {
             user = await prisma.user.update({
               where: { id: user.id },
-              data: { googleId: profile.id, avatarUrl: user.avatarUrl || avatarUrl }
+              data: { 
+                googleId: profile.id, 
+                // Upgrade to Google photo if their old avatar was missing or a generic fallback
+                avatarUrl: user.avatarUrl && !user.avatarUrl.includes('gravatar.com') ? user.avatarUrl : finalAvatarUrl 
+              }
             });
           }
           return done(null, user);
         }
 
+        // CASE B: Brand new OAuth registration node creation
         const baseUsername = profile.displayName.toLowerCase().replace(/[^a-z0-9]/g, '');
         const randomString = Math.random().toString(36).substring(2, 6);
         const usernamePlaceholder = `${baseUsername}_${randomString}`;
@@ -123,7 +134,9 @@ passport.use(
             googleId: profile.id,
             displayName: profile.displayName,
             username: usernamePlaceholder,
-            avatarUrl: avatarUrl,
+            avatarUrl: finalAvatarUrl, // Natively assigns Google photo or custom Gravatar retro layout
+            colorPalette: 'default',
+            colorScheme: 'light'
           }
         });
 

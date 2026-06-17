@@ -33,7 +33,7 @@ describe('Authentication Routing Integration Tests', () => {
       expect(res.body.user.email).toBe(testUserPayload.email);
       expect(res.body.user.colorPalette).toBe('default');
       expect(res.body.user.colorScheme).toBe('light');
-      expect(res.body.user.avatarUrl).toContain('https://dicebear.com');
+      expect(res.body.user.avatarUrl).toContain('https://gravatar.com');
       expect(res.body.user).not.toHaveProperty('passwordHash'); // Ensure secure serialization
     });
 

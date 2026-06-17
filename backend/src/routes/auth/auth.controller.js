@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
+import { getGravatarUrl } from '../../utils/gravatar.js';
 import { prisma } from '../../../../db/src/index.js';
 
 // Helper function to generate stateless JWTs
@@ -17,12 +18,10 @@ export const registerUser = async (req, res, next) => {
   try {
     const { email, username, password, displayName } = req.body;
 
-    // Basic validation
     if (!email || !username || !password) {
       return res.status(400).json({ message: 'Missing required fields.' });
     }
 
-    // Check if user already exists
     const existingUser = await prisma.user.findFirst({
       where: { OR: [{ email }, { username }] }
     });
@@ -31,44 +30,29 @@ export const registerUser = async (req, res, next) => {
       return res.status(400).json({ message: 'Email or Username already taken.' });
     }
 
-    // Hash the password
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Assign a default placeholder avatar
-    const seeds = ['Felix', 'Aneka', 'Harley', 'Buster', 'Kiki', 'Casper', 'Socks', 'Spooky', 'Mittens'];
-    const randomSeed = seeds[Math.floor(Math.random() * seeds.length)];
-    const defaultAvatarUrl = `https://dicebear.com{randomSeed}`;
+    const defaultAvatarUrl = getGravatarUrl(email);
 
-    // Create the user record matching our new schema parameters
     const newUser = await prisma.user.create({
-      data: { 
-        email, 
-        username, 
-        displayName: displayName || username, 
-        avatarUrl: defaultAvatarUrl, 
+      data: {
+        email,
+        username,
+        displayName: displayName || username,
+        avatarUrl: defaultAvatarUrl,
         passwordHash,
         colorPalette: 'default',
         colorScheme: 'light'
       },
       select: {
-        id: true,
-        email: true,
-        username: true,
-        displayName: true,
-        avatarUrl: true,
-        bio: true,
-        colorPalette: true,
-        colorScheme: true,
-        isOnline: true,
-        isGuest: true,
-        createdAt: true
+        id: true, email: true, username: true, displayName: true,
+        avatarUrl: true, bio: true, colorPalette: true, colorScheme: true,
+        isOnline: true, isGuest: true, createdAt: true
       }
     });
 
-    // Automatically log the user in by generating a token upon registration
     const token = generateToken(newUser.id);
-
     return res.status(201).json({ message: 'User registered successfully.', token, user: newUser });
   } catch (error) {
     next(error);
@@ -162,22 +146,22 @@ export const getMe = async (req, res) => {
 // 5. GOOGLE OAUTH CALLBACK CONTROLLER
 export const googleAuthCallback = async (req, res, next) => {
   try {
+    const frontendBaseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
     if (!req.user) {
-      return res.redirect('http://localhost:5173/login?error=oauth_failed');
+      return res.redirect(`${frontendBaseUrl}/login?error=oauth_failed`);
     }
 
-    // Set network presence status to true, matching loginUser behavior
+    // Set network presence status to true
     await prisma.user.update({
       where: { id: req.user.id },
       data: { isOnline: true }
     });
 
-    // Generate the stateless access token
     const token = generateToken(req.user.id);
-
-    // Redirect back to the frontend workspace route with the token parameter
-    const frontendRedirectUrl = `http://localhost:5173/auth-success?token=${token}`;
-
+    
+    // Dynamic production-ready redirect link parsing
+    const frontendRedirectUrl = `${frontendBaseUrl}/auth-success?token=${token}`;
     return res.redirect(frontendRedirectUrl);
   } catch (error) {
     next(error);
@@ -187,17 +171,12 @@ export const googleAuthCallback = async (req, res, next) => {
 // 6. INSTANT RECRUITER GUEST CONTROLLER
 export const loginGuestUser = async (req, res, next) => {
   try {
-    // Generate a completely unique, timestamped identifier string
     const uniqueId = Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
     const guestUsername = `recruiter_guest_${uniqueId}`;
     const guestEmail = `${guestUsername}@guest.odin.local`;
 
-    // Assign a friendly avatar variant using Dicebear glyph configurations
-    const guestSeeds = ['Buster', 'Casper', 'Mittens', 'Socks', 'Spooky'];
-    const selectedSeed = guestSeeds[Math.floor(Math.random() * guestSeeds.length)];
-    const guestAvatar = `https://dicebear.com{selectedSeed}`;
+    const guestAvatar = getGravatarUrl(guestEmail);
 
-    // Commit the transient guest model directly to our custom layout
     const newGuest = await prisma.user.create({
       data: {
         email: guestEmail,
@@ -205,33 +184,20 @@ export const loginGuestUser = async (req, res, next) => {
         displayName: "✨ Recruiter Guest Profile",
         avatarUrl: guestAvatar,
         bio: "Logged in via instant guest token access. Feel free to explore!",
-        colorPalette: "cyberpunk", // Fun default override option for recruiters to see instantly
+        colorPalette: "cyberpunk",
         colorScheme: "dark",
         isOnline: true,
         isGuest: true,
       },
       select: {
-        id: true,
-        email: true,
-        username: true,
-        displayName: true,
-        avatarUrl: true,
-        bio: true,
-        colorPalette: true,
-        colorScheme: true,
-        isOnline: true,
-        isGuest: true,
-        createdAt: true
+        id: true, email: true, username: true, displayName: true,
+        avatarUrl: true, bio: true, colorPalette: true, colorScheme: true,
+        isOnline: true, isGuest: true, createdAt: true
       }
     });
 
     const token = generateToken(newGuest.id);
-
-    return res.status(201).json({
-      message: 'Guest workspace initialized successfully.',
-      token,
-      user: newGuest
-    });
+    return res.status(201).json({ message: 'Guest workspace initialized successfully.', token, user: newGuest });
   } catch (error) {
     next(error);
   }

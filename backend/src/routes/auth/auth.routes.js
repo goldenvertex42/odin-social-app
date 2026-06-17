@@ -22,7 +22,7 @@ router.post('/guest', loginGuestUser);
 
 // --- Google Third-Party OAuth Endpoints ---
 router.get(
-  '/google', 
+  '/google',
   passport.authenticate('google', { 
     scope: ['profile', 'email'], 
     session: false 
@@ -30,11 +30,12 @@ router.get(
 );
 
 router.get(
-  '/google/callback', 
+  '/google/callback',
   passport.authenticate('google', { 
-    failureRedirect: '/login', 
+    // Dynamically references environment variables across dev and prod environments
+    failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=oauth_failed`, 
     session: false 
-  }), 
+  }),
   googleAuthCallback
 );
 
