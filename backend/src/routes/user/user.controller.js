@@ -1,4 +1,21 @@
 import { prisma } from '../../../../db/src/index.js';
+import cloudinary from 'cloudinary';
+
+const streamUploadToCloudinary = (fileBuffer) => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.v2.uploader.upload_stream(
+      {
+        folder: 'odin_social_avatars', // Group user icons into a clean separate directory
+        transformation: [{ width: 400, height: 400, crop: 'limit' }] // Auto-downscale high-res images
+      },
+      (error, result) => {
+        if (result) resolve(result.secure_url);
+        else reject(error);
+      }
+    );
+    uploadStream.end(fileBuffer);
+  });
+};
 
 // 1. FETCH ALL USERS (WITH FOLLOW STATUS DISCOVERY)
 export const getAllUsers = async (req, res, next) => {
@@ -145,9 +162,8 @@ export const removeFollowRelationship = async (req, res, next) => {
 export const updateProfile = async (req, res, next) => {
   try {
     const currentUserId = req.user.id;
-    const { displayName, bio, colorPalette, colorScheme } = req.body;
+    const { displayName, bio, colorPalette, colorScheme, email } = req.body;
 
-    // Validate enum boundaries for color choices if they are provided
     const validPalettes = ['default', 'cyberpunk', 'nord', 'sunset'];
     const validSchemes = ['light', 'dark'];
 
@@ -159,13 +175,32 @@ export const updateProfile = async (req, res, next) => {
       return res.status(400).json({ message: 'Invalid color scheme luminosity selection.' });
     }
 
-    // Perform the update using Prisma's selective data assignment
+    if (email) {
+      const emailOwner = await prisma.user.findFirst({
+        where: { email: email.trim().toLowerCase(), id: { not: currentUserId } }
+      });
+      if (emailOwner) {
+        return res.status(400).json({ message: 'Email address is already linked to another account.' });
+      }
+    }
+
+    // ⚠️ CRITICAL UX ADDITION: Intercept and process incoming custom avatar files
+    let customAvatarUrl = undefined;
+    if (req.file) {
+      try {
+        customAvatarUrl = await streamUploadToCloudinary(req.file.buffer);
+      } catch (cloudinaryError) {
+        return res.status(500).json({ message: 'Failed to upload new avatar asset to cloud media bucket.' });
+      }
+    }
+
     const updatedUser = await prisma.user.update({
       where: { id: currentUserId },
       data: {
-        // Fallback to existing values if not provided in request body
+        email: email ? email.trim().toLowerCase() : undefined,
         displayName: displayName !== undefined ? displayName.trim() : undefined,
         bio: bio !== undefined ? bio.trim() : undefined,
+        avatarUrl: customAvatarUrl || undefined, // Overwrites with your new custom Cloudinary target path
         colorPalette: colorPalette || undefined,
         colorScheme: colorScheme || undefined,
       },

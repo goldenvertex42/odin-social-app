@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import passport from 'passport';
+import { upload } from '../../middleware/upload.js';
 import { 
   getAllUsers, 
   getRelationshipState, 
@@ -18,6 +19,6 @@ router.post('/:id/follow', requireAuth, sendFollowRequest);
 router.patch('/:id/accept', requireAuth, acceptFollowRequest);
 router.delete('/:id/cancel', requireAuth, removeFollowRelationship);
 
-router.put('/profile', requireAuth, updateProfile);
+router.put('/profile', requireAuth, upload.single('avatar'),updateProfile);
 
 export default router;

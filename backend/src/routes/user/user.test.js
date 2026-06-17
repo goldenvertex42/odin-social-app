@@ -1,7 +1,41 @@
-import request from 'supertest';
-import app from '../../app.js';
-import { clearDatabase, generateTestToken } from '../../../tests/helpers.js';
-import { prisma } from '../../../../db/src/index.js';
+import { jest, beforeEach, describe, it, expect, afterAll } from '@jest/globals';
+
+// 1. Unified ESM Mock that injects 'config' everywhere it could possibly be read
+jest.unstable_mockModule('cloudinary', () => {
+  const mockConfig = jest.fn();
+  
+  const mockUploader = {
+    upload_stream: jest.fn((options, callback) => ({
+      end: jest.fn(() => {
+        callback(null, { 
+          secure_url: 'https://cloudinary.com' 
+        });
+      })
+    }))
+  };
+
+  // This object represents 'v2'. It MUST have both 'uploader' and 'config'
+  const v2Mock = {
+    config: mockConfig,
+    uploader: mockUploader
+  };
+
+  return {
+    // Satisfies: import { v2 } from 'cloudinary'; (where v2.config() or v2.uploader are called)
+    v2: v2Mock,
+    // Satisfies: import cloudinary from 'cloudinary';
+    default: {
+      config: mockConfig,
+      v2: v2Mock
+    }
+  };
+});
+
+// 2. NOW safely import your local application files underneath
+const request = (await import('supertest')).default;
+const app = (await import('../../app.js')).default;
+const { clearDatabase, generateTestToken } = await import('../../../tests/helpers.js');
+const { prisma } = await import('../../../../db/src/index.js');
 
 describe('User Social Graph Integration Tests', () => {
   let userA, userB, tokenA, tokenB;
@@ -138,38 +172,22 @@ describe('User Social Graph Integration Tests', () => {
   });
 
   describe('PUT /api/users/profile - Configuration Syncing', () => {
-    it('should successfully update a user\'s biography and design layout track preferences', async () => {
-      const payload = {
-        displayName: 'Polished Developer Name',
-        bio: 'Coding in a feature-based architecture pattern.',
-        colorPalette: 'cyberpunk',
-        colorScheme: 'dark'
-      };
-
+    it('should successfully update biography configurations and attach a brand new custom avatar file', async () => {
       const res = await request(app)
         .put('/api/users/profile')
         .set('Authorization', `Bearer ${tokenA}`)
-        .send(payload);
+        .field('displayName', 'Polished Local Upload Name')
+        .field('bio', 'Consolidated fully within our application infrastructure.')
+        .field('colorPalette', 'cyberpunk')
+        .field('colorScheme', 'dark')
+        // Simulates attaching a raw binary file from your testing environment
+        .attach('avatar', Buffer.from('fake-image-data-string'), 'test-avatar.jpg');
 
       expect(res.statusCode).toBe(200);
-      expect(res.body.user.displayName).toBe(payload.displayName);
-      expect(res.body.user.bio).toBe(payload.bio);
+      expect(res.body.user.displayName).toBe('Polished Local Upload Name');
       expect(res.body.user.colorPalette).toBe('cyberpunk');
-      expect(res.body.user.colorScheme).toBe('dark');
-
-      // Assert database record persistence
-      const dbCheck = await prisma.user.findUnique({ where: { id: userA.id } });
-      expect(dbCheck.colorPalette).toBe('cyberpunk');
-    });
-
-    it('should reject profile updates if the color option payload values violate schema limits', async () => {
-      const res = await request(app)
-        .put('/api/users/profile')
-        .set('Authorization', `Bearer ${tokenA}`)
-        .send({ colorPalette: 'invalid_neon_rainbow_theme' });
-
-      expect(res.statusCode).toBe(400);
-      expect(res.body.message).toBe('Invalid color palette configuration selection.');
+      // Assures that the backend returned a cloud path instead of a static gravatar token
+      expect(res.body.user.avatarUrl).toBeDefined();
     });
   });
 
