@@ -1,52 +1,45 @@
 import { prisma } from '../../../../db/src/index.js';
+import cloudinary from 'cloudinary';
+
+// Unified Cloudinary helper to stream memory buffers for post content
+const streamPostImageToCloudinary = (fileBuffer) => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.v2.uploader.upload_stream(
+      {
+        folder: 'odin_social_post_images', // Dedicated post media cloud storage folder
+        transformation: [{ width: 1200, crop: 'limit' }] // Cap wide images for performance, preserve aspect ratio
+      },
+      (error, result) => {
+        if (result) resolve(result.secure_url);
+        else reject(error);
+      }
+    );
+    uploadStream.end(fileBuffer);
+  });
+};
 
 // 1. FETCH CHRONOLOGICAL SOCIAL FEED
 export const getSocialFeed = async (req, res, next) => {
   try {
     const currentUserId = req.user.id;
 
-    // A. Query the database to find all users that the current user is FOLLOWING
     const followedRelations = await prisma.follow.findMany({
-      where: {
-        followerId: currentUserId,
-        status: 'ACCEPTED',
-      },
-      select: {
-        followingId: true,
-      },
+      where: { followerId: currentUserId, status: 'ACCEPTED' },
+      select: { followingId: true },
     });
 
-    // B. Flatten the relations array into a clean list of ID strings
     const followedUserIds = followedRelations.map((rel) => rel.followingId);
-
-    // C. Combine followed IDs with the user's own ID to include self-authored posts
     const feedAuthorIds = [...followedUserIds, currentUserId];
 
-    // D. Fetch the final post array utilizing clean relational inclusion blocks
     const feedPosts = await prisma.post.findMany({
-      where: {
-        authorId: {
-          in: feedAuthorIds,
-        },
-      },
-      orderBy: {
-        createdAt: 'desc', // Forces chronological sorting order
-      },
+      where: { authorId: { in: feedAuthorIds } },
+      orderBy: { createdAt: 'desc' },
       include: {
         author: {
-          select: {
-            id: true,
-            username: true,
-            displayName: true,
-            avatarUrl: true,
-            isOnline: true,
-          },
+          select: { id: true, username: true, displayName: true, avatarUrl: true, isOnline: true },
         },
         _count: {
-          select: {
-            likes: true,    // Matches your PostLike explicit model
-            comments: true, // Matches your Comment explicit model
-          },
+          select: { likes: true, comments: true },
         },
       },
     });
@@ -57,71 +50,84 @@ export const getSocialFeed = async (req, res, next) => {
   }
 };
 
-// 2. CREATE A NEW POST NODE
+// 2. CREATE A NEW POST NODE (With Direct Cloudinary Stream Integration)
 export const createPost = async (req, res, next) => {
   try {
     const currentUserId = req.user.id;
-    const { content, imageUrl } = req.body;
+    const { content } = req.body;
 
     if (!content || content.trim() === '') {
       return res.status(400).json({ message: 'Post content cannot be empty.' });
     }
 
+    // Process the image file upload if the user attached one
+    let uploadedImageUrl = null;
+    if (req.file) {
+      try {
+        uploadedImageUrl = await streamPostImageToCloudinary(req.file.buffer);
+      } catch (cloudinaryError) {
+        return res.status(500).json({ message: 'Failed to upload post image to cloud media bucket.' });
+      }
+    }
+
     const newPost = await prisma.post.create({
       data: {
         content: content.trim(),
-        imageUrl: imageUrl || null,
+        imageUrl: uploadedImageUrl, // Saves secure URL from Cloudinary
         authorId: currentUserId,
       },
       include: {
         author: {
-          select: {
-            id: true,
-            username: true,
-            displayName: true,
-            avatarUrl: true,
-          },
+          select: { id: true, username: true, displayName: true, avatarUrl: true },
         },
       },
     });
 
     return res.status(201).json({ message: 'Post published successfully.', post: newPost });
   } catch (error) {
-    console.error("❌ PRISMA CREATION ERROR DETECTED:", error); 
     next(error);
   }
 };
 
-// 3. EDIT AN EXISTING POST
+// 3. EDIT AN EXISTING POST (Allows Uploading a New Image)
 export const updatePost = async (req, res, next) => {
   try {
     const currentUserId = req.user.id;
     const { postId } = req.params;
-    const { content, imageUrl } = req.body;
+    const { content, removeImage } = req.body; // removeImage allows resetting media
 
     if (!content || content.trim() === '') {
       return res.status(400).json({ message: 'Post content cannot be empty.' });
     }
 
-    // Find the post to verify current existence and author footprint
-    const post = await prisma.post.findUnique({
-      where: { id: postId }
-    });
+    const post = await prisma.post.findUnique({ where: { id: postId } });
 
     if (!post) {
       return res.status(404).json({ message: 'Target post not found.' });
     }
 
-    // Strict authorship gatekeeper check
     if (post.authorId !== currentUserId) {
       return res.status(403).json({ message: 'Unauthorized to edit this post.' });
     }
 
+    // Determine target imageUrl state logic
+    let targetImageUrl = post.imageUrl;
+    
+    if (req.file) {
+      try {
+        targetImageUrl = await streamPostImageToCloudinary(req.file.buffer);
+      } catch (cloudinaryError) {
+        return res.status(500).json({ message: 'Failed to update post image asset.' });
+      }
+    } else if (removeImage === 'true') {
+      targetImageUrl = null; // Purge image if flag is set explicitly
+    }
+
     const updatedPost = await prisma.post.update({
       where: { id: postId },
-      data: { 
+      data: {
         content: content.trim(),
-        imageUrl: imageUrl || null
+        imageUrl: targetImageUrl
       },
       include: {
         author: {
@@ -142,27 +148,19 @@ export const deletePost = async (req, res, next) => {
     const currentUserId = req.user.id;
     const { postId } = req.params;
 
-    const post = await prisma.post.findUnique({
-      where: { id: postId }
-    });
+    const post = await prisma.post.findUnique({ where: { id: postId } });
 
     if (!post) {
       return res.status(404).json({ message: 'Target post not found.' });
     }
 
-    // Strict authorship gatekeeper check
     if (post.authorId !== currentUserId) {
       return res.status(403).json({ message: 'Unauthorized to delete this post.' });
     }
 
-    // Delete query cleanly triggers cascade rules inside schema.prisma for likes/comments
-    await prisma.post.delete({
-      where: { id: postId }
-    });
-
+    await prisma.post.delete({ where: { id: postId } });
     return res.status(200).json({ success: true, message: 'Post deleted successfully.' });
   } catch (error) {
     next(error);
   }
 };
-

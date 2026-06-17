@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import passport from 'passport';
+import { upload } from '../../middleware/upload.js';
 import { 
   getSocialFeed, 
   createPost,
@@ -13,8 +14,8 @@ const requireAuth = passport.authenticate('jwt', { session: false });
 router.get('/feed', requireAuth, getSocialFeed);
 
 // Content mutation endpoints
-router.post('/', requireAuth, createPost);
-router.put('/:postId', requireAuth, updatePost);
+router.post('/', requireAuth, upload.single('image'),createPost);
+router.put('/:postId', requireAuth, upload.single('image'), updatePost);
 router.delete('/:postId', requireAuth, deletePost);
 
 export default router;

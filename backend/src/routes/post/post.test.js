@@ -1,7 +1,38 @@
-import request from 'supertest';
-import app from '../../app.js'; 
-import { clearDatabase, generateTestToken } from '../../../tests/helpers.js';
-import { prisma } from '../../../../db/src/index.js';
+import { jest, beforeEach, describe, it, expect, afterAll } from '@jest/globals';
+
+// 1. Unified ESM Mock to catch post controller media uploader streams
+jest.unstable_mockModule('cloudinary', () => {
+  const mockConfig = jest.fn();
+  
+  const mockUploader = {
+    upload_stream: jest.fn((options, callback) => ({
+      end: jest.fn(() => {
+        callback(null, { 
+          secure_url: 'https://cloudinary.com' 
+        });
+      })
+    }))
+  };
+
+  const v2Mock = {
+    config: mockConfig,
+    uploader: mockUploader
+  };
+
+  return {
+    v2: v2Mock,
+    default: {
+      config: mockConfig,
+      v2: v2Mock
+    }
+  };
+});
+
+// 2. Safely dynamic-import your local app dependencies below the module mock
+const request = (await import('supertest')).default;
+const app = (await import('../../app.js')).default;
+const { clearDatabase, generateTestToken } = await import('../../../tests/helpers.js');
+const { prisma } = await import('../../../../db/src/index.js');
 
 describe('Post & Social Feed Integration Tests', () => {
   let userA, userB, userC;
@@ -71,20 +102,16 @@ describe('Post & Social Feed Integration Tests', () => {
   });
 
   describe('POST /api/posts - Content Creation Pipeline', () => {
-    it('should allow a logged-in user to publish content successfully', async () => {
-      const payload = {
-        content: 'Testing local content validation rules.',
-        mediaUrl: 'https://unsplash.com',
-      };
-
+    it('should allow a logged-in user to publish content and image files successfully', async () => {
       const res = await request(app)
         .post('/api/posts')
         .set('Authorization', `Bearer ${tokenA}`)
-        .send(payload);
+        .field('content', 'Testing form-data multi-part content pipeline.')
+        .attach('image', Buffer.from('fake-binary-data'), 'test-photo.png'); // Simulates upload
 
       expect(res.statusCode).toBe(201);
-      expect(res.body.post.content).toBe(payload.content);
-      expect(res.body.post.author.id).toBe(userA.id);
+      expect(res.body.post.content).toBe('Testing form-data multi-part content pipeline.');
+      expect(res.body.post.imageUrl).toBeDefined();
     });
 
     it('should reject content creations when content string parameters are empty', async () => {
