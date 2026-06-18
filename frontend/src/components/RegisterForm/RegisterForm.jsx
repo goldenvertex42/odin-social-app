@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router';
 import { customFetch } from '../../utils/api/api';
-import googleIcon from '../../assets/google-icon.svg';
 import styles from './RegisterForm.module.css';
 
 export default function RegisterForm() {

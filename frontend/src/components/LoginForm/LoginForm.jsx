@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { useAuth } from '../../context/AuthContext/AuthContext';
-import googleIcon from '../../assets/google-icon.svg';
 import styles from './LoginForm.module.css';
 
 export default function LoginForm() {
