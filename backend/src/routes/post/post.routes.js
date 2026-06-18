@@ -5,7 +5,7 @@ import {
   getSocialFeed, 
   createPost,
   updatePost,
-  deletePost } from './post.controller';
+  deletePost } from './post.controller.js';
 
 const router = Router();
 const requireAuth = passport.authenticate('jwt', { session: false });
