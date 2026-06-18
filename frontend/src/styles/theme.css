@@ -1,0 +1,191 @@
+/* src/styles/theme.css */
+
+/* ==========================================
+   1. SEMANTIC BASELINE CONSTRAINTS & FLUID SYSTEM
+   ========================================== */
+:root {
+  /* Fluid responsive layout sizing tokens */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2.25rem;
+
+  /* Font scales designed for mobile scaling upward */
+  --font-xs: 0.75rem;
+  --font-sm: 0.875rem;
+  --font-base: 1rem;
+  --font-lg: 1.25rem;
+  --font-xl: 1.75rem;
+
+  /* Structural default sizing scales */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-full: 9999px;
+  --app-max-width: 1240px;
+  --nav-height: 60px;
+
+  /* Light Default Surface Baseline Settings */
+  --bg-app: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-sidebar: #f1f5f9;
+  --border-main: #e2e8f0;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --btn-action-text: #ffffff;
+
+  /* 🎯 INTERACTIVE HOVER SURFACE HOOKS (Light Defaults) */
+  --bg-hover: #f1f5f9;          /* Used for interactive card/feed row list items */
+  --bg-sidebar-hover: #e2e8f0;  /* Used for active navigation links */
+
+  /* Default Light Palette Colors */
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-accent: #dbeafe;
+}
+
+/* Base Dark Surface Override Changes */
+:root[data-color-scheme="dark"] {
+  --bg-app: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-sidebar: #0f172a;
+  --border-main: #334155;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  
+  /* 🎯 INTERACTIVE HOVER SURFACE HOOKS (Dark Overrides) */
+  --bg-hover: #2d3748;
+  --bg-sidebar-hover: #1e293b;
+
+  --color-primary: #3b82f6;
+  --color-primary-hover: #60a5fa;
+  --color-accent: #1e3a8a;
+}
+
+/* ==========================================
+   2. DETAILED PREFERENCE PALETTE TRACKS
+   ========================================== */
+
+/* 🟢 THE NORD THEME (Clean Arctic Frost Aura) */
+:root[data-color-palette="nord"] {
+  --color-primary: #88c0d0;
+  --color-primary-hover: #8fbcbb;
+  --color-accent: #e5e9f0;
+  --bg-hover: #e5e9f0;
+  --bg-sidebar-hover: #d8dee9;
+}
+:root[data-color-scheme="dark"][data-color-palette="nord"] {
+  --bg-app: #2e3440;
+  --bg-surface: #3b4252;
+  --bg-sidebar: #2e3440;
+  --border-main: #4c566a;
+  --text-main: #d8dee9;
+  --text-muted: #e5e9f0;
+  --color-accent: #434c5e;
+  --bg-hover: #434c5e;
+  --bg-sidebar-hover: #4c566a;
+}
+
+/* 🟡 THE SUNSET THEME (Vibrant Warm Dusk) */
+:root[data-color-palette="sunset"] {
+  --color-primary: #ff5e62;
+  --color-primary-hover: #ff4146;
+  --color-accent: #ffe3e4;
+  --bg-hover: #ffe3e4;
+  --bg-sidebar-hover: #ffd1d2;
+}
+:root[data-color-scheme="dark"][data-color-palette="sunset"] {
+  --bg-app: #201419;
+  --bg-surface: #2d1b22;
+  --bg-sidebar: #1a0f14;
+  --border-main: #4a2835;
+  --text-main: #fff1f2;
+  --text-muted: #fecdd3;
+  --color-accent: #69243f;
+  --bg-hover: #3d222e;
+  --bg-sidebar-hover: #4a2835;
+}
+
+/* 🟣 THE CYBERPUNK THEME (High Contrast Retro Future Synth) */
+:root[data-color-palette="cyberpunk"] {
+  --color-primary: #ff0055;
+  --color-primary-hover: #00f0ff;
+  --color-accent: #ffe600;
+  --bg-hover: #ffe600;
+  --bg-sidebar-hover: #e6cc00;
+}
+:root[data-color-scheme="dark"][data-color-palette="cyberpunk"] {
+  --bg-app: #05050a;
+  --bg-surface: #0f0f1d;
+  --bg-sidebar: #000000;
+  --border-main: #ff0055;
+  --text-main: #00ff66;
+  --text-muted: #00f0ff;
+  --color-accent: #260033;
+  --btn-action-text: #000000;
+  --bg-hover: #1a1a33;
+  --bg-sidebar-hover: #ff0055;
+}
+
+/* ⚫ THE MIDNIGHT OBSIDIAN THEME (Sleek Tactical Stealth) */
+:root[data-color-palette="obsidian"] {
+  --color-primary: #4f46e5;
+  --color-primary-hover: #4338ca;
+  --color-accent: #e0e7ff;
+  --bg-hover: #f3f4f6;
+  --bg-sidebar-hover: #e5e7eb;
+}
+:root[data-color-scheme="dark"][data-color-palette="obsidian"] {
+  --bg-app: #030712;
+  --bg-surface: #111827;
+  --bg-sidebar: #030712;
+  --border-main: #1f2937;
+  --text-main: #f9fafb;
+  --text-muted: #9ca3af;
+  --color-accent: #312e81;
+  --bg-hover: #1f2937;
+  --bg-sidebar-hover: #374151;
+}
+
+/* 🔵 THE NEON MINT THEME (Crisp Tech Energy) */
+:root[data-color-palette="neonmint"] {
+  --color-primary: #059669;
+  --color-primary-hover: #047857;
+  --color-accent: #ecfdf5;
+  --bg-hover: #f0fdf4;
+  --bg-sidebar-hover: #d1fae5;
+}
+:root[data-color-scheme="dark"][data-color-palette="neonmint"] {
+  --bg-app: #022c22;
+  --bg-surface: #064e3b;
+  --bg-sidebar: #022c22;
+  --border-main: #047857;
+  --text-main: #f0fdf4;
+  --text-muted: #34d399;
+  --color-accent: #022c22;
+  --bg-hover: #065f46;
+  --bg-sidebar-hover: #047857;
+}
+
+/* ==========================================
+   3. RESPONSIVE GRID MEDIA QUERY BLUEPRINTS
+   ========================================== */
+
+/* Tablet Optimization Configurations */
+@media (min-width: 768px) {
+  :root {
+    --spacing-md: 1.25rem;
+    --font-base: 1.05rem;
+    --font-xl: 2.25rem;
+    --nav-height: 70px;
+  }
+}
+
+/* Desktop Wide Resolution Optimization Layout Blocks */
+@media (min-width: 1024px) {
+  :root {
+    --spacing-lg: 2rem;
+    --font-base: 1.1rem;
+    --font-xl: 2.75rem;
+  }
+}
