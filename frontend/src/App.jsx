@@ -1,25 +1,74 @@
-import { useState, useEffect } from 'react';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router';
+import { AuthProvider } from './context/AuthContext/AuthContext';
+import { ThemeProvider } from './context/ThemeContext/ThemeContext';
 
-function App() {
-  const [message, setMessage] = useState('Connecting to API...');
+// Import Layout / Security Guards
+import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 
-  useEffect(() => {
-    // Points directly to your Express backend local development port
-    fetch('http://localhost:3000/api/test')
-      .then((res) => {
-        if (!res.ok) throw new Error('API server returned an error');
-        return res.json();
-      })
-      .then((data) => setMessage(data.message || 'Connected!'))
-      .catch((err) => setMessage(`❌ API Connection Failed: ${err.message}`));
-  }, []);
+// Import Feature Views (To be created next)
+import LoginForm from './components/LoginForm/LoginForm';
+import RegisterForm from './components/RegisterForm/RegisterForm';
+import AuthSuccess from './components/AuthSuccess/AuthSuccess';
 
+// Temporary fallback UI anchors for index routes
+const PlaceholderFeed = () => <div><h2>Chronological Post Feed Dashboard View</h2><p>Responsive layout grids coming next.</p></div>;
+const PlaceholderUsers = () => <div><h2>Platform Users Index Feed</h2><p>Follow status graph buttons go here.</p></div>;
+
+// 🎯 MODERN ARCHITECTURE: Configure standard flat route parameters using object arrays
+const router = createBrowserRouter([
+  /* --- Public Unauthenticated Route Nodes --- */
+  {
+    path: '/login',
+    element: 
+    <div className="authContainer">
+      <LoginForm />
+    </div>,
+  },
+  {
+    path: '/register',
+    element: 
+    <div className="authContainer">
+      <RegisterForm />
+    </div>,
+  },
+  {
+    path: '/auth-success',
+    element: <AuthSuccess />,
+  },
+
+  /* --- Secured Protected App Workspace Boundaries --- */
+  {
+    element: <ProtectedRoute />, // Secures all child route nodes underneath
+    children: [
+      {
+        path: '/feed',
+        element: <PlaceholderFeed />,
+      },
+      {
+        path: '/explore',
+        element: <PlaceholderUsers />,
+      },
+      {
+        path: '/users/:id',
+        element: <div>User Individual Profile Dynamic Sub-Canvas Layout Container</div>,
+      },
+    ],
+  },
+
+  /* --- Absolute Baseline Fallback Redirect Hook --- */
+  {
+    path: '*',
+    element: <Navigate to="/feed" replace />,
+  },
+]);
+
+export default function App() {
   return (
-    <div style={{ fontFamily: 'sans-serif', padding: '40px', textAlign: 'center' }}>
-      <h1>Monorepo Frontend Template</h1>
-      <p style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{message}</p>
-    </div>
+    <AuthProvider>
+      <ThemeProvider>
+        {/* Inject your optimized object router context into the virtual DOM grid matrix */}
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
-
-export default App;
