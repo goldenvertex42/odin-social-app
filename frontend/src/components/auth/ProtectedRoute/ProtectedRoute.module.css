@@ -1,0 +1,103 @@
+/* ==========================================================================
+   1. AUTH SYNC LOADING BLOCK
+   ========================================================================== */
+.loadingWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: var(--bg-app);
+  font-family: system-ui, sans-serif;
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid var(--border-main);
+  border-top-color: var(--color-primary);
+  border-radius: var(--radius-full);
+  animation: spin 1s linear infinite;
+}
+
+.text {
+  margin-top: var(--spacing-md);
+  font-size: var(--font-sm);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   2. APPLICATION WIREFRAME CORE (MOBILE FIRST GRID)
+   ========================================================================== */
+.appContainer {
+  display: grid;
+  grid-template-rows: var(--header-height, 60px) 1fr var(--mobile-nav-height, 60px);
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "header"
+    "main"
+    "sidebar";
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.headerArea {
+  grid-area: header;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.sidebarArea {
+  grid-area: sidebar;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: var(--mobile-nav-height, 60px);
+  z-index: 90;
+  border-top: 1px solid var(--border-main, #e0e0e0);
+  background-color: var(--bg-app);
+}
+
+.mainContentArea {
+  grid-area: main;
+  padding: 16px;
+  overflow-y: auto;
+  background-color: var(--bg-app);
+  /* Prevents content layout from hiding behind sticky mobile toolbar */
+  padding-bottom: calc(var(--mobile-nav-height, 60px) + 16px);
+}
+
+/* ==========================================================================
+   3. DESKTOP ADAPTIVE VIEWPORT OVERRIDES
+   ========================================================================== */
+@media (min-width: 769px) {
+  .appContainer {
+    grid-template-rows: var(--header-height, 60px) 1fr;
+    grid-template-columns: var(--sidebar-width, 240px) 1fr;
+    grid-template-areas:
+      "header  header"
+      "sidebar main";
+  }
+
+  .sidebarArea {
+    position: sticky;
+    top: var(--header-height, 60px);
+    left: 0;
+    width: var(--sidebar-width, 240px);
+    height: calc(100vh - var(--header-height, 60px));
+    border-top: none;
+    border-right: 1px solid var(--border-main, #e0e0e0);
+  }
+
+  .mainContentArea {
+    padding: 32px;
+    padding-bottom: 32px;
+  }
+}
