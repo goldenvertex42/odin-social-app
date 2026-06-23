@@ -19,7 +19,8 @@
     "db:push": "npx prisma db push --schema=db/prisma/schema.prisma",
     "db:migrate": "npx prisma migrate dev --schema=db/prisma/schema.prisma",
     "db:generate": "PRISMA_SKIP_POSTINSTALL_GENERATE=true npx prisma generate --schema=db/prisma/schema.prisma",
-    "db:seed": "node db/prisma/direct-seed.js",
+    "db:seed": "npx prisma db seed",
+    "db:reset": "npx prisma migrate reset --force",
     "build:frontend": "npm run build --workspace=frontend",
     "build": "npm run db:generate && npm run build:frontend",
     "start": "node backend/src/app.js"

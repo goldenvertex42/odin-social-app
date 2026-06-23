@@ -5,12 +5,20 @@
   "main": "src/index.js",
   "scripts": {
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "prisma db seed",
+    "db:reset": "prisma migrate reset --force"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@prisma/client": "^7.8.0"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.5.0",
+    "@prisma/adapter-pg": "^7.8.0",
+    "pg": "^8.22.0",
     "prisma": "^7.8.0"
   }
 }
