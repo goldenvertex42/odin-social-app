@@ -1,0 +1,84 @@
+.sidebarContainer {
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: var(--bg-card, #ffffff);
+}
+
+.navigationGrid {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gridItem {
+  flex: 1;
+  text-align: center;
+  height: 100%;
+}
+
+.navLink {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  text-decoration: none;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted, #888888);
+  gap: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.navIcon {
+  font-size: 1.25rem;
+}
+
+.navText {
+  display: block;
+}
+
+/* Hover style hooks using your design tokens */
+.navLink:hover {
+  background-color: var(--bg-sidebar-hover, var(--bg-hover, #f5f5f5));
+  color: var(--text-primary, #111111);
+}
+
+.activeLink {
+  color: var(--primary-accent, #0066cc);
+  background-color: var(--bg-sidebar-hover, var(--bg-hover, #f5f5f5));
+  font-weight: 600;
+}
+
+/* Desktop Adaptive Scaling Grid */
+@media (min-width: 769px) {
+  .sidebarContainer {
+    padding: 24px 12px;
+  }
+
+  .navigationGrid {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .gridItem {
+    flex: initial;
+    height: auto;
+  }
+
+  .navLink {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    gap: 12px;
+  }
+}
