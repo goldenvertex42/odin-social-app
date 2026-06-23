@@ -19,6 +19,6 @@ router.post('/:id/follow', requireAuth, sendFollowRequest);
 router.patch('/:id/accept', requireAuth, acceptFollowRequest);
 router.delete('/:id/cancel', requireAuth, removeFollowRelationship);
 
-router.put('/profile', requireAuth, upload.single('avatar'),updateProfile);
+router.put('/profile', requireAuth, upload.single('avatar'), updateProfile);
 
 export default router;
