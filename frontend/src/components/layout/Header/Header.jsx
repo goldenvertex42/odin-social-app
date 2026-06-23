@@ -5,10 +5,6 @@ import styles from './Header.module.css';
 export default function Header() {
   const { user, logout } = useAuth(); // Clean useAuth integration
 
-  const fallbackAvatar = user?.email 
-    ? `https://gravatar.com/avatar/${encodeURIComponent(user.email.trim().toLowerCase())}?d=identicon&s=150`
-    : '/default-avatar.svg';
-
   return (
     <header className={styles.headerContainer}>
       <div className={styles.brandingBlock}>
@@ -23,7 +19,7 @@ export default function Header() {
           <div className={styles.authenticatedUser}>
             <div className={styles.profileBadge}>
               <img 
-                src={user.avatarUrl || fallbackAvatar} 
+                src={user.avatarUrl} 
                 alt={`${user.displayName}'s profile`} 
                 className={styles.userAvatar} 
               />
