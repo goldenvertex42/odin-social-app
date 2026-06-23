@@ -35,38 +35,47 @@ export function AuthProvider({ children }) {
 
   // Handle traditional credential form logins
   const login = async (email, password) => {
-    setLoading(true);
-    try {
-      const res = await customFetch('/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      localStorage.setItem('token', data.token);
-      setUser(data.user);
-      setLoading(false);
-      return data.user;
-    } catch (err) {
-      setLoading(false);
-      throw err;
-    }
-  };
+  setLoading(true);
+  try {
+    const res = await customFetch('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    
+    localStorage.setItem('token', data.token);
+    
+    // This populates the global layout parameters BEFORE lifting the loader!
+    setUser(data.user);
+    await syncIdentity(); 
+    
+    setLoading(false);
+    return data.user;
+  } catch (err) {
+    setLoading(false);
+    throw err;
+  }
+};
 
-  // Handle transient recruiter layout skips
-  const loginGuest = async () => {
-    setLoading(true);
-    try {
-      const res = await customFetch('/api/auth/guest', { method: 'POST' });
-      const data = await res.json();
-      localStorage.setItem('token', data.token);
-      setUser(data.user);
-      setLoading(false);
-      return data.user;
-    } catch (err) {
-      setLoading(false);
-      throw err;
-    }
-  };
+// Handle transient recruiter layout skips
+const loginGuest = async () => {
+  setLoading(true);
+  try {
+    const res = await customFetch('/api/auth/guest', { method: 'POST' });
+    const data = await res.json();
+    
+    localStorage.setItem('token', data.token);
+    
+    setUser(data.user);
+    await syncIdentity(); 
+    
+    setLoading(false);
+    return data.user;
+  } catch (err) {
+    setLoading(false);
+    throw err;
+  }
+};
 
   // Gracefully terminate sessions and mutate network presence states back to false
   const logout = async () => {
@@ -77,6 +86,8 @@ export function AuthProvider({ children }) {
       console.error('Logout request exception:', err);
     } finally {
       localStorage.removeItem('token');
+      localStorage.removeItem('workspace-color-palette');
+      localStorage.removeItem('workspace-color-scheme');
       setUser(null);
       setLoading(false);
     }
