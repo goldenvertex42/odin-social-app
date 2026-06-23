@@ -1,0 +1,113 @@
+.cardContainer {
+  background-color: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-main, #e0e0e0);
+  border-radius: var(--radius-md, 8px);
+  padding: var(--spacing-lg, 20px);
+  margin-bottom: var(--spacing-md, 16px);
+  box-sizing: border-box;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 12px);
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+.authorAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full, 50%);
+  object-fit: cover;
+  border: 1px solid var(--border-main, #e0e0e0);
+}
+
+.metaText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.authorProfileLink {
+  font-weight: 600;
+  font-size: var(--font-md, 1rem);
+  text-decoration: none;
+  color: var(--color-primary, #111111);
+}
+
+.authorProfileLink:hover {
+  text-decoration: underline;
+}
+
+.postTimestamp {
+  font-size: var(--font-xs, 0.75rem);
+  color: var(--text-muted, #888888);
+}
+
+.cardBody {
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+.textContent {
+  white-space: pre-wrap;
+  line-height: 1.5;
+  color: var(--color-primary, #111111);
+  margin: 0;
+}
+
+.imageWrapper {
+  margin-top: var(--spacing-sm, 12px);
+  border-radius: var(--radius-sm, 6px);
+  overflow: hidden;
+  border: 1px solid var(--border-main, #e0e0e0);
+}
+
+.mediaAsset {
+  width: 100%;
+  max-height: 450px;
+  object-fit: cover;
+  display: block;
+}
+
+.cardFooter {
+  border-top: 1px solid var(--border-main, #e0e0e0);
+  border-bottom: 1px solid var(--border-main, #e0e0e0);
+  padding: var(--spacing-xs, 8px) 0;
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+.likeActionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px var(--spacing-md, 16px);
+  border-radius: var(--radius-sm, 4px);
+  color: var(--text-muted, #888888);
+  font-weight: 500;
+  font-size: var(--font-sm, 0.9rem);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.likeActionButton:hover {
+  background-color: var(--bg-hover, #f5f5f5);
+  color: var(--color-primary, #111111);
+}
+
+.activeLikedState {
+  color: #e0245e; /* Standout active tracking indicator */
+  font-weight: 700;
+}
+
+.commentThreadSection {
+  margin-top: var(--spacing-md, 16px);
+}
+
+.commentStreamTitle {
+  font-size: var(--font-sm, 0.9rem);
+  font-weight: 600;
+  color: var(--color-primary, #111111);
+  margin: 0 0 var(--spacing-sm, 12px) 0;
+}
