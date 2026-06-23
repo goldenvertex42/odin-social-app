@@ -12,5 +12,5 @@ export const getGravatarUrl = (email) => {
 
   // d=retro acts as a default fallback generation parameter for unregistered users.
   // Options include: identicon, monsterid, wavatar, retro, robohash
-  return `https://gravatar.com/${hash}?d=identicon&s=200`;
+  return `https://gravatar.com/avatar/${hash}?d=mp&s=200`;
 };
