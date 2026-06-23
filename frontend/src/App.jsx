@@ -3,12 +3,12 @@ import { AuthProvider } from './context/AuthContext/AuthContext';
 import { ThemeProvider } from './context/ThemeContext/ThemeContext';
 
 // Import Layout / Security Guards
-import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
+import ProtectedRoute from './components/auth/ProtectedRoute/ProtectedRoute';
 
 // Import Feature Views (To be created next)
-import LoginForm from './components/LoginForm/LoginForm';
-import RegisterForm from './components/RegisterForm/RegisterForm';
-import AuthSuccess from './components/AuthSuccess/AuthSuccess';
+import LoginForm from './components/auth/LoginForm/LoginForm';
+import RegisterForm from './components/auth/RegisterForm/RegisterForm';
+import AuthSuccess from './components/auth/AuthSuccess/AuthSuccess';
 
 // Temporary fallback UI anchors for index routes
 const PlaceholderFeed = () => <div><h2>Chronological Post Feed Dashboard View</h2><p>Responsive layout grids coming next.</p></div>;
