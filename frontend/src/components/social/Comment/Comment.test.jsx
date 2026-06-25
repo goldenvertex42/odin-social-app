@@ -1,13 +1,14 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { MemoryRouter } from 'react-router';
-import customFetch from '../../../utils/api/api';
 import Comment from './Comment';
 
 // Mock the custom fetch module
 vi.mock('../../../utils/api/api', () => ({
-  default: vi.fn()
+  customFetch: vi.fn()
 }));
+
+import { customFetch } from '../../../utils/api/api';
 
 describe('Comment Feature Component Module', () => {
   const mockCommentData = {
@@ -60,7 +61,11 @@ describe('Comment Feature Component Module', () => {
       { id: 'like-1', commentId: 'comment-uuid-456', userId: 'user-uuid-111' },
       { id: 'like-2', commentId: 'comment-uuid-456', userId: 'user-uuid-222' }
     ];
-    vi.mocked(customFetch).mockResolvedValueOnce(updatedLikesPayload);
+    
+    vi.mocked(customFetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => updatedLikesPayload
+    });
 
     render(
       <MemoryRouter>
@@ -69,10 +74,14 @@ describe('Comment Feature Component Module', () => {
     );
 
     const likeBtn = screen.getByRole('button', { name: /like comment/i });
+
     fireEvent.click(likeBtn);
 
-    expect(customFetch).toHaveBeenCalledTimes(1);
-    expect(customFetch).toHaveBeenCalledWith('api/likes/comment/comment-uuid-456', { method: 'POST' });
+    await waitFor(() => {
+      expect(customFetch).toHaveBeenCalledTimes(1);
+    });
+
+    expect(customFetch).toHaveBeenCalledWith('/api/likes/comment/comment-uuid-456', { method: 'POST' });
 
     // UI recalculates structural arrays dynamically
     const updatedCounter = await screen.findByText('2');
