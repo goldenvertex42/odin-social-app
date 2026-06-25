@@ -1,0 +1,113 @@
+.profileContainer {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  width: 100%;
+}
+
+.profileHeader {
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 16px;
+  padding: 2rem;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.avatarBig {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: var(--bg-secondary, #f1f5f9);
+}
+
+.headerDetails {
+  flex: 1;
+}
+
+.displayName {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+  color: var(--text-main, #0f172a);
+}
+
+.username {
+  font-size: 0.95rem;
+  color: var(--text-secondary, #64748b);
+  margin: 0 0 0.75rem 0;
+}
+
+.bioText {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-main, #334155);
+  margin: 0;
+}
+
+.selfBadge {
+  background-color: var(--bg-secondary, #f1f5f9);
+  color: var(--text-secondary, #64748b);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.actionBtn {
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+}
+
+.connectBtn {
+  background-color: var(--primary-color, #3b82f6);
+  color: white;
+}
+
+.cancelBtn {
+  background-color: var(--bg-secondary, #f1f5f9);
+  color: var(--text-main, #334155);
+  border: 1px solid var(--border-color, #e2e8f0);
+}
+
+.acceptBtn {
+  background-color: var(--success-color, #22c55e);
+  color: white;
+}
+
+.disconnectBtn {
+  background-color: transparent;
+  color: var(--error-color, #ef4444);
+  border: 1px solid var(--error-color, #ef4444);
+}
+
+.btnGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.timelineHeading {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.postStack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.centeredState, .emptyTimeline {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-secondary, #64748b);
+}
