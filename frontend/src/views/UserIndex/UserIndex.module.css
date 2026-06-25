@@ -1,0 +1,49 @@
+.pageContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.traySection {
+  background-color: var(--bg-secondary, #f8fafc);
+  border: 1px dashed var(--primary-color, #3b82f6);
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+.sectionHeading {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-main, #0f172a);
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+}
+
+.gridArray {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.centeredState {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-secondary, #64748b);
+  font-size: 1.1rem;
+}
+
+.error {
+  color: var(--error-color, #ef4444);
+}
+
+.emptyMessage {
+  color: var(--text-secondary, #64748b);
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem;
+}
