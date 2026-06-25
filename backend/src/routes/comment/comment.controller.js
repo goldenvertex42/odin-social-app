@@ -51,24 +51,20 @@ export const getPostComments = async (req, res, next) => {
 
     const comments = await prisma.comment.findMany({
       where: { postId: postId },
-      orderBy: {
-        createdAt: 'asc' // Threaded discussions read chronologically forward
+      orderBy: { 
+        createdAt: 'asc' // Threaded discussions read chronologically forward 
       },
       include: {
         author: {
-          select: {
-            id: true,
-            username: true,
-            displayName: true,
-            avatarUrl: true,
-            isOnline: true
+          select: { 
+            id: true, 
+            username: true, 
+            displayName: true, 
+            avatarUrl: true, 
+            isOnline: true 
           }
         },
-        _count: {
-          select: {
-            likes: true // Counts from your CommentLike explicit join table
-          }
-        }
+        likes: true 
       }
     });
 
@@ -77,6 +73,7 @@ export const getPostComments = async (req, res, next) => {
     next(error);
   }
 };
+
 
 // 3. EDIT AN EXISTING COMMENT
 export const updateComment = async (req, res, next) => {
