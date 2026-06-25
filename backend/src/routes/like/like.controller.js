@@ -6,47 +6,35 @@ export const togglePostLike = async (req, res, next) => {
     const currentUserId = req.user.id;
     const { postId } = req.params;
 
-    const targetPost = await prisma.post.findUnique({
-      where: { id: postId }
-    });
-
+    const targetPost = await prisma.post.findUnique({ where: { id: postId } });
     if (!targetPost) {
       return res.status(404).json({ message: 'Target post not found.' });
     }
 
-    // MATCHES REVERSED SCHEMA: postId first, then userId
     const existingLike = await prisma.postLike.findUnique({
-      where: {
-        postId_userId: {
-          postId: postId,
-          userId: currentUserId
-        }
-      }
+      where: { postId_userId: { postId, userId: currentUserId } }
     });
 
     if (existingLike) {
       await prisma.postLike.delete({
-        where: {
-          postId_userId: {
-            postId: postId,
-            userId: currentUserId
-          }
-        }
+        where: { postId_userId: { postId, userId: currentUserId } }
       });
-      return res.status(200).json({ liked: false, message: 'Post unliked successfully.' });
+    } else {
+      await prisma.postLike.create({
+        data: { postId, userId: currentUserId }
+      });
     }
 
-    await prisma.postLike.create({
-      data: {
-        postId: postId,
-        userId: currentUserId
-      }
+    const updatedLikes = await prisma.postLike.findMany({
+      where: { postId }
     });
-    return res.status(201).json({ liked: true, message: 'Post liked successfully.' });
+
+    return res.status(200).json(updatedLikes);
   } catch (error) {
     next(error);
   }
 };
+
 
 // 2. TOGGLE COMMENT LIKE STATUS
 export const toggleCommentLike = async (req, res, next) => {
@@ -82,15 +70,15 @@ export const toggleCommentLike = async (req, res, next) => {
         }
       });
       return res.status(200).json({ liked: false, message: 'Comment unliked successfully.' });
+    } else {
+      await prisma.commentLike.create({
+        data: {
+          commentId: commentId,
+          userId: currentUserId
+        }
+      });
+      return res.status(201).json({ liked: true, message: 'Comment liked successfully.' });
     }
-
-    await prisma.commentLike.create({
-      data: {
-        commentId: commentId,
-        userId: currentUserId
-      }
-    });
-    return res.status(201).json({ liked: true, message: 'Comment liked successfully.' });
   } catch (error) {
     next(error);
   }
