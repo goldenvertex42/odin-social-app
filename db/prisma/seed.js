@@ -96,6 +96,9 @@ async function main() {
   console.log('📝 Publishing chronological posts and interactive thread layers...');
   
   for (const user of users) {
+    const randomSeed = faker.string.alphanumeric(10);
+    const imageUrl = `https://picsum.photos/seed/${randomSeed}/600/800`;
+    
     // Each user creates between 2 and 5 posts
     const postLoops = faker.number.int({ min: 2, max: 5 });
 
@@ -104,7 +107,7 @@ async function main() {
         data: {
           content: faker.lorem.paragraphs(faker.number.int({ min: 1, max: 3 })),
           // 40% chance a post contains an image link
-          imageUrl: faker.datatype.boolean(0.4) ? faker.image.urlLoremFlickr({ category: 'abstract' }) : null,
+          imageUrl: faker.datatype.boolean(0.4) ? imageUrl : null,
           authorId: user.id,
           // Stagger timestamps across the past month to check sorting indexes
           createdAt: faker.date.recent({ days: 30 }),
@@ -126,7 +129,6 @@ async function main() {
       const commentLoops = faker.number.int({ min: 0, max: 6 });
       for (let c = 0; c < commentLoops; c++) {
         const commentAuthor = faker.helpers.arrayElement(users);
-        
         const comment = await prisma.comment.create({
           data: {
             content: faker.lorem.sentence(),
@@ -149,6 +151,7 @@ async function main() {
       }
     }
   }
+
 
   console.log('🚀 Database seeding operations finalized cleanly!');
 }
