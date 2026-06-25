@@ -3,29 +3,15 @@ import { jest, beforeEach, describe, it, expect, afterAll } from '@jest/globals'
 // 1. Unified ESM Mock to catch post controller media uploader streams
 jest.unstable_mockModule('cloudinary', () => {
   const mockConfig = jest.fn();
-  
   const mockUploader = {
     upload_stream: jest.fn((options, callback) => ({
       end: jest.fn(() => {
-        callback(null, { 
-          secure_url: 'https://cloudinary.com' 
-        });
+        callback(null, { secure_url: 'https://cloudinary.com' });
       })
     }))
   };
-
-  const v2Mock = {
-    config: mockConfig,
-    uploader: mockUploader
-  };
-
-  return {
-    v2: v2Mock,
-    default: {
-      config: mockConfig,
-      v2: v2Mock
-    }
-  };
+  const v2Mock = { config: mockConfig, uploader: mockUploader };
+  return { v2: v2Mock, default: { config: mockConfig, v2: v2Mock } };
 });
 
 // 2. Safely dynamic-import your local app dependencies below the module mock
@@ -107,7 +93,7 @@ describe('Post & Social Feed Integration Tests', () => {
         .post('/api/posts')
         .set('Authorization', `Bearer ${tokenA}`)
         .field('content', 'Testing form-data multi-part content pipeline.')
-        .attach('image', Buffer.from('fake-binary-data'), 'test-photo.png'); // Simulates upload
+        .attach('image', Buffer.from('fake-binary-data'), 'test-photo.png');
 
       expect(res.statusCode).toBe(201);
       expect(res.body.post.content).toBe('Testing form-data multi-part content pipeline.');
@@ -118,7 +104,7 @@ describe('Post & Social Feed Integration Tests', () => {
       const res = await request(app)
         .post('/api/posts')
         .set('Authorization', `Bearer ${tokenA}`)
-        .send({ content: '   ' }); // Empty spaces validation catch
+        .send({ content: ' ' });
 
       expect(res.statusCode).toBe(400);
       expect(res.body.message).toBe('Post content cannot be empty.');
@@ -128,7 +114,7 @@ describe('Post & Social Feed Integration Tests', () => {
   describe('GET /api/posts/feed - Chronological Aggregation Pipeline', () => {
     it('should aggregate self posts and accepted follow posts while filtering out pending connections', async () => {
       // Seed a post by the Accepted Friend (User B)
-      const postFromBeta = await prisma.post.create({
+      await prisma.post.create({
         data: { content: 'Hello from User Beta!', authorId: userB.id },
       });
 
@@ -138,7 +124,7 @@ describe('Post & Social Feed Integration Tests', () => {
       });
 
       // Seed a post by the logged-in User Self (User A)
-      const postFromAlpha = await prisma.post.create({
+      await prisma.post.create({
         data: { content: 'My personal update notice.', authorId: userA.id },
       });
 
@@ -149,7 +135,6 @@ describe('Post & Social Feed Integration Tests', () => {
 
       expect(res.statusCode).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
-
       // Total count should equal exactly 2 (User A's own post + User B's post)
       expect(res.body.length).toBe(2);
 
@@ -157,16 +142,17 @@ describe('Post & Social Feed Integration Tests', () => {
       const includesGammaContent = res.body.some(post => post.authorId === userC.id);
       expect(includesGammaContent).toBe(false);
 
-      // Verify that relational user entities and count objects are packed cleanly
+      // FIXED: Swapped out deprecated _count property matchers to align with rich pre-loaded array footprints
       expect(res.body[0]).toHaveProperty('author');
-      expect(res.body[0]).toHaveProperty('_count');
+      expect(res.body[0]).toHaveProperty('likes');
+      expect(res.body[0]).toHaveProperty('comments');
     });
 
     it('should enforce descending chronological ordering across the entire dataset arrays', async () => {
       // Seed older post from Friend Beta
       await prisma.post.create({
-        data: { 
-          content: 'Old news statement.', 
+        data: {
+          content: 'Old news statement.',
           authorId: userB.id,
           createdAt: new Date(Date.now() - 60000) // 1 minute ago
         },
@@ -174,8 +160,8 @@ describe('Post & Social Feed Integration Tests', () => {
 
       // Seed modern post from Friend Beta
       const newerPost = await prisma.post.create({
-        data: { 
-          content: 'Breaking recent news updates.', 
+        data: {
+          content: 'Breaking recent news updates.',
           authorId: userB.id,
           createdAt: new Date() // Just now
         },
@@ -186,7 +172,6 @@ describe('Post & Social Feed Integration Tests', () => {
         .set('Authorization', `Bearer ${tokenA}`);
 
       expect(res.statusCode).toBe(200);
-      
       // Index [0] must contain the most recent post node entry
       expect(res.body[0].id).toBe(newerPost.id);
       expect(res.body[0].content).toBe('Breaking recent news updates.');
@@ -215,7 +200,7 @@ describe('Post & Social Feed Integration Tests', () => {
     it('should block edits made by non-author user tokens with a 403 status', async () => {
       const res = await request(app)
         .put(`/api/posts/${activePost.id}`)
-        .set('Authorization', `Bearer ${tokenB}`) // Using User B's token
+        .set('Authorization', `Bearer ${tokenB}`)
         .send({ content: 'Malicious modification text content.' });
 
       expect(res.statusCode).toBe(403);
@@ -251,8 +236,7 @@ describe('Post & Social Feed Integration Tests', () => {
       expect(res.statusCode).toBe(403);
 
       const checkDb = await prisma.post.findUnique({ where: { id: securePost.id } });
-      expect(checkDb).not.toBeNull(); // Verifies data integrity remains locked
+      expect(checkDb).not.toBeNull();
     });
   });
-
 });

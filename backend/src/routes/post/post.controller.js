@@ -18,29 +18,38 @@ const streamPostImageToCloudinary = (fileBuffer) => {
   });
 };
 
-// 1. FETCH CHRONOLOGICAL SOCIAL FEED
+// 1. FETCH CHRONOLOGICAL SOCIAL FEED (UPDATED WITH ARRAY INCLUSIONS)
 export const getSocialFeed = async (req, res, next) => {
   try {
     const currentUserId = req.user.id;
 
+    // Discover who the current session user is following
     const followedRelations = await prisma.follow.findMany({
       where: { followerId: currentUserId, status: 'ACCEPTED' },
       select: { followingId: true },
     });
 
     const followedUserIds = followedRelations.map((rel) => rel.followingId);
+    // Combine followed IDs with current user ID to form full feed target bounds
     const feedAuthorIds = [...followedUserIds, currentUserId];
 
     const feedPosts = await prisma.post.findMany({
       where: { authorId: { in: feedAuthorIds } },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: 'desc' }, // Descending chronological index order
       include: {
         author: {
           select: { id: true, username: true, displayName: true, avatarUrl: true, isOnline: true },
         },
-        _count: {
-          select: { likes: true, comments: true },
-        },
+        likes: true, 
+        comments: {
+          orderBy: { createdAt: 'desc' },
+          include: {
+            author: {
+              select: { id: true, username: true, displayName: true, avatarUrl: true }
+            },
+            likes: true
+          }
+        }
       },
     });
 
@@ -49,6 +58,7 @@ export const getSocialFeed = async (req, res, next) => {
     next(error);
   }
 };
+
 
 // 2. CREATE A NEW POST NODE (With Direct Cloudinary Stream Integration)
 export const createPost = async (req, res, next) => {
@@ -160,6 +170,76 @@ export const deletePost = async (req, res, next) => {
 
     await prisma.post.delete({ where: { id: postId } });
     return res.status(200).json({ success: true, message: 'Post deleted successfully.' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 5. FETCH CHRONOLOGICAL POSTS FOR A SINGLE TARGET USER
+export const getUserPosts = async (req, res, next) => {
+  try {
+    const targetUserId = req.params.id;
+
+    // Optional validation guard: Verify target user exists before processing posts
+    const targetUser = await prisma.user.findUnique({ where: { id: targetUserId } });
+    if (!targetUser) {
+      return res.status(404).json({ message: 'Target user profile records not found.' });
+    }
+
+    const userPosts = await prisma.post.findMany({
+      where: { authorId: targetUserId },
+      orderBy: { createdAt: 'desc' }, // Descending chronological index order
+      include: {
+        author: {
+          select: { id: true, username: true, displayName: true, avatarUrl: true, isOnline: true },
+        },
+        likes: true, // Crucial: satisfy frontend likes.some() and likes.length counters
+        comments: {
+          orderBy: { createdAt: 'desc' }, // Order leaf replies chronologically descending
+          include: {
+            author: {
+              select: { id: true, username: true, displayName: true, avatarUrl: true }
+            }
+          }
+        }
+      },
+    });
+
+    return res.status(200).json(userPosts);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 6. FETCH A SINGLE DEEP-LINKED POST THREAD WITH RICH DATA HYDRATION
+export const getSinglePost = async (req, res, next) => {
+  try {
+    const { postId } = req.params;
+
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      include: {
+        author: {
+          select: { id: true, username: true, displayName: true, avatarUrl: true, isOnline: true },
+        },
+        likes: true, // Post Likes Array for frontend .some() evaluation
+        comments: {
+          orderBy: { createdAt: 'desc' }, // Displays thread replies chronologically descending
+          include: {
+            author: {
+              select: { id: true, username: true, displayName: true, avatarUrl: true }
+            },
+            likes: true // Comment Likes Array for nested leaf comment nodes
+          }
+        }
+      },
+    });
+
+    if (!post) {
+      return res.status(404).json({ message: 'The requested post could not be found.' });
+    }
+
+    return res.status(200).json(post);
   } catch (error) {
     next(error);
   }
