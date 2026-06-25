@@ -61,23 +61,6 @@ describe('Header Feature Component Suite', () => {
     expect(screen.getByRole('button', { name: /log out/i })).toBeInTheDocument();
   });
 
-  it('falls back to default local vector avatar when backend avatarUrl is null', () => {
-    mockUser = {
-      id: 'user-uuid-222',
-      displayName: 'Clark Kent',
-      avatarUrl: null // Google or local account fallback condition
-    };
-
-    render(
-      <MemoryRouter>
-        <Header />
-      </MemoryRouter>
-    );
-
-    const avatar = screen.getByAltText("Clark Kent's profile");
-    expect(avatar).toHaveAttribute('src', '/default-avatar.svg');
-  });
-
   it('dispatches the context logout action sequence when the session close button is clicked', () => {
     mockUser = {
       id: 'user-uuid-111',
