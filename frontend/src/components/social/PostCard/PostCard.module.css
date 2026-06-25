@@ -111,3 +111,43 @@
   color: var(--color-primary, #111111);
   margin: 0 0 var(--spacing-sm, 12px) 0;
 }
+
+.clickableCard {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.clickableCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--shadow-color, rgba(0, 0, 0, 0.05));
+}
+
+.avatarLink {
+  display: block;
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border-color, #e2e8f0);
+  padding-top: 0.75rem;
+}
+
+.threadLinkBtn {
+  background: none;
+  border: none;
+  color: var(--text-secondary, #64748b);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.threadLinkBtn:hover {
+  color: var(--primary-color, #3b82f6);
+  background-color: var(--bg-secondary, #f1f5f9);
+}
+

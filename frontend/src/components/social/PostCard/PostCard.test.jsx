@@ -1,13 +1,14 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { MemoryRouter } from 'react-router';
-import customFetch from '../../../utils/api/api';
 import PostCard from './PostCard';
 
 // Mock custom fetch utility engine
 vi.mock('../../../utils/api/api', () => ({
-  default: vi.fn()
+  customFetch: vi.fn()
 }));
+
+import { customFetch } from '../../../utils/api/api';
 
 // Mock nested child thread component to cleanly isolate testing scope parameters
 vi.mock('../CommentThread/CommentThread', () => ({
@@ -72,20 +73,42 @@ describe('PostCard Feature Component Module', () => {
       { id: 'like-1', postId: 'post-uuid-99', userId: 'user-uuid-abc' },
       { id: 'like-2', postId: 'post-uuid-99', userId: 'user-uuid-xyz' }
     ];
-    vi.mocked(customFetch).mockResolvedValueOnce(updatedLikesPayload);
+
+    // 1. Force explicit data contracts on the post prop so likes array checks pass on load
+    const robustMockPost = {
+      id: 'post-uuid-99',
+      content: 'Mock post content string data text asset',
+      authorId: 'user-uuid-abc',
+      createdAt: new Date().toISOString(),
+      likes: [], // Explicit initial empty array so button is enabled
+      comments: [],
+      author: { displayName: 'Odin Alpha', username: 'alpha_odin', avatarUrl: null }
+    };
+
+    // 2. Explicitly spy on the direct module export to bypass import binding caching issues
+    vi.mocked(customFetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => updatedLikesPayload
+    });
 
     render(
       <MemoryRouter>
-        <PostCard post={mockPostData} currentUserId="user-uuid-xyz" />
+        <PostCard post={robustMockPost} currentUserId="user-uuid-xyz" />
       </MemoryRouter>
     );
 
+    // Find the button explicitly by role and trigger click
     const button = screen.getByRole('button', { name: /like post/i });
+    expect(button).not.toBeDisabled(); // Double-check safety assertion
+    
     fireEvent.click(button);
 
-    expect(customFetch).toHaveBeenCalledTimes(1);
-    expect(customFetch).toHaveBeenCalledWith('api/likes/post/post-uuid-99', { method: 'POST' });
+    await waitFor(() => {
+      expect(customFetch).toHaveBeenCalledTimes(1);
+    });
     
+    expect(customFetch).toHaveBeenCalledWith('/api/likes/post/post-uuid-99', { method: 'POST' });
+
     // UI state recalculates values and updates live text content streams automatically
     const updatedLabel = await screen.findByText(/liked \(2\)/i);
     expect(updatedLabel).toBeInTheDocument();
