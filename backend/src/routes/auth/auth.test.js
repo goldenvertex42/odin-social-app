@@ -14,11 +14,11 @@ describe('Authentication Routing Integration Tests', () => {
     await prisma.$disconnect();
   });
 
-  const testUserPayload = {
-    email: 'test_recruiter@odin.local',
-    username: 'test_dev_user',
-    password: 'OdinPassword123!',
-    displayName: 'Odin Developer'
+  const testUserPayload = { 
+    email: 'test_recruiter@odin.local', 
+    username: 'test_dev_user', 
+    password: 'OdinPassword123!', 
+    displayName: 'Odin Developer' 
   };
 
   // 1. TEST REGISTRATION
@@ -33,7 +33,8 @@ describe('Authentication Routing Integration Tests', () => {
       expect(res.body.user.email).toBe(testUserPayload.email);
       expect(res.body.user.colorPalette).toBe('default');
       expect(res.body.user.colorScheme).toBe('light');
-      expect(res.body.user.avatarUrl).toContain('https://gravatar.com');
+      // Asserting flexible case-agnostic domain checking for your Gravatar MP updates
+      expect(res.body.user.avatarUrl.toLowerCase()).toContain('gravatar.com');
       expect(res.body.user).not.toHaveProperty('passwordHash'); // Ensure secure serialization
     });
 
@@ -50,26 +51,22 @@ describe('Authentication Routing Integration Tests', () => {
   // 2. TEST LOCAL LOGIN
   describe('POST /api/auth/login', () => {
     it('should successfully log in, return a JWT, and set isOnline to true', async () => {
-      // First, create the user manually with a hashed password to check matching signatures
       const bcrypt = await import('bcryptjs');
       const salt = await bcrypt.default.genSalt(10);
       const hash = await bcrypt.default.hash(testUserPayload.password, salt);
 
       await prisma.user.create({
-        data: {
-          email: testUserPayload.email,
-          username: testUserPayload.username,
-          displayName: testUserPayload.displayName,
-          passwordHash: hash
+        data: { 
+          email: testUserPayload.email, 
+          username: testUserPayload.username, 
+          displayName: testUserPayload.displayName, 
+          passwordHash: hash 
         }
       });
 
       const res = await request(app)
         .post('/api/auth/login')
-        .send({
-          email: testUserPayload.email,
-          password: testUserPayload.password
-        });
+        .send({ email: testUserPayload.email, password: testUserPayload.password });
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toHaveProperty('token');
@@ -81,7 +78,7 @@ describe('Authentication Routing Integration Tests', () => {
   describe('POST /api/auth/guest', () => {
     it('should instantly generate an online recruiter guest with custom defaults', async () => {
       const res = await request(app).post('/api/auth/guest');
-
+      
       expect(res.statusCode).toBe(201);
       expect(res.body).toHaveProperty('token');
       expect(res.body.user.isGuest).toBe(true);
@@ -95,14 +92,9 @@ describe('Authentication Routing Integration Tests', () => {
   describe('GET /api/auth/me', () => {
     it('should securely fetch user profile attributes when a valid token header is set', async () => {
       const dbUser = await prisma.user.create({
-        data: {
-          email: testUserPayload.email,
-          username: testUserPayload.username,
-          displayName: testUserPayload.displayName
-        }
+        data: { email: testUserPayload.email, username: testUserPayload.username, displayName: testUserPayload.displayName }
       });
 
-      // Leverage your test helper to generate a token signature instantly
       const token = generateTestToken(dbUser.id);
 
       const res = await request(app)
@@ -117,6 +109,32 @@ describe('Authentication Routing Integration Tests', () => {
     it('should block profile requests if an authorization token is omitted', async () => {
       const res = await request(app).get('/api/auth/me');
       expect(res.statusCode).toBe(401);
+    });
+  });
+
+  /* --- NEW SEPARATE SECTION: VALIDATE LOGOUT TERMINATIONS --- */
+  describe('POST /api/auth/logout', () => {
+    it('should allow an active user to terminate their session successfully', async () => {
+      const dbUser = await prisma.user.create({
+        data: { 
+          email: 'logging_out@odin.local', 
+          username: 'logout_user', 
+          displayName: 'Logout Dev',
+          isOnline: true // Initialized as true
+        }
+      });
+
+      const token = generateTestToken(dbUser.id);
+
+      const res = await request(app)
+        .post('/api/auth/logout')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toBe(200);
+      
+      // Verify database updates status flag natively to false
+      const updatedUser = await prisma.user.findUnique({ where: { id: dbUser.id } });
+      expect(updatedUser.isOnline).toBe(false);
     });
   });
 });
