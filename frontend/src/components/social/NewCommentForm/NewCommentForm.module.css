@@ -1,0 +1,46 @@
+.formContainer {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--border-color, #e2e8f0);
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.commentInput {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 20px;
+  background-color: var(--bg-secondary, #f8fafc);
+  color: var(--text-main, #0f172a);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.commentInput:focus {
+  border-color: var(--primary-color, #3b82f6);
+  background-color: var(--bg-card, #ffffff);
+}
+
+.commentInput:disabled {
+  opacity: 0.6;
+}
+
+.submitBtn {
+  background-color: var(--primary-color, #3b82f6);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
