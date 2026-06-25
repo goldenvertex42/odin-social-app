@@ -1,0 +1,22 @@
+.feedContainer {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+  width: 100%;
+}
+
+.feedList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.loading, .error, .emptyMessage {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary, #64748b);
+}
+
+.error {
+  color: var(--error-color, #ef4444);
+}
