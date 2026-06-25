@@ -239,4 +239,72 @@ describe('Post & Social Feed Integration Tests', () => {
       expect(checkDb).not.toBeNull();
     });
   });
+
+  describe('GET /api/posts/user/:id - Individual User Timelines', () => {
+    it('should aggregate only posts created by the specified author id in descending order', async () => {
+      // Seed a post from Target User B
+      const postFromBeta = await prisma.post.create({
+        data: { content: 'User Beta specific update text.', authorId: userB.id }
+      });
+
+      // Seed a post from User A (should be filtered out since we are querying User B's route)
+      await prisma.post.create({
+        data: { content: 'User Alpha isolated text.', authorId: userA.id }
+      });
+
+      const res = await request(app)
+        .get(`/api/posts/user/${userB.id}`)
+        .set('Authorization', `Bearer ${tokenA}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(1);
+      expect(res.body[0].id).toBe(postFromBeta.id);
+      expect(res.body[0].content).toBe('User Beta specific update text.');
+      
+      // Enforce your frontend relation hydration contracts
+      expect(res.body[0]).toHaveProperty('author');
+      expect(res.body[0]).toHaveProperty('likes');
+      expect(res.body[0]).toHaveProperty('comments');
+    });
+
+    it('should return 404 if the requested author id does not exist in the registry', async () => {
+      const res = await request(app)
+        .get('/api/posts/user/non-existent-uuid-string')
+        .set('Authorization', `Bearer ${tokenA}`);
+
+      expect(res.statusCode).toBe(404);
+    });
+  });
+
+  describe('GET /api/posts/:postId - Standalone Deep-Linked Thread Fetcher', () => {
+    it('should retrieve a single post with nested deep relation arrays hydrated cleanly', async () => {
+      const targetPost = await prisma.post.create({
+        data: { content: 'Isolated post target text anchor.', authorId: userB.id }
+      });
+
+      const res = await request(app)
+        .get(`/api/posts/${targetPost.id}`)
+        .set('Authorization', `Bearer ${tokenA}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(typeof res.body).toBe('object');
+      expect(res.body.id).toBe(targetPost.id);
+      expect(res.body.content).toBe('Isolated post target text anchor.');
+      
+      // Ensure the deeply nested comment layers match frontend PostView requirements
+      expect(res.body).toHaveProperty('author');
+      expect(res.body).toHaveProperty('likes');
+      expect(res.body).toHaveProperty('comments');
+    });
+
+    it('should return a 404 status error if the post id does not match database rows', async () => {
+      const res = await request(app)
+        .get('/api/posts/non-existent-post-uuid')
+        .set('Authorization', `Bearer ${tokenA}`);
+
+      expect(res.statusCode).toBe(404);
+    });
+  });
+
 });
