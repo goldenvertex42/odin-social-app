@@ -2,16 +2,19 @@ import { Router } from 'express';
 import passport from 'passport';
 import { upload } from '../../middleware/upload.js';
 import { 
-  getAllUsers, 
+  getAllUsers,
+  getSingleUser, 
   getRelationshipState, 
   sendFollowRequest, 
   acceptFollowRequest, 
   removeFollowRelationship,
-  updateProfile 
+  updateProfile
 } from './user.controller.js';
 
 const router = Router();
 const requireAuth = passport.authenticate('jwt', { session: false });
+
+router.get('/:id', requireAuth, getSingleUser);
 
 router.get('/', requireAuth, getAllUsers);
 router.get('/:id/relationship', requireAuth, getRelationshipState);

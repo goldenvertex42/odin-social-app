@@ -226,3 +226,78 @@ export const updateProfile = async (req, res, next) => {
     next(error);
   }
 };
+
+// 7. FETCH A SINGLE USER PROFILE (WITH CALCULATED RELATIONSHIP STATE)
+export const getSingleUser = async (req, res, next) => {
+  try {
+    const currentUserId = req.user.id;
+    const targetUserId = req.params.id;
+
+    // Handle self lookup profile edge case smoothly
+    if (currentUserId === targetUserId) {
+      const selfProfile = await prisma.user.findUnique({
+        where: { id: currentUserId },
+        select: {
+          id: true,
+          username: true,
+          displayName: true,
+          avatarUrl: true,
+          bio: true,
+          colorPalette: true,
+          colorScheme: true,
+          isOnline: true
+        }
+      });
+      if (!selfProfile) return res.status(404).json({ message: 'User not found.' });
+      return res.status(200).json({ ...selfProfile, relationshipStatus: 'SELF' });
+    }
+
+    // Query profile details alongside relationship records simultaneously
+    const targetProfile = await prisma.user.findUnique({
+      where: { id: targetUserId },
+      select: {
+        id: true,
+        username: true,
+        displayName: true,
+        avatarUrl: true,
+        bio: true,
+        colorPalette: true,
+        colorScheme: true,
+        isOnline: true,
+        // Check if the current user is following them
+        receivedFollows: {
+          where: { followerId: currentUserId }
+        },
+        // Check if they are following the current user
+        sentFollows: {
+          where: { followingId: currentUserId }
+        }
+      }
+    });
+
+    if (!targetProfile) {
+      return res.status(404).json({ message: 'Target profile records not found.' });
+    }
+
+    // Decode the relational rows directly into your explicit four-stage status machine
+    let relationshipStatus = 'NOT_FOLLOWING';
+    const outboundingFollow = targetProfile.receivedFollows[0]; // Current user -> Target
+    const inboundingFollow = targetProfile.sentFollows[0];     // Target -> Current user
+
+    if (outboundingFollow) {
+      relationshipStatus = outboundingFollow.status === 'ACCEPTED' ? 'FOLLOWING' : 'REQUEST_SENT';
+    } else if (inboundingFollow) {
+      relationshipStatus = inboundingFollow.status === 'ACCEPTED' ? 'FOLLOWING' : 'REQUEST_RECEIVED';
+    }
+
+    // Strip out raw relation arrays to return a clean safe payload
+    const { receivedFollows, sentFollows, ...safeProfile } = targetProfile;
+
+    return res.status(200).json({
+      ...safeProfile,
+      relationshipStatus
+    });
+  } catch (error) {
+    next(error);
+  }
+};
