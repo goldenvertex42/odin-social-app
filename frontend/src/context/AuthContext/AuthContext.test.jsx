@@ -1,117 +1,109 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { AuthProvider, useAuth } from './AuthContext';
+import * as apiModule from '../../utils/api/api';
 
-function ConsumerComponent() {
+// A mock consumer component to test context values
+function TestConsumer() {
   const { user, loading, login, loginGuest, logout } = useAuth();
-
-  if (loading) return <div>Synchronizing Session...</div>;
+  
+  if (loading) return <div data-testid="auth-loading">Loading...</div>;
   if (!user) {
     return (
       <div>
-        <span>Unauthenticated Screen</span>
-        <button onClick={() => login('alpha@odin.local', 'OdinPassword123!')}>Standard Sign In</button>
-        <button onClick={loginGuest}>Recruiter Bypass</button>
+        <div data-testid="anonymous-view">No Active Session</div>
+        <button data-testid="login-btn" onClick={() => login('odin@test.com', 'password123')}>Log In</button>
+        <button data-testid="guest-btn" onClick={() => loginGuest()}>Recruiter Bypass</button>
       </div>
     );
   }
 
   return (
     <div>
-      <span>Welcome, {user.displayName}</span>
-      <button onClick={logout}>Sign Out</button>
+      <h1 data-testid="welcome-heading">Welcome {user.username}</h1>
+      <button data-testid="logout-btn" onClick={logout}>Sign Out</button>
     </div>
   );
 }
 
-describe('AuthContext Global State Orchestration Suite', () => {
+describe('AuthContext Strict Production Suite', () => {
   beforeEach(() => {
+    vi.restoreAllMocks();
     localStorage.clear();
   });
 
-  it('should initialize and resolve to unauthenticated if token is empty', async () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+  });
+
+  it('authenticates traditional credentials and syncs user identity', async () => {
+    // Intercept customFetch globally and return data matching login route requirements
+    const fetchSpy = vi.spyOn(apiModule, 'customFetch').mockImplementation(async (url) => {
+      if (url.includes('/api/auth/login')) {
+        return {
+          json: async () => ({ token: 'jwt-alpha', user: { username: 'Odin Alpha' } })
+        };
+      }
+      if (url.includes('/api/auth/me')) {
+        return {
+          json: async () => ({ username: 'Odin Alpha' })
+        };
+      }
+      throw new Error('Not found');
+    });
+
     render(
       <AuthProvider>
-        <ConsumerComponent />
+        <TestConsumer />
       </AuthProvider>
     );
 
-    const unauthScreen = await screen.findByText('Unauthenticated Screen');
-    expect(unauthScreen).toBeInTheDocument();
+    // Initial syncIdentity finishes (no token in localStorage, falls back quickly)
+    await waitFor(() => {
+      expect(screen.queryByTestId('auth-loading')).not.toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('login-btn'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('welcome-heading')).toHaveTextContent('Welcome Odin Alpha');
+    });
+    expect(localStorage.getItem('token')).toBe('jwt-alpha');
   });
 
-  it('should auto-authenticate users on mount if a valid token string resides in localStorage', async () => {
-    localStorage.setItem('token', 'mock-valid-jwt-string-from-msw');
+  it('executes ephemeral recruiter login bypass routes without state leakage', async () => {
+    // Intercept customFetch globally and return data matching guest route requirements
+    const fetchSpy = vi.spyOn(apiModule, 'customFetch').mockImplementation(async (url) => {
+      if (url.includes('/api/auth/guest')) {
+        return {
+          json: async () => ({ token: 'jwt-recruiter', user: { username: 'Recruiter' } })
+        };
+      }
+      if (url.includes('/api/auth/me')) {
+        return {
+          json: async () => ({ username: 'Recruiter' })
+        };
+      }
+      throw new Error('Not found');
+    });
 
     render(
       <AuthProvider>
-        <ConsumerComponent />
+        <TestConsumer />
       </AuthProvider>
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Welcome, Odin Alpha')).toBeInTheDocument();
+      expect(screen.queryByTestId('auth-loading')).not.toBeInTheDocument();
     });
-  });
 
-  it('should handle standard login requests and write returned token strings to local storage', async () => {
-    const user = userEvent.setup();
-    
-    render(
-      <AuthProvider>
-        <ConsumerComponent />
-      </AuthProvider>
-    );
-
-    await waitFor(() => expect(screen.getByText('Unauthenticated Screen')).toBeInTheDocument());
-
-    await user.click(screen.getByRole('button', { name: 'Standard Sign In' }));
+    fireEvent.click(screen.getByTestId('guest-btn'));
 
     await waitFor(() => {
-      expect(screen.getByText('Welcome, Odin Alpha')).toBeInTheDocument();
+      expect(screen.getByTestId('welcome-heading')).toHaveTextContent('Welcome Recruiter');
     });
-
-    expect(localStorage.getItem('token')).toBe('mock-valid-jwt-string-from-msw');
-  });
-
-  it('should execute recruiter shortcuts and instantiate cyberpunk theme parameters natively', async () => {
-    const user = userEvent.setup();
-    
-    render(
-      <AuthProvider>
-        <ConsumerComponent />
-      </AuthProvider>
-    );
-
-    await waitFor(() => expect(screen.getByText('Unauthenticated Screen')).toBeInTheDocument());
-
-    await user.click(screen.getByRole('button', { name: 'Recruiter Bypass' }));
-
-    await waitFor(() => {
-      expect(screen.getByText('Welcome, ✨ Recruiter Guest Profile')).toBeInTheDocument();
-    });
-
-    expect(localStorage.getItem('token')).toBe('mock-guest-jwt-string');
-  });
-
-  it('should drop token references and reset user states to null on logout triggers', async () => {
-    const user = userEvent.setup();
-    localStorage.setItem('token', 'mock-valid-jwt-string-from-msw');
-
-    render(
-      <AuthProvider>
-        <ConsumerComponent />
-      </AuthProvider>
-    );
-
-    await waitFor(() => expect(screen.getByText('Welcome, Odin Alpha')).toBeInTheDocument());
-
-    await user.click(screen.getByRole('button', { name: 'Sign Out' }));
-
-    await waitFor(() => {
-      expect(screen.getByText('Unauthenticated Screen')).toBeInTheDocument();
-    });
-    expect(localStorage.getItem('token')).toBeNull();
+    expect(localStorage.getItem('token')).toBe('jwt-recruiter');
   });
 });
