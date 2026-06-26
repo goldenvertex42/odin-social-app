@@ -11,8 +11,11 @@ import RegisterForm from './components/auth/RegisterForm/RegisterForm';
 import AuthSuccess from './components/auth/AuthSuccess/AuthSuccess';
 
 // Temporary fallback UI anchors for index routes
-const PlaceholderFeed = () => <div><h2>Chronological Post Feed Dashboard View</h2><p>Responsive layout grids coming next.</p></div>;
-const PlaceholderUsers = () => <div><h2>Platform Users Index Feed</h2><p>Follow status graph buttons go here.</p></div>;
+import SocialFeed from './views/SocialFeed/SocialFeed';
+import UserIndex from './views/UserIndex/UserIndex';
+import ProfileView from './views/ProfileView/ProfileView';
+import PostView from './views/PostView/PostView';
+import ProfileEditView from './views/ProfileEditView/ProfileEditView';
 
 // 🎯 MODERN ARCHITECTURE: Configure standard flat route parameters using object arrays
 const router = createBrowserRouter([
@@ -42,15 +45,23 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/feed',
-        element: <PlaceholderFeed />,
+        element: <SocialFeed />,
       },
       {
         path: '/explore',
-        element: <PlaceholderUsers />,
+        element: <UserIndex />,
       },
       {
         path: '/users/:id',
-        element: <div>User Individual Profile Dynamic Sub-Canvas Layout Container</div>,
+        element: <ProfileView />,
+      },
+      {
+        path: '/posts/:postId', // Added direct deep-linked post path parameter configuration
+        element: <PostView />,
+      },
+      {
+        path: '/settings', // Added direct layout screen route mapping for user profile edits
+        element: <ProfileEditView />,
       },
     ],
   },
