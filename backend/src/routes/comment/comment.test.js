@@ -139,40 +139,58 @@ describe('Comment Threading Integration Tests', () => {
   });
 
   describe('DELETE /api/comments/:commentId - Destruction Guard', () => {
-    it('should delete a record when called by the correct owner', async () => {
+    it('should delete a record when called by the correct owner and return 204', async () => {
       const commentToDelete = await prisma.comment.create({
-        data: { content: 'Delete me soon.', postId: targetPost.id, authorId: activeUser.id }
+        data: { 
+          content: 'Delete me soon.', 
+          postId: targetPost.id, 
+          authorId: activeUser.id 
+        }
       });
 
       const res = await request(app)
         .delete(`/api/comments/${commentToDelete.id}`)
         .set('Authorization', `Bearer ${userToken}`);
 
-      expect(res.statusCode).toBe(200);
-      expect(res.body.success).toBe(true);
+      expect(res.statusCode).toBe(204);
+      expect(res.body).toEqual({});
 
-      const checkDb = await prisma.comment.findUnique({ where: { id: commentToDelete.id } });
+      const checkDb = await prisma.comment.findUnique({ 
+        where: { id: commentToDelete.id } 
+      });
       expect(checkDb).toBeNull();
     });
 
-    it('should allow the post owner to delete comments written by third parties', async () => {
+    it('should allow the post owner to delete comments written by third parties and return 204', async () => {
       const commentWriter = await prisma.user.create({
-        data: { email: 'writer@odin.local', username: 'writer_dev', displayName: 'Spammer', passwordHash: 'hash' }
+        data: { 
+          email: 'writer@odin.local', 
+          username: 'writer_dev', 
+          displayName: 'Spammer', 
+          passwordHash: 'hash' 
+        }
       });
 
       const offensiveComment = await prisma.comment.create({
-        data: { content: 'Offensive spam message text.', postId: targetPost.id, authorId: commentWriter.id }
+        data: { 
+          content: 'Offensive spam message text.', 
+          postId: targetPost.id, 
+          authorId: commentWriter.id 
+        }
       });
 
       const res = await request(app)
         .delete(`/api/comments/${offensiveComment.id}`)
         .set('Authorization', `Bearer ${userToken}`);
 
-      expect(res.statusCode).toBe(200);
-      expect(res.body.success).toBe(true);
+      expect(res.statusCode).toBe(204);
+      expect(res.body).toEqual({});
 
-      const checkDb = await prisma.comment.findUnique({ where: { id: offensiveComment.id } });
+      const checkDb = await prisma.comment.findUnique({ 
+        where: { id: offensiveComment.id } 
+      });
       expect(checkDb).toBeNull();
     });
   });
+
 });

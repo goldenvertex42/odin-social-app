@@ -121,15 +121,12 @@ export const deleteComment = async (req, res, next) => {
     const currentUserId = req.user.id;
     const { commentId } = req.params;
 
-    // We must include the parent Post relation to check who owns the thread anchor
     const comment = await prisma.comment.findUnique({
       where: { id: commentId },
-      include: {
-        post: {
-          select: {
-            authorId: true // Fetches the ID of the person who wrote the post
-          }
-        }
+      include: { 
+        post: { 
+          select: { authorId: true } 
+        } 
       }
     });
 
@@ -137,27 +134,19 @@ export const deleteComment = async (req, res, next) => {
       return res.status(404).json({ message: 'Comment not found.' });
     }
 
-    // Determine authorization states
     const isCommentAuthor = comment.authorId === currentUserId;
     const isPostAuthor = comment.post.authorId === currentUserId;
 
-    // ⚠️ Security Guard: If you are NEITHER author, you are blocked
     if (!isCommentAuthor && !isPostAuthor) {
       return res.status(403).json({ message: 'Unauthorized to delete this comment.' });
     }
 
-    await prisma.comment.delete({
-      where: { id: commentId }
-    });
-
-    return res.status(200).json({ 
-      success: true, 
-      message: isPostAuthor 
-        ? 'Comment moderated and removed by post author.' 
-        : 'Comment deleted successfully by author.' 
-    });
+    await prisma.comment.delete({ where: { id: commentId } });
+    
+    return res.status(204).send();
   } catch (error) {
     next(error);
   }
 };
+
 
