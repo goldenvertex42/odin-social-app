@@ -1,177 +1,231 @@
-/* src/styles/theme.css */
-
-/* ==========================================
-   1. SEMANTIC BASELINE CONSTRAINTS & FLUID SYSTEM
-   ========================================== */
+/* ==========================================================================
+   1. CORE DESIGN SCALE TOKENS (Constant Layout Framework Definitions)
+   ========================================================================== */
 :root {
-  /* Fluid responsive layout sizing tokens */
+  /* Fluid responsive padding and layout margin scales */
   --spacing-xs: 0.5rem;
   --spacing-sm: 0.75rem;
   --spacing-md: 1rem;
   --spacing-lg: 1.5rem;
   --spacing-xl: 2.25rem;
 
-  /* Font scales designed for mobile scaling upward */
+  /* Font weight and typographical sizing scales */
   --font-xs: 0.75rem;
   --font-sm: 0.875rem;
   --font-base: 1rem;
   --font-lg: 1.25rem;
   --font-xl: 1.75rem;
+  
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
 
-  /* Structural default sizing scales */
+  /* Consistent border radius structural curves */
   --radius-sm: 6px;
   --radius-md: 12px;
+  --radius-lg: 16px;
   --radius-full: 9999px;
+
+  /* Grid and navigation global height caps */
   --app-max-width: 1240px;
   --nav-height: 60px;
-
-  /* Light Default Surface Baseline Settings */
-  --bg-app: #f8fafc;
-  --bg-surface: #ffffff;
-  --bg-sidebar: #f1f5f9;
-  --border-main: #e2e8f0;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
+  
+  /* Constant action utility indicator colors */
+  --color-success: #22c55e;
+  --color-error: #ef4444;
   --btn-action-text: #ffffff;
-
-  /* 🎯 INTERACTIVE HOVER SURFACE HOOKS (Light Defaults) */
-  --bg-hover: #f1f5f9;          /* Used for interactive card/feed row list items */
-  --bg-sidebar-hover: #e2e8f0;  /* Used for active navigation links */
-
-  /* Default Light Palette Colors */
-  --color-primary: #2563eb;
-  --color-primary-hover: #1d4ed8;
-  --color-accent: #dbeafe;
 }
 
-/* Base Dark Surface Override Changes */
-:root[data-color-scheme="dark"] {
+/* ==========================================================================
+   2. DYNAMIC THEMATIC THEME CHANNELS (Color, Surfaces, and Overrides)
+   ========================================================================== */
+
+/* 🔵 DEFAULT PALETTE: Clean Corporate Tech */
+:root[data-color-palette="default"] {
+  --bg-app: #f1f5f9;
+  --bg-surface: #ffffff;
+  --bg-sidebar: #e2e8f0;
+  --border-main: #cbd5e1;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --bg-hover: #cbd5e1;
+  --bg-sidebar-hover: #94a3b8;
+  --color-primary: #1d4ed8;
+  --color-primary-hover: #1e40af;
+  --color-accent: #dbeafe;
+  --shadow-color: rgba(15, 23, 42, 0.04);
+}
+:root[data-color-scheme="dark"][data-color-palette="default"] {
   --bg-app: #0f172a;
   --bg-surface: #1e293b;
   --bg-sidebar: #0f172a;
   --border-main: #334155;
   --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  
-  /* 🎯 INTERACTIVE HOVER SURFACE HOOKS (Dark Overrides) */
+  --text-muted: #cbd5e1;
   --bg-hover: #2d3748;
   --bg-sidebar-hover: #1e293b;
-
-  --color-primary: #3b82f6;
-  --color-primary-hover: #60a5fa;
+  --color-primary: #60a5fa;
+  --color-primary-hover: #93c5fd;
   --color-accent: #1e3a8a;
+  --shadow-color: rgba(0, 0, 0, 0.3);
 }
 
-/* ==========================================
-   2. DETAILED PREFERENCE PALETTE TRACKS
-   ========================================== */
-
-/* 🟢 THE NORD THEME (Clean Arctic Frost Aura) */
+/* 🟢 THE NORD THEME: High-Vibrancy Arctic Frost */
 :root[data-color-palette="nord"] {
-  --color-primary: #88c0d0;
-  --color-primary-hover: #8fbcbb;
-  --color-accent: #e5e9f0;
-  --bg-hover: #e5e9f0;
-  --bg-sidebar-hover: #d8dee9;
+  --bg-app: #e5e9f0;
+  --bg-surface: #eceff4;
+  --bg-sidebar: #d8dee9;
+  --border-main: #b48ead;
+  --text-main: #2e3440;
+  --text-muted: #4c566a;
+  --bg-hover: #d8dee9;
+  --bg-sidebar-hover: #c4cbd7;
+  --color-primary: #2b788c;
+  --color-primary-hover: #205c6d;
+  --color-accent: #d8dee9;
+  --shadow-color: rgba(46, 52, 64, 0.05);
 }
 :root[data-color-scheme="dark"][data-color-palette="nord"] {
   --bg-app: #2e3440;
   --bg-surface: #3b4252;
   --bg-sidebar: #2e3440;
   --border-main: #4c566a;
-  --text-main: #d8dee9;
+  --text-main: #f3f4f6;
   --text-muted: #e5e9f0;
-  --color-accent: #434c5e;
   --bg-hover: #434c5e;
   --bg-sidebar-hover: #4c566a;
+  --color-primary: #88c0d0;
+  --color-primary-hover: #8fbcbb;
+  --color-accent: #434c5e;
+  --shadow-color: rgba(0, 0, 0, 0.4);
 }
 
-/* 🟡 THE SUNSET THEME (Vibrant Warm Dusk) */
+/* 🟡 THE SUNSET THEME: Rich Warm Dusk Cream */
 :root[data-color-palette="sunset"] {
-  --color-primary: #ff5e62;
-  --color-primary-hover: #ff4146;
-  --color-accent: #ffe3e4;
-  --bg-hover: #ffe3e4;
-  --bg-sidebar-hover: #ffd1d2;
+  --bg-app: #fef2f2;
+  --bg-surface: #fff5f5;
+  --bg-sidebar: #ffe4e6;
+  --border-main: #fca5a5;
+  --text-main: #4c0519;
+  --text-muted: #881337;
+  --bg-hover: #fecdd3;
+  --bg-sidebar-hover: #fda4af;
+  --color-primary: #be123c;
+  --color-primary-hover: #9f1239;
+  --color-accent: #ffe4e6;
+  --shadow-color: rgba(76, 5, 25, 0.04);
 }
 :root[data-color-scheme="dark"][data-color-palette="sunset"] {
-  --bg-app: #201419;
-  --bg-surface: #2d1b22;
-  --bg-sidebar: #1a0f14;
-  --border-main: #4a2835;
-  --text-main: #fff1f2;
-  --text-muted: #fecdd3;
+  --bg-app: #1c1216;
+  --bg-surface: #2b1820;
+  --bg-sidebar: #170d12;
+  --border-main: #5c2d3e;
+  --text-main: #fff5f5;
+  --text-muted: #ffe4e6;
+  --bg-hover: #3d1d2b;
+  --bg-sidebar-hover: #4a2434;
+  --color-primary: #fda4af;
+  --color-primary-hover: #fecdd3;
   --color-accent: #69243f;
-  --bg-hover: #3d222e;
-  --bg-sidebar-hover: #4a2835;
+  --shadow-color: rgba(0, 0, 0, 0.45);
 }
 
-/* 🟣 THE CYBERPUNK THEME (High Contrast Retro Future Synth) */
+/* 🟣 THE CYBERPUNK THEME: Electric Synth Overdrive */
 :root[data-color-palette="cyberpunk"] {
-  --color-primary: #ff0055;
-  --color-primary-hover: #00f0ff;
-  --color-accent: #ffe600;
-  --bg-hover: #ffe600;
-  --bg-sidebar-hover: #e6cc00;
+  --bg-app: #fffb00;
+  --bg-surface: #fffa65;
+  --bg-sidebar: #e6e200;
+  --border-main: #000000;
+  --text-main: #000000;
+  --text-muted: #1a1a1a;
+  --bg-hover: #ccd100;
+  --bg-sidebar-hover: #b5ba00;
+  --color-primary: #bc003f;
+  --color-primary-hover: #91002e;
+  --color-accent: #e6e200;
+  --btn-action-text: #ffffff;
+  --shadow-color: rgba(0, 0, 0, 0.1);
 }
 :root[data-color-scheme="dark"][data-color-palette="cyberpunk"] {
-  --bg-app: #05050a;
-  --bg-surface: #0f0f1d;
+  --bg-app: #030307;
+  --bg-surface: #0c0c17;
   --bg-sidebar: #000000;
   --border-main: #ff0055;
   --text-main: #00ff66;
   --text-muted: #00f0ff;
+  --bg-hover: #16162e;
+  --bg-sidebar-hover: #ff0055;
+  --color-primary: #ff0055;
+  --color-primary-hover: #00f0ff;
   --color-accent: #260033;
   --btn-action-text: #000000;
-  --bg-hover: #1a1a33;
-  --bg-sidebar-hover: #ff0055;
+  --shadow-color: rgba(255, 0, 85, 0.15);
 }
 
-/* ⚫ THE MIDNIGHT OBSIDIAN THEME (Sleek Tactical Stealth) */
+/* ⚫ THE MIDNIGHT OBSIDIAN THEME: Sleek Stealth Charcoal */
 :root[data-color-palette="obsidian"] {
-  --color-primary: #4f46e5;
-  --color-primary-hover: #4338ca;
+  --bg-app: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-sidebar: #e2e8f0;
+  --border-main: #cbd5e1;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --bg-hover: #e2e8f0;
+  --bg-sidebar-hover: #cbd5e1;
+  --color-primary: #4338ca;
+  --color-primary-hover: #3730a3;
   --color-accent: #e0e7ff;
-  --bg-hover: #f3f4f6;
-  --bg-sidebar-hover: #e5e7eb;
+  --shadow-color: rgba(15, 23, 42, 0.04);
 }
 :root[data-color-scheme="dark"][data-color-palette="obsidian"] {
   --bg-app: #030712;
   --bg-surface: #111827;
   --bg-sidebar: #030712;
-  --border-main: #1f2937;
+  --border-main: #374151;
   --text-main: #f9fafb;
-  --text-muted: #9ca3af;
-  --color-accent: #312e81;
+  --text-muted: #d1d5db;
   --bg-hover: #1f2937;
   --bg-sidebar-hover: #374151;
+  --color-primary: #818cf8;
+  --color-primary-hover: #a5b4fc;
+  --color-accent: #312e81;
+  --shadow-color: rgba(0, 0, 0, 0.5);
 }
 
-/* 🔵 THE NEON MINT THEME (Crisp Tech Energy) */
+/* 🟢 THE NEON MINT THEME: Crisp Technical Emerald */
 :root[data-color-palette="neonmint"] {
-  --color-primary: #059669;
-  --color-primary-hover: #047857;
-  --color-accent: #ecfdf5;
-  --bg-hover: #f0fdf4;
-  --bg-sidebar-hover: #d1fae5;
+  --bg-app: #f0fdf4;
+  --bg-surface: #f6fef9;
+  --bg-sidebar: #d1fae5;
+  --border-main: #a7f3d0;
+  --text-main: #064e3b;
+  --text-muted: #0f766e;
+  --bg-hover: #a7f3d0;
+  --bg-sidebar-hover: #6ee7b7;
+  --color-primary: #047857;
+  --color-primary-hover: #065f46;
+  --color-accent: #d1fae5;
+  --shadow-color: rgba(6, 78, 59, 0.03);
 }
 :root[data-color-scheme="dark"][data-color-palette="neonmint"] {
   --bg-app: #022c22;
   --bg-surface: #064e3b;
   --bg-sidebar: #022c22;
-  --border-main: #047857;
+  --border-main: #059669;
   --text-main: #f0fdf4;
-  --text-muted: #34d399;
-  --color-accent: #022c22;
+  --text-muted: #6ee7b7;
   --bg-hover: #065f46;
   --bg-sidebar-hover: #047857;
+  --color-primary: #10b981;
+  --color-primary-hover: #34d399;
+  --color-accent: #022c22;
+  --shadow-color: rgba(0, 0, 0, 0.4);
 }
 
-/* ==========================================
-   3. RESPONSIVE GRID MEDIA QUERY BLUEPRINTS
-   ========================================== */
-
-/* Tablet Optimization Configurations */
+/* ==========================================================================
+   3. RESPONSIVE FLUID MEDIA QUERY BREAKPOINTS
+   ========================================================================== */
 @media (min-width: 768px) {
   :root {
     --spacing-md: 1.25rem;
@@ -181,7 +235,6 @@
   }
 }
 
-/* Desktop Wide Resolution Optimization Layout Blocks */
 @media (min-width: 1024px) {
   :root {
     --spacing-lg: 2rem;
