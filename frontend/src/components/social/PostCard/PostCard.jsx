@@ -4,11 +4,12 @@ import { customFetch } from '../../../utils/api/api';
 import CommentThread from '../CommentThread/CommentThread';
 import styles from './PostCard.module.css';
 
+import { ThumbsUp, MessageSquare } from 'lucide-react';
+
 export default function PostCard({ post, currentUserId }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Detect if we are already viewing this post on its dedicated standalone thread page
   const isStandaloneView = location.pathname === `/posts/${post.id}`;
 
   const [likes, setLikes] = useState(Array.isArray(post.likes) ? post.likes : []);
@@ -21,7 +22,6 @@ export default function PostCard({ post, currentUserId }) {
   });
 
   const handlePostLikeToggle = async (e) => {
-    // Crucial: Stop event bubbling so liking a card doesn't accidentally trigger macro page navigation
     e.stopPropagation();
 
     if (isLiking) return;
@@ -38,7 +38,6 @@ export default function PostCard({ post, currentUserId }) {
   };
 
   const handleCardNavigation = () => {
-    // Only navigate to deep-link view if user isn't already browsing it
     if (!isStandaloneView) {
       navigate(`/posts/${post.id}`);
     }
@@ -50,11 +49,13 @@ export default function PostCard({ post, currentUserId }) {
       className={`${styles.cardContainer} ${!isStandaloneView ? styles.clickableCard : ''}`} 
       data-testid="post-card"
     >
-      {/* Meta User Profile Header Section */}
       <header className={styles.cardHeader}>
-        {/* stopPropagation ensures clicking the avatar navigates to the profile, not the post thread */}
         <Link to={`/users/${post.authorId}`} onClick={(e) => e.stopPropagation()} className={styles.avatarLink}>
-          <img src={post.author?.avatarUrl} alt="" className={styles.authorAvatar} />
+          <img 
+            src={post.author?.avatarUrl || '/default-avatar.svg'} 
+            alt={`${post.author?.displayName || 'User'}'s profile avatar`} 
+            className={styles.authorAvatar} 
+          />
         </Link>
         <div className={styles.metaText}>
           <Link to={`/users/${post.authorId}`} onClick={(e) => e.stopPropagation()} className={styles.authorProfileLink}>
@@ -66,7 +67,6 @@ export default function PostCard({ post, currentUserId }) {
         </div>
       </header>
 
-      {/* Main Core Content Layout Canvas */}
       <div className={styles.cardBody}>
         <p className={styles.textContent}>{post.content}</p>
         {post.imageUrl && (
@@ -84,7 +84,6 @@ export default function PostCard({ post, currentUserId }) {
         )}
       </div>
 
-      {/* Action Footer Controls Panel */}
       <footer className={styles.cardFooter}>
         <button 
           onClick={handlePostLikeToggle} 
@@ -92,21 +91,26 @@ export default function PostCard({ post, currentUserId }) {
           className={`${styles.likeActionButton} ${hasLiked ? styles.activeLikedState : ''}`}
           aria-label={hasLiked ? "Unlike post" : "Like post"}
         >
-          <span className={styles.actionIcon} aria-hidden="true">👍</span>
+          <ThumbsUp 
+            className={styles.actionIcon} 
+            size={16} 
+            aria-hidden="true" 
+            fill={hasLiked ? "currentColor" : "none"} 
+          />
           <span className={styles.actionLabel}>
             {hasLiked ? 'Liked' : 'Like'} ({likes.length})
           </span>
         </button>
 
-        {/* Dynamic Link UI Indicator: visible only when browsing general feeds */}
         {!isStandaloneView && (
           <button className={styles.threadLinkBtn} aria-label="Open full discussion thread">
-            💬 View Full Thread
+            {/* FIXED: Swapped raw speech bubble emoji for a high-end discussion vector icon */}
+            <MessageSquare className={styles.actionIcon} size={16} aria-hidden="true" />
+            <span className={styles.actionLabel}>View Full Thread</span>
           </button>
         )}
       </footer>
 
-      {/* Nested Interaction Comment Flow Area */}
       <section className={styles.commentThreadSection} aria-label="Post replies stream" onClick={(e) => e.stopPropagation()}>
         <h4 className={styles.commentStreamTitle}>
           Comments ({post.comments?.length || 0})

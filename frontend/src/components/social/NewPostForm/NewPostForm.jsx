@@ -1,5 +1,7 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import styles from './NewPostForm.module.css';
+
+import { Image, X } from 'lucide-react';
 
 export default function NewPostForm({ onPostCreated }) {
   const [content, setContent] = useState('');
@@ -11,7 +13,6 @@ export default function NewPostForm({ onPostCreated }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     setImageFile(file);
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -36,7 +37,6 @@ export default function NewPostForm({ onPostCreated }) {
       setIsSubmitting(true);
       const token = localStorage.getItem('token');
       
-      // Use FormData to support image uploads alongside string content
       const formData = new FormData();
       formData.append('content', content);
       if (imageFile) {
@@ -47,17 +47,14 @@ export default function NewPostForm({ onPostCreated }) {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
-          // Note: Do NOT set Content-Type header when sending FormData; browser sets it automatically
         },
         body: formData
       });
 
       if (!response.ok) throw new Error('Failed to publish your post.');
-      
       const newPost = await response.json();
       onPostCreated(newPost);
       
-      // Reset input layout flags
       setContent('');
       handleRemoveImage();
     } catch (err) {
@@ -69,13 +66,13 @@ export default function NewPostForm({ onPostCreated }) {
 
   return (
     <form onSubmit={handleSubmit} className={styles.formContainer} data-testid="new-post-form">
-      <textarea
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder="What's on your mind?"
-        className={styles.textarea}
-        maxLength={280}
-        data-testid="new-post-input"
+      <textarea 
+        value={content} 
+        onChange={(e) => setContent(e.target.value)} 
+        placeholder="What's on your mind?" 
+        className={styles.textarea} 
+        maxLength={280} 
+        data-testid="new-post-input" 
       />
 
       {imagePreview && (
@@ -84,31 +81,33 @@ export default function NewPostForm({ onPostCreated }) {
           <button 
             type="button" 
             onClick={handleRemoveImage} 
-            className={styles.removeImageBtn}
+            className={styles.removeImageBtn} 
             data-testid="remove-image-btn"
+            aria-label="Remove uploaded image"
           >
-            ✕
+            <X className={styles.closeIcon} size={14} aria-hidden="true" />
           </button>
         </div>
       )}
 
       <div className={styles.actionBar}>
         <label className={styles.uploadLabel} data-testid="upload-label">
-          <span>📷 Add Image</span>
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleImageChange}
-            accept="image/*"
-            className={styles.fileInput}
-            data-testid="image-file-input"
+          <Image className={styles.cameraIcon} size={16} aria-hidden="true" />
+          <span className={styles.uploadLabelText}>Add Image</span>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleImageChange} 
+            accept="image/*" 
+            className={styles.fileInput} 
+            data-testid="image-file-input" 
           />
         </label>
-
-        <button
-          type="submit"
-          className={styles.submitBtn}
-          disabled={isSubmitting || (!content.trim() && !imageFile)}
+        
+        <button 
+          type="submit" 
+          className={styles.submitBtn} 
+          disabled={isSubmitting || (!content.trim() && !imageFile)} 
           data-testid="new-post-submit"
         >
           {isSubmitting ? 'Posting...' : 'Share'}

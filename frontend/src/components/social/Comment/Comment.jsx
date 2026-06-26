@@ -3,6 +3,8 @@ import { Link } from 'react-router';
 import { customFetch } from '../../../utils/api/api';
 import styles from './Comment.module.css';
 
+import { Heart } from 'lucide-react';
+
 export default function Comment({ comment, currentUserId }) {
   const [likes, setLikes] = useState(Array.isArray(comment.likes) ? comment.likes : []);
   const [isLiking, setIsLiking] = useState(false);
@@ -11,7 +13,6 @@ export default function Comment({ comment, currentUserId }) {
   const hasLiked = likes.some(like => {
     const likeUserId = typeof like.userId === 'object' ? like.userId?.id : like.userId;
     const targetUserId = typeof currentUserId === 'object' ? currentUserId?.id : currentUserId;
-    
     return String(likeUserId) === String(targetUserId);
   });
 
@@ -40,13 +41,12 @@ export default function Comment({ comment, currentUserId }) {
     }
   };
 
-
   return (
     <div className={styles.commentContainer} data-testid="comment-node">
       <header className={styles.commentHeader}>
         <img 
-          src={comment.author?.avatarUrl} 
-          alt="" 
+          src={comment.author?.avatarUrl || '/default-avatar.svg'} 
+          alt={`${comment.author?.displayName || 'User'}'s profile avatar`} 
           className={styles.commentAvatar} 
         />
         <div className={styles.metaBlock}>
@@ -58,19 +58,24 @@ export default function Comment({ comment, currentUserId }) {
           </span>
         </div>
       </header>
-
+      
       <div className={styles.commentBody}>
         <p className={styles.contentParagraph}>{comment.content}</p>
       </div>
-
+      
       <footer className={styles.commentFooter}>
         <button 
           onClick={handleCommentLikeToggle} 
-          disabled={isLiking}
-          className={`${styles.likeButton} ${hasLiked ? styles.activeLikedState : ''}`}
-          aria-label={hasLiked ? "Unlike comment" : "Like comment"}
+          disabled={isLiking} 
+          className={`${styles.likeButton} ${hasLiked ? styles.activeLikedState : ''}`} 
+          aria-label={hasLiked ? "Unlike comment" : "Like comment"} 
         >
-          <span className={styles.heartIcon} aria-hidden="true">❤️</span>
+          <Heart 
+            className={styles.heartIcon} 
+            size={14} 
+            aria-hidden="true" 
+            fill={hasLiked ? "currentColor" : "none"} 
+          />
           <span className={styles.likeCounter}>{likes.length}</span>
         </button>
       </footer>

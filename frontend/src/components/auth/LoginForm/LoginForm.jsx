@@ -3,13 +3,14 @@ import { useNavigate, Link } from 'react-router';
 import { useAuth } from '../../../context/AuthContext/AuthContext';
 import styles from './LoginForm.module.css';
 
+import { Zap } from 'lucide-react';
+
 export default function LoginForm() {
   const { login, loginGuest, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [localError, setLocalError] = useState(null);
   const [localLoading, setLocalLoading] = useState(false);
-
   const loading = authLoading || localLoading;
 
   const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -49,40 +50,20 @@ export default function LoginForm() {
   return (
     <div className={styles.wrapper}>
       <form className={styles.form} onSubmit={handleSubmit}>
-        {/* 🎯 HEADER CONTEXT LABEL */}
         <h2 className={styles.title}>Sign in to your account</h2>
         
         {localError && <div className={styles.errorBanner} role="alert">{localError}</div>}
-        
+
         <div className={styles.formGroup}>
           <label htmlFor="email" className={styles.label}>Email Address</label>
-          <input 
-            id="email" 
-            type="email" 
-            name="email" 
-            required 
-            disabled={loading} 
-            value={formData.email} 
-            onChange={handleChange} 
-            className={styles.input} 
-          />
+          <input id="email" type="email" name="email" required disabled={loading} value={formData.email} onChange={handleChange} className={styles.input} />
         </div>
-        
+
         <div className={styles.formGroup}>
           <label htmlFor="password" className={styles.label}>Password</label>
-          <input 
-            id="password" 
-            type="password" 
-            name="password" 
-            required 
-            disabled={loading} 
-            value={formData.password} 
-            onChange={handleChange} 
-            className={styles.input} 
-            autoComplete="current-password"
-          />
+          <input id="password" type="password" name="password" required disabled={loading} value={formData.password} onChange={handleChange} className={styles.input} autoComplete="current-password" />
         </div>
-        
+
         <button type="submit" disabled={loading} className={styles.submitBtn}>
           {loading ? 'Signing in...' : 'Sign In'}
         </button>
@@ -91,11 +72,8 @@ export default function LoginForm() {
           <span>or continue with</span>
         </div>
 
-        <a 
-          href={googleOAuthUrl} 
-          className={`${styles.oauthBtn} ${loading ? styles.disabledLink : ''}`}
-        >
-          <svg className={styles.googleIcon} xmlns="http://www.w3.org" viewBox="0 0 24 24" width="100%" height="100%" aria-hidden="true">
+        <a href={googleOAuthUrl} className={`${styles.oauthBtn} ${loading ? styles.disabledLink : ''}`}>
+          <svg className={styles.googleIcon} xmlns="http://w3.org" viewBox="0 0 24 24" width="100%" height="100%" aria-hidden="true">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
@@ -104,16 +82,11 @@ export default function LoginForm() {
           Google
         </a>
 
-        <button 
-          type="button" 
-          disabled={loading} 
-          onClick={handleGuestBypass} 
-          className={styles.guestBtn}
-        >
-          ⚡ Instant Recruiter Guest Access
+        <button type="button" disabled={loading} onClick={handleGuestBypass} className={styles.guestBtn}>
+          <Zap className={styles.zapIcon} size={16} aria-hidden="true" fill="currentColor" />
+          <span>Instant Recruiter Guest Access</span>
         </button>
 
-        {/* 🎯 CROSS-ROUTE NAVIGATION FOOTER */}
         <p className={styles.footerText}>
           Don't have an account? <Link to="/register" className={styles.link}>Sign Up</Link>
         </p>

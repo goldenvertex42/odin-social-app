@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router';
+import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router';
 import { useAuth } from '../../context/AuthContext/AuthContext';
 import { useTheme } from '../../context/ThemeContext/ThemeContext'; // Import your custom theme hook
 import { customFetch } from '../../utils/api/api';
 import PostCard from '../../components/social/PostCard/PostCard';
 import styles from './ProfileView.module.css';
+
+import { Settings, UserPlus, UserCheck, UserX, UserMinus } from 'lucide-react';
 
 export default function ProfileView() {
   const { id: profileId } = useParams();
@@ -79,7 +81,18 @@ export default function ProfileView() {
   };
 
   const renderConnectionButton = () => {
-    if (isSelf) return <span className={styles.selfBadge}>This is You</span>;
+    if (isSelf) {
+      return (
+        <Link 
+          to="/settings" 
+          className={`${styles.actionBtn} ${styles.editProfileBtn}`}
+          data-testid="edit-profile-navigation-btn"
+        >
+          <Settings className={styles.btnIcon} aria-hidden="true" size={16} />
+          <span className={styles.btnText}>Edit Profile</span>
+        </Link>
+      );
+    }
 
     switch (relationship) {
       case 'NOT_FOLLOWING':
@@ -90,7 +103,8 @@ export default function ProfileView() {
             className={`${styles.actionBtn} ${styles.connectBtn}`}
             data-testid="profile-connect-btn"
           >
-            {isProcessing ? 'Connecting...' : 'Connect'}
+            <UserPlus className={styles.btnIcon} aria-hidden="true" size={16} />
+            <span className={styles.btnText}>{isProcessing ? 'Connecting...' : 'Connect'}</span>
           </button>
         );
       case 'REQUEST_SENT':
@@ -101,7 +115,8 @@ export default function ProfileView() {
             className={`${styles.actionBtn} ${styles.cancelBtn}`}
             data-testid="profile-cancel-btn"
           >
-            {isProcessing ? 'Canceling...' : 'Cancel Request'}
+            <UserX className={styles.btnIcon} aria-hidden="true" size={16} />
+            <span className={styles.btnText}>{isProcessing ? 'Canceling...' : 'Cancel Request'}</span>
           </button>
         );
       case 'REQUEST_RECEIVED':
@@ -113,7 +128,8 @@ export default function ProfileView() {
               className={`${styles.actionBtn} ${styles.acceptBtn}`}
               data-testid="profile-accept-btn"
             >
-              Accept Request
+              <UserCheck className={styles.btnIcon} aria-hidden="true" size={16} />
+              <span className={styles.btnText}>Accept</span>
             </button>
             <button
               onClick={() => handleNetworkAction('DELETE', `/api/users/${profileId}/cancel`, 'NOT_FOLLOWING')}
@@ -132,7 +148,8 @@ export default function ProfileView() {
             className={`${styles.actionBtn} ${styles.disconnectBtn}`}
             data-testid="profile-unfollow-btn"
           >
-            {isProcessing ? 'Disconnecting...' : 'Disconnect'}
+            <UserMinus className={styles.btnIcon} aria-hidden="true" size={16} />
+            <span className={styles.btnText}>{isProcessing ? 'Disconnecting...' : 'Disconnect'}</span>
           </button>
         );
       default:
