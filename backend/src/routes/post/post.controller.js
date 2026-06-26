@@ -6,8 +6,8 @@ const streamPostImageToCloudinary = (fileBuffer) => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.v2.uploader.upload_stream(
       {
-        folder: 'odin_social_post_images', // Dedicated post media cloud storage folder
-        transformation: [{ width: 1200, crop: 'limit' }] // Cap wide images for performance, preserve aspect ratio
+        folder: 'odin_social_post_images',
+        transformation: [{ width: 1200, crop: 'limit' }]
       },
       (error, result) => {
         if (result) resolve(result.secure_url);
@@ -18,35 +18,58 @@ const streamPostImageToCloudinary = (fileBuffer) => {
   });
 };
 
-// 1. FETCH CHRONOLOGICAL SOCIAL FEED (UPDATED WITH ARRAY INCLUSIONS)
+// Extract Cloudinary Public ID utility for safe asset clearing
+const getCloudinaryPublicId = (url) => {
+  if (!url) return null;
+  
+  try {
+    const parts = url.split('/');
+    const filePart = parts[parts.length - 1].split('.')[0];
+    const folderPart = parts[parts.length - 2];
+
+    // If the image is housed in one of your two active folder namespaces, prepend it
+    if (folderPart === 'odin_social_avatars' || folderPart === 'odin_social_post_images') {
+      return `${folderPart}/${filePart}`;
+    }
+
+    // Standard fallback loop for root-level assets
+    return filePart;
+  } catch (error) {
+    console.error('Failed to parse Cloudinary public_id out of resource URL payload:', error);
+    return null;
+  }
+};
+
+
+// 1. FETCH CHRONOLOGICAL SOCIAL FEED
 export const getSocialFeed = async (req, res, next) => {
   try {
     const currentUserId = req.user.id;
 
-    // Discover who the current session user is following
+    // Discover who the current session user is actively tracking using the new alignment enums
     const followedRelations = await prisma.follow.findMany({
-      where: { followerId: currentUserId, status: 'ACCEPTED' },
+      where: { 
+        followerId: currentUserId, 
+        status: 'FOLLOWING' // Aligned with the four-part state configuration
+      },
       select: { followingId: true },
     });
 
     const followedUserIds = followedRelations.map((rel) => rel.followingId);
-    // Combine followed IDs with current user ID to form full feed target bounds
     const feedAuthorIds = [...followedUserIds, currentUserId];
 
     const feedPosts = await prisma.post.findMany({
       where: { authorId: { in: feedAuthorIds } },
-      orderBy: { createdAt: 'desc' }, // Descending chronological index order
+      orderBy: { createdAt: 'desc' },
       include: {
         author: {
           select: { id: true, username: true, displayName: true, avatarUrl: true, isOnline: true },
         },
-        likes: true, 
+        likes: true,
         comments: {
           orderBy: { createdAt: 'desc' },
           include: {
-            author: {
-              select: { id: true, username: true, displayName: true, avatarUrl: true }
-            },
+            author: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
             likes: true
           }
         }
@@ -59,8 +82,7 @@ export const getSocialFeed = async (req, res, next) => {
   }
 };
 
-
-// 2. CREATE A NEW POST NODE (With Direct Cloudinary Stream Integration)
+// 2. CREATE A NEW POST NODE (With Complete Array Pre-Hydration)
 export const createPost = async (req, res, next) => {
   try {
     const currentUserId = req.user.id;
@@ -70,7 +92,6 @@ export const createPost = async (req, res, next) => {
       return res.status(400).json({ message: 'Post content cannot be empty.' });
     }
 
-    // Process the image file upload if the user attached one
     let uploadedImageUrl = null;
     if (req.file) {
       try {
@@ -83,13 +104,19 @@ export const createPost = async (req, res, next) => {
     const newPost = await prisma.post.create({
       data: {
         content: content.trim(),
-        imageUrl: uploadedImageUrl, // Saves secure URL from Cloudinary
+        imageUrl: uploadedImageUrl,
         authorId: currentUserId,
       },
       include: {
         author: {
           select: { id: true, username: true, displayName: true, avatarUrl: true },
         },
+        likes: true,
+        comments: {
+          include: {
+            author: { select: { id: true, username: true, displayName: true, avatarUrl: true } }
+          }
+        }
       },
     });
 
@@ -99,12 +126,13 @@ export const createPost = async (req, res, next) => {
   }
 };
 
-// 3. EDIT AN EXISTING POST (Allows Uploading a New Image)
+
+// 3. EDIT AN EXISTING POST
 export const updatePost = async (req, res, next) => {
   try {
     const currentUserId = req.user.id;
     const { postId } = req.params;
-    const { content, removeImage } = req.body; // removeImage allows resetting media
+    const { content, removeImage } = req.body;
 
     if (!content || content.trim() === '') {
       return res.status(400).json({ message: 'Post content cannot be empty.' });
@@ -120,30 +148,30 @@ export const updatePost = async (req, res, next) => {
       return res.status(403).json({ message: 'Unauthorized to edit this post.' });
     }
 
-    // Determine target imageUrl state logic
     let targetImageUrl = post.imageUrl;
-    
     if (req.file) {
       try {
+        // Purge old asset from Cloudinary nodes if replacing it with a fresh file upload
+        if (post.imageUrl) {
+          const publicId = getCloudinaryPublicId(post.imageUrl);
+          if (publicId) await cloudinary.v2.uploader.destroy(publicId);
+        }
         targetImageUrl = await streamPostImageToCloudinary(req.file.buffer);
       } catch (cloudinaryError) {
         return res.status(500).json({ message: 'Failed to update post image asset.' });
       }
     } else if (removeImage === 'true') {
-      targetImageUrl = null; // Purge image if flag is set explicitly
+      if (post.imageUrl) {
+        const publicId = getCloudinaryPublicId(post.imageUrl);
+        if (publicId) await cloudinary.v2.uploader.destroy(publicId);
+      }
+      targetImageUrl = null;
     }
 
     const updatedPost = await prisma.post.update({
       where: { id: postId },
-      data: {
-        content: content.trim(),
-        imageUrl: targetImageUrl
-      },
-      include: {
-        author: {
-          select: { id: true, username: true, displayName: true, avatarUrl: true }
-        }
-      }
+      data: { content: content.trim(), imageUrl: targetImageUrl },
+      include: { author: { select: { id: true, username: true, displayName: true, avatarUrl: true } } }
     });
 
     return res.status(200).json({ message: 'Post updated successfully.', post: updatedPost });
@@ -152,7 +180,7 @@ export const updatePost = async (req, res, next) => {
   }
 };
 
-// 4. DELETE A POST NATIVELY
+// 4. DELETE A POST NATIVELY (With Complete Phase 2 Binary Clearing)
 export const deletePost = async (req, res, next) => {
   try {
     const currentUserId = req.user.id;
@@ -168,8 +196,16 @@ export const deletePost = async (req, res, next) => {
       return res.status(403).json({ message: 'Unauthorized to delete this post.' });
     }
 
+    // Phase 2 Cleanup: Purge binary files from Cloudinary storage nodes instantly
+    if (post.imageUrl) {
+      const publicId = getCloudinaryPublicId(post.imageUrl);
+      if (publicId) {
+        await cloudinary.v2.uploader.destroy(publicId);
+      }
+    }
+
     await prisma.post.delete({ where: { id: postId } });
-    return res.status(200).json({ success: true, message: 'Post deleted successfully.' });
+    return res.status(204).send(); // Standard non-content transaction finish
   } catch (error) {
     next(error);
   }
@@ -180,7 +216,6 @@ export const getUserPosts = async (req, res, next) => {
   try {
     const targetUserId = req.params.id;
 
-    // Optional validation guard: Verify target user exists before processing posts
     const targetUser = await prisma.user.findUnique({ where: { id: targetUserId } });
     if (!targetUser) {
       return res.status(404).json({ message: 'Target user profile records not found.' });
@@ -188,18 +223,16 @@ export const getUserPosts = async (req, res, next) => {
 
     const userPosts = await prisma.post.findMany({
       where: { authorId: targetUserId },
-      orderBy: { createdAt: 'desc' }, // Descending chronological index order
+      orderBy: { createdAt: 'desc' },
       include: {
         author: {
           select: { id: true, username: true, displayName: true, avatarUrl: true, isOnline: true },
         },
-        likes: true, // Crucial: satisfy frontend likes.some() and likes.length counters
+        likes: true,
         comments: {
-          orderBy: { createdAt: 'desc' }, // Order leaf replies chronologically descending
+          orderBy: { createdAt: 'desc' },
           include: {
-            author: {
-              select: { id: true, username: true, displayName: true, avatarUrl: true }
-            }
+            author: { select: { id: true, username: true, displayName: true, avatarUrl: true } }
           }
         }
       },
@@ -211,25 +244,22 @@ export const getUserPosts = async (req, res, next) => {
   }
 };
 
-// 6. FETCH A SINGLE DEEP-LINKED POST THREAD WITH RICH DATA HYDRATION
+// 6. FETCH A SINGLE DEEP-LINKED POST THREAD
 export const getSinglePost = async (req, res, next) => {
   try {
     const { postId } = req.params;
-
     const post = await prisma.post.findUnique({
       where: { id: postId },
       include: {
         author: {
           select: { id: true, username: true, displayName: true, avatarUrl: true, isOnline: true },
         },
-        likes: true, // Post Likes Array for frontend .some() evaluation
+        likes: true,
         comments: {
-          orderBy: { createdAt: 'desc' }, // Displays thread replies chronologically descending
+          orderBy: { createdAt: 'desc' },
           include: {
-            author: {
-              select: { id: true, username: true, displayName: true, avatarUrl: true }
-            },
-            likes: true // Comment Likes Array for nested leaf comment nodes
+            author: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
+            likes: true
           }
         }
       },

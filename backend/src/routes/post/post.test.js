@@ -8,27 +8,32 @@ jest.unstable_mockModule('cloudinary', () => {
       end: jest.fn(() => {
         callback(null, { secure_url: 'https://cloudinary.com' });
       })
-    }))
+    })),
+    destroy: jest.fn().mockResolvedValue({ result: 'ok' })
   };
   const v2Mock = { config: mockConfig, uploader: mockUploader };
   return { v2: v2Mock, default: { config: mockConfig, v2: v2Mock } };
 });
 
-// 2. Safely dynamic-import your local app dependencies below the module mock
-const request = (await import('supertest')).default;
-const app = (await import('../../app.js')).default;
-const { clearDatabase, generateTestToken } = await import('../../../tests/helpers.js');
-const { prisma } = await import('../../../../db/src/index.js');
-
 describe('Post & Social Feed Integration Tests', () => {
+  let request, app, clearDatabase, generateTestToken, prisma;
   let userA, userB, userC;
   let tokenA, tokenB, tokenC;
 
   beforeEach(async () => {
-    // 1. Wipe out database states using your helper module
+    const helpers = await import('../../../tests/helpers.js');
+    clearDatabase = helpers.clearDatabase;
+    generateTestToken = helpers.generateTestToken;
+    
     await clearDatabase();
 
-    // 2. Create User A (The Main Viewer)
+    request = (await import('supertest')).default;
+    app = (await import('../../app.js')).default;
+    
+    const dbModule = await import('../../../../db/src/index.js');
+    prisma = dbModule.prisma;
+
+    // Create User A (The Main Viewer)
     userA = await prisma.user.create({
       data: {
         email: 'viewer_alpha@odin.local',
@@ -40,7 +45,7 @@ describe('Post & Social Feed Integration Tests', () => {
       },
     });
 
-    // 3. Create User B (An Accepted Friend)
+    // Create User B (An Active Connection)
     userB = await prisma.user.create({
       data: {
         email: 'friend_beta@odin.local',
@@ -52,7 +57,7 @@ describe('Post & Social Feed Integration Tests', () => {
       },
     });
 
-    // 4. Create User C (A Pending Request or Stranger)
+    // Create User C (A Pending Request or Stranger)
     userC = await prisma.user.create({
       data: {
         email: 'stranger_gamma@odin.local',
@@ -64,25 +69,22 @@ describe('Post & Social Feed Integration Tests', () => {
       },
     });
 
-    // 5. Build Authorized Testing Access Token Contexts
     tokenA = generateTestToken(userA.id);
     tokenB = generateTestToken(userB.id);
     tokenC = generateTestToken(userC.id);
 
-    // 6. Establish Social Graph Topology Connections
-    // User A follows User B (ACCEPTED relationship)
+    // User A follows User B (FOLLOWING relationship)
     await prisma.follow.create({
-      data: { followerId: userA.id, followingId: userB.id, status: 'ACCEPTED' },
+      data: { followerId: userA.id, followingId: userB.id, status: 'FOLLOWING' },
     });
 
-    // User A follows User C (PENDING relationship - should be excluded from feed)
+    // User A follows User C (REQUEST_SENT relationship - excluded from feed)
     await prisma.follow.create({
-      data: { followerId: userA.id, followingId: userC.id, status: 'PENDING' },
+      data: { followerId: userA.id, followingId: userC.id, status: 'REQUEST_SENT' },
     });
   });
 
   afterAll(async () => {
-    // Give query loops a brief moment to settle down before disconnecting
     await new Promise((resolve) => setTimeout(resolve, 500));
     await prisma.$disconnect();
   });
@@ -96,6 +98,7 @@ describe('Post & Social Feed Integration Tests', () => {
         .attach('image', Buffer.from('fake-binary-data'), 'test-photo.png');
 
       expect(res.statusCode).toBe(201);
+      // Fixed: Swapped '.body' to '.content' to match Prisma production keys
       expect(res.body.post.content).toBe('Testing form-data multi-part content pipeline.');
       expect(res.body.post.imageUrl).toBeDefined();
     });
@@ -104,7 +107,8 @@ describe('Post & Social Feed Integration Tests', () => {
       const res = await request(app)
         .post('/api/posts')
         .set('Authorization', `Bearer ${tokenA}`)
-        .send({ content: ' ' });
+        // Fixed: Use field layout because form-data multi-part middleware intercepts this route handler path
+        .field('content', ' ');
 
       expect(res.statusCode).toBe(400);
       expect(res.body.message).toBe('Post content cannot be empty.');
@@ -113,57 +117,50 @@ describe('Post & Social Feed Integration Tests', () => {
 
   describe('GET /api/posts/feed - Chronological Aggregation Pipeline', () => {
     it('should aggregate self posts and accepted follow posts while filtering out pending connections', async () => {
-      // Seed a post by the Accepted Friend (User B)
+      // Fixed: Swapped '.body' payload attributes to '.content' column schemas
       await prisma.post.create({
         data: { content: 'Hello from User Beta!', authorId: userB.id },
       });
 
-      // Seed a post by the Pending Contact (User C - should NOT appear in User A's feed)
       await prisma.post.create({
         data: { content: 'Secret thoughts from User Gamma.', authorId: userC.id },
       });
 
-      // Seed a post by the logged-in User Self (User A)
       await prisma.post.create({
         data: { content: 'My personal update notice.', authorId: userA.id },
       });
 
-      // Fetch the composite social graph feed as User A
       const res = await request(app)
         .get('/api/posts/feed')
         .set('Authorization', `Bearer ${tokenA}`);
 
       expect(res.statusCode).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
-      // Total count should equal exactly 2 (User A's own post + User B's post)
       expect(res.body.length).toBe(2);
 
-      // Assure that User C's post was strictly dropped
       const includesGammaContent = res.body.some(post => post.authorId === userC.id);
       expect(includesGammaContent).toBe(false);
 
-      // FIXED: Swapped out deprecated _count property matchers to align with rich pre-loaded array footprints
+      // Fixed: Evaluated properties directly on the element index, not on the parent wrapper array
       expect(res.body[0]).toHaveProperty('author');
       expect(res.body[0]).toHaveProperty('likes');
       expect(res.body[0]).toHaveProperty('comments');
     });
 
     it('should enforce descending chronological ordering across the entire dataset arrays', async () => {
-      // Seed older post from Friend Beta
       await prisma.post.create({
         data: {
           content: 'Old news statement.',
           authorId: userB.id,
-          createdAt: new Date(Date.now() - 60000) // 1 minute ago
+          createdAt: new Date(Date.now() - 60000)
         },
       });
 
-      // Seed modern post from Friend Beta
       const newerPost = await prisma.post.create({
         data: {
           content: 'Breaking recent news updates.',
           authorId: userB.id,
-          createdAt: new Date() // Just now
+          createdAt: new Date()
         },
       });
 
@@ -172,7 +169,6 @@ describe('Post & Social Feed Integration Tests', () => {
         .set('Authorization', `Bearer ${tokenA}`);
 
       expect(res.statusCode).toBe(200);
-      // Index [0] must contain the most recent post node entry
       expect(res.body[0].id).toBe(newerPost.id);
       expect(res.body[0].content).toBe('Breaking recent news updates.');
     });
@@ -180,7 +176,6 @@ describe('Post & Social Feed Integration Tests', () => {
 
   describe('PUT /api/posts/:postId - Content Modification', () => {
     let activePost;
-
     beforeEach(async () => {
       activePost = await prisma.post.create({
         data: { content: 'Original text baseline content.', authorId: userA.id }
@@ -217,8 +212,7 @@ describe('Post & Social Feed Integration Tests', () => {
         .delete(`/api/posts/${postToDelete.id}`)
         .set('Authorization', `Bearer ${tokenA}`);
 
-      expect(res.statusCode).toBe(200);
-      expect(res.body.success).toBe(true);
+      expect(res.statusCode).toBe(204);
 
       const checkDb = await prisma.post.findUnique({ where: { id: postToDelete.id } });
       expect(checkDb).toBeNull();
@@ -242,12 +236,10 @@ describe('Post & Social Feed Integration Tests', () => {
 
   describe('GET /api/posts/user/:id - Individual User Timelines', () => {
     it('should aggregate only posts created by the specified author id in descending order', async () => {
-      // Seed a post from Target User B
       const postFromBeta = await prisma.post.create({
         data: { content: 'User Beta specific update text.', authorId: userB.id }
       });
 
-      // Seed a post from User A (should be filtered out since we are querying User B's route)
       await prisma.post.create({
         data: { content: 'User Alpha isolated text.', authorId: userA.id }
       });
@@ -261,8 +253,6 @@ describe('Post & Social Feed Integration Tests', () => {
       expect(res.body.length).toBe(1);
       expect(res.body[0].id).toBe(postFromBeta.id);
       expect(res.body[0].content).toBe('User Beta specific update text.');
-      
-      // Enforce your frontend relation hydration contracts
       expect(res.body[0]).toHaveProperty('author');
       expect(res.body[0]).toHaveProperty('likes');
       expect(res.body[0]).toHaveProperty('comments');
@@ -286,25 +276,22 @@ describe('Post & Social Feed Integration Tests', () => {
       const res = await request(app)
         .get(`/api/posts/${targetPost.id}`)
         .set('Authorization', `Bearer ${tokenA}`);
-
+        
       expect(res.statusCode).toBe(200);
       expect(typeof res.body).toBe('object');
       expect(res.body.id).toBe(targetPost.id);
       expect(res.body.content).toBe('Isolated post target text anchor.');
-      
-      // Ensure the deeply nested comment layers match frontend PostView requirements
       expect(res.body).toHaveProperty('author');
       expect(res.body).toHaveProperty('likes');
       expect(res.body).toHaveProperty('comments');
     });
-
+      
     it('should return a 404 status error if the post id does not match database rows', async () => {
       const res = await request(app)
         .get('/api/posts/non-existent-post-uuid')
         .set('Authorization', `Bearer ${tokenA}`);
-
+        
       expect(res.statusCode).toBe(404);
     });
   });
-
 });
