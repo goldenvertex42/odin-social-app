@@ -90,6 +90,7 @@
   width: 100%;
 }
 
+/* Aligned: Flex grid controls centering internal text blocks and SVG tracks perfectly */
 .actionBtn {
   width: 100%;
   padding: var(--spacing-xs);
@@ -98,6 +99,10 @@
   font-weight: var(--weight-semibold);
   cursor: pointer;
   border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
   transition: opacity 0.2s ease, background-color 0.2s ease, outline 0.2s ease;
 }
 
@@ -109,6 +114,18 @@
 .actionBtn:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+/* Aligned: Fluid scaling constraints applied explicitly for modern layout engines */
+.btnIcon {
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.btnText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .connectBtn {

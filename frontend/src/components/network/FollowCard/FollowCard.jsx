@@ -1,11 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { customFetch } from '../../../utils/api/api';
 import styles from './FollowCard.module.css';
+import { UserPlus, UserCheck, UserX, UserMinus } from 'lucide-react';
 
 export default function FollowCard({ member, initialStatus, onStatusChange }) {
-  const [status, setStatus] = useState(initialStatus || 'NOT_FOLLOWING');
+  const [status, setStatus] = useState(initialStatus || member.followStatus || 'NOT_FOLLOWING');
   const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    if (initialStatus) {
+      setStatus(initialStatus);
+    } else if (member.followStatus) {
+      setStatus(member.followStatus);
+    }
+  }, [initialStatus, member.followStatus]);
 
   const handleNetworkAction = async (method, endpoint, nextStatus) => {
     if (isProcessing) return;
@@ -29,56 +38,61 @@ export default function FollowCard({ member, initialStatus, onStatusChange }) {
     switch (status) {
       case 'NOT_FOLLOWING':
         return (
-          <button
-            onClick={() => handleNetworkAction('POST', `/api/users/${member.id}/follow`, 'REQUEST_SENT')}
+          <button 
+            onClick={() => handleNetworkAction('POST', `/api/users/${member.id}/follow`, 'REQUEST_SENT')} 
             disabled={isProcessing}
             className={`${styles.actionBtn} ${styles.connectBtn}`}
             data-testid="follow-btn"
           >
-            {isProcessing ? 'Connecting...' : 'Connect'}
+            <UserPlus className={styles.btnIcon} aria-hidden="true" size={16} />
+            <span className={styles.btnText}>{isProcessing ? 'Connecting...' : 'Connect'}</span>
           </button>
         );
       case 'REQUEST_SENT':
         return (
-          <button
-            onClick={() => handleNetworkAction('DELETE', `/api/users/${member.id}/cancel`, 'NOT_FOLLOWING')}
+          <button 
+            onClick={() => handleNetworkAction('DELETE', `/api/users/${member.id}/cancel`, 'NOT_FOLLOWING')} 
             disabled={isProcessing}
             className={`${styles.actionBtn} ${styles.cancelBtn}`}
             data-testid="cancel-request-btn"
           >
-            {isProcessing ? 'Canceling...' : 'Cancel Request'}
+            <UserX className={styles.btnIcon} aria-hidden="true" size={16} />
+            <span className={styles.btnText}>{isProcessing ? 'Canceling...' : 'Cancel Request'}</span>
           </button>
         );
       case 'REQUEST_RECEIVED':
         return (
           <div className={styles.btnGroup}>
-            <button
-              onClick={() => handleNetworkAction('PATCH', `/api/users/${member.id}/accept`, 'FOLLOWING')}
+            <button 
+              onClick={() => handleNetworkAction('PATCH', `/api/users/${member.id}/accept`, 'FOLLOWING')} 
               disabled={isProcessing}
               className={`${styles.actionBtn} ${styles.acceptBtn}`}
               data-testid="accept-btn"
             >
-              Accept
+              <UserCheck className={styles.btnIcon} aria-hidden="true" size={16} />
+              <span className={styles.btnText}>Accept</span>
             </button>
-            <button
-              onClick={() => handleNetworkAction('DELETE', `/api/users/${member.id}/cancel`, 'NOT_FOLLOWING')}
+            <button 
+              onClick={() => handleNetworkAction('DELETE', `/api/users/${member.id}/cancel`, 'NOT_FOLLOWING')} 
               disabled={isProcessing}
               className={`${styles.actionBtn} ${styles.rejectBtn}`}
               data-testid="reject-btn"
             >
-              Ignore
+              <UserX className={styles.btnIcon} aria-hidden="true" size={16} />
+              <span className={styles.btnText}>Ignore</span>
             </button>
           </div>
         );
       case 'FOLLOWING':
         return (
-          <button
-            onClick={() => handleNetworkAction('DELETE', `/api/users/${member.id}/cancel`, 'NOT_FOLLOWING')}
+          <button 
+            onClick={() => handleNetworkAction('DELETE', `/api/users/${member.id}/cancel`, 'NOT_FOLLOWING')} 
             disabled={isProcessing}
             className={`${styles.actionBtn} ${styles.disconnectBtn}`}
             data-testid="unfollow-btn"
           >
-            {isProcessing ? 'Disconnecting...' : 'Disconnect'}
+            <UserMinus className={styles.btnIcon} aria-hidden="true" size={16} />
+            <span className={styles.btnText}>{isProcessing ? 'Disconnecting...' : 'Disconnect'}</span>
           </button>
         );
       default:
@@ -92,11 +106,11 @@ export default function FollowCard({ member, initialStatus, onStatusChange }) {
         <img 
           src={member.avatarUrl} 
           alt={`${member.displayName || member.username}'s avatar`} 
-          className={styles.avatar} 
+          className={styles.avatar}
+          referrerPolicy="no-referrer" 
         />
       </Link>
       <div className={styles.info}>
-        {/* Linked display name to profile view */}
         <Link to={`/users/${member.id}`} className={styles.profileLink}>
           <h3 className={styles.displayName}>{member.displayName || member.username}</h3>
         </Link>
