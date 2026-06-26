@@ -1,4 +1,4 @@
-import { PrismaClient, FollowStatus } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import pg from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
@@ -9,7 +9,6 @@ const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log('🔄 Purging existing database tables...');
-  // Delete in specific dependency order to avoid foreign key relation blocks
   await prisma.commentLike.deleteMany({});
   await prisma.postLike.deleteMany({});
   await prisma.comment.deleteMany({});
@@ -23,16 +22,16 @@ async function main() {
   const usersCount = 20;
   const users = [];
 
-  // Create an explicit stable developer test account first
+  // Create stable developer test account
   const devUser = await prisma.user.create({
     data: {
       email: 'developer@socialsphere.com',
       username: 'dev_mode',
       displayName: 'Lead Developer',
-      passwordHash: '$2b$10$2TC9RtF/OEaleV7xnxZ75uqxwfQ3HPr.FLbS4MgT3S6Lk7YwzXybe', // Dummy hash
+      passwordHash: '$2b$10$2TC9RtF/OEaleV7xnxZ75uqxwfQ3HPr.FLbS4MgT3S6Lk7YwzXybe', 
       avatarUrl: `https://gravatar.com/avatar/${faker.string.uuid()}?d=mp&s=150`,
       bio: 'Seeding account built for checking UI rendering parameters.',
-      colorPalette: 'cyberpunk', // Explicit active configuration token
+      colorPalette: 'cyberpunk', 
       colorScheme: 'dark',
       isOnline: true,
       isGuest: false,
@@ -40,14 +39,27 @@ async function main() {
   });
   users.push(devUser);
 
-  // Generate remaining random platform users using correct track definitions
-  for (let i = 0; i < usersCount - 1; i++) {
-    const email = faker.internet.email();
-    
-    // Construct a Gravatar URL using a unique identifier.
-    // The '?d=identicon' or '?d=robohash' parameter guarantees a unique, distinct fallback graphic per user!
-    const gravatarUrl = `https://gravatar.com/avatar/${faker.string.uuid()}?d=mp&s=150`;
+  // Create the single, official recruiter guest account
+  const guestUser = await prisma.user.create({
+    data: {
+      email: 'recruiter@socialsphere.com',
+      username: 'recruiter_guest',
+      displayName: 'Hiring Manager Guest',
+      passwordHash: '$2b$10$2TC9RtF/OEaleV7xnxZ75uqxwfQ3HPr.FLbS4MgT3S6Lk7YwzXybe', 
+      avatarUrl: `https://gravatar.com/avatar/${faker.string.uuid()}?d=mp&s=150`,
+      bio: 'Explore mode activated. Previewing system architecture and decoupled state machines.',
+      colorPalette: 'default',
+      colorScheme: 'light',
+      isOnline: true,
+      isGuest: true, // Controlled singular guest access target node
+    },
+  });
+  users.push(guestUser);
 
+  // Generate remaining platform users as standard, active contributors
+  for (let i = 0; i < usersCount - 2; i++) {
+    const email = faker.internet.email();
+    const gravatarUrl = `https://gravatar.com/avatar/${faker.string.uuid()}?d=mp&s=150`;
     const paletteOptions = ['nord', 'sunset', 'cyberpunk', 'obsidian', 'neonmint'];
     const schemeOptions = ['light', 'dark'];
 
@@ -56,14 +68,14 @@ async function main() {
         email: email,
         username: faker.internet.username(),
         displayName: faker.person.fullName(),
-        passwordHash: faker.internet.password(), 
-        googleId: faker.datatype.boolean(0.2) ? faker.string.uuid() : null, 
-        avatarUrl: gravatarUrl, // 🎯 Perfectly compatible! Saved as a real, stable URL string.
+        passwordHash: faker.internet.password(),
+        googleId: faker.datatype.boolean(0.2) ? faker.string.uuid() : null,
+        avatarUrl: gravatarUrl,
         bio: faker.lorem.sentence(),
         colorPalette: faker.helpers.arrayElement(paletteOptions),
         colorScheme: faker.helpers.arrayElement(schemeOptions),
         isOnline: faker.datatype.boolean(0.3),
-        isGuest: faker.datatype.boolean(0.1),
+        isGuest: false, // Fixed: Forced to false to prevent unpopulated ghost accounts
       },
     });
     users.push(user);
@@ -74,58 +86,73 @@ async function main() {
   // 2. GENERATE FOLLOW STATUS NETWORKS
   console.log('🔗 Connecting user relationship networks...');
   for (const user of users) {
-    // Pick 5 random unique targets for each user to interact with
+    if (user.id === guestUser.id) continue;
+
     const targets = faker.helpers.arrayElements(
-      users.filter((u) => u.id !== user.id),
+      users.filter((u) => u.id !== user.id && u.id !== guestUser.id),
       5
     );
 
     for (const target of targets) {
-      await prisma.follow.create({
-        data: {
-          followerId: user.id,
-          followingId: target.id,
-          // Mix up pending vs accepted workflows
-          status: faker.datatype.boolean(0.75) ? FollowStatus.ACCEPTED : FollowStatus.PENDING,
-        },
+      const existing = await prisma.follow.findUnique({
+        where: { followerId_followingId: { followerId: user.id, followingId: target.id } }
       });
+
+      if (existing) continue;
+
+      const statuses = ['NOT_FOLLOWING', 'REQUEST_SENT', 'FOLLOWING'];
+      const randomStatus = faker.helpers.arrayElement(statuses);
+
+      if (randomStatus === 'FOLLOWING') {
+        await prisma.follow.create({
+          data: { followerId: user.id, followingId: target.id, status: 'FOLLOWING' }
+        });
+        await prisma.follow.upsert({
+          where: { followerId_followingId: { followerId: target.id, followingId: user.id } },
+          update: { status: 'FOLLOWING' },
+          create: { followerId: target.id, followingId: user.id, status: 'FOLLOWING' }
+        });
+      } else if (randomStatus === 'REQUEST_SENT') {
+        await prisma.follow.create({
+          data: { followerId: user.id, followingId: target.id, status: 'REQUEST_SENT' }
+        });
+        await prisma.follow.upsert({
+          where: { followerId_followingId: { followerId: target.id, followingId: user.id } },
+          update: { status: 'REQUEST_RECEIVED' },
+          create: { followerId: target.id, followingId: user.id, status: 'REQUEST_RECEIVED' }
+        });
+      } else {
+        await prisma.follow.create({
+          data: { followerId: user.id, followingId: target.id, status: 'NOT_FOLLOWING' }
+        });
+      }
     }
   }
 
   // 3. GENERATE POSTS, COMMENTS, AND INTERACTIVE LIKES
   console.log('📝 Publishing chronological posts and interactive thread layers...');
-  
   for (const user of users) {
     const randomSeed = faker.string.alphanumeric(10);
     const imageUrl = `https://picsum.photos/seed/${randomSeed}/600/800`;
-    
-    // Each user creates between 2 and 5 posts
     const postLoops = faker.number.int({ min: 2, max: 5 });
 
     for (let p = 0; p < postLoops; p++) {
       const post = await prisma.post.create({
         data: {
           content: faker.lorem.paragraphs(faker.number.int({ min: 1, max: 3 })),
-          // 40% chance a post contains an image link
           imageUrl: faker.datatype.boolean(0.4) ? imageUrl : null,
           authorId: user.id,
-          // Stagger timestamps across the past month to check sorting indexes
           createdAt: faker.date.recent({ days: 30 }),
         },
       });
 
-      // Generate post likes from a random group of users
       const postLikers = faker.helpers.arrayElements(users, faker.number.int({ min: 0, max: 8 }));
       for (const liker of postLikers) {
         await prisma.postLike.create({
-          data: {
-            postId: post.id,
-            userId: liker.id,
-          },
-        }).catch(() => {}); // Catch block blocks accidental duplicate user errors
+          data: { postId: post.id, userId: liker.id },
+        }).catch(() => {});
       }
 
-      // Generate between 0 and 6 comments per post
       const commentLoops = faker.number.int({ min: 0, max: 6 });
       for (let c = 0; c < commentLoops; c++) {
         const commentAuthor = faker.helpers.arrayElement(users);
@@ -138,21 +165,43 @@ async function main() {
           },
         });
 
-        // Generate comment likes
         const commentLikers = faker.helpers.arrayElements(users, faker.number.int({ min: 0, max: 4 }));
         for (const liker of commentLikers) {
           await prisma.commentLike.create({
-            data: {
-              commentId: comment.id,
-              userId: liker.id,
-            },
+            data: { commentId: comment.id, userId: liker.id },
           }).catch(() => {});
         }
       }
     }
   }
 
+  // 4. HYDRATE FEED STREAMS FOR THE SEEDED GUEST ACCOUNT
+  console.log('✨ Hydrating feed streams for the Recruiter Guest account...');
+  
+  const activeCreators = await prisma.user.findMany({
+    where: {
+      id: { notIn: [guestUser.id, devUser.id] }
+    },
+    take: 6
+  });
 
+  const timelineTargets = [...activeCreators, devUser];
+
+  for (const creator of timelineTargets) {
+    await prisma.follow.upsert({
+      where: { followerId_followingId: { followerId: guestUser.id, followingId: creator.id } },
+      update: { status: 'FOLLOWING' },
+      create: { followerId: guestUser.id, followingId: creator.id, status: 'FOLLOWING' }
+    });
+
+    await prisma.follow.upsert({
+      where: { followerId_followingId: { followerId: creator.id, followingId: guestUser.id } },
+      update: { status: 'FOLLOWING' },
+      create: { followerId: creator.id, followingId: guestUser.id, status: 'FOLLOWING' }
+    });
+  }
+
+  console.log(`🟢 Recruiter guest is now actively following ${timelineTargets.length} members.`);
   console.log('🚀 Database seeding operations finalized cleanly!');
 }
 
