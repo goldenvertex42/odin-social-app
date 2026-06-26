@@ -35,23 +35,39 @@ export default function SocialFeed() {
   };
 
   const handlePostCreated = (apiPostResponse) => {
-    // Hydrate the raw database response with nested author details to satisfy PostCard expectations
-    const fullyHydratedPost = {
-      ...apiPostResponse,
-      createdAt: apiPostResponse.createdAt || new Date().toISOString(),
-      author: {
-        id: currentUser?.id,
-        username: currentUser?.username || 'You',
-        avatarUrl: currentUser?.avatarUrl,
-        email: currentUser?.email || ''
-      },
-      comments: [],
-      likes: []
+    const targetPost = apiPostResponse?.post ? apiPostResponse.post : apiPostResponse;
+
+    if (!targetPost || !targetPost.id) {
+      console.error('CRITICAL: handlePostCreated received an invalid post node payload matrix:', apiPostResponse);
+      return;
+    }
+
+    const unifiedAuthor = targetPost.author || {
+      id: currentUser?.id,
+      username: currentUser?.username || 'You',
+      displayName: currentUser?.displayName || currentUser?.displayName || 'You',
+      avatarUrl: currentUser?.avatarUrl || null
     };
 
-    // Prepend safely to the descending feed array
+    const fullyHydratedPost = {
+      ...targetPost,
+      createdAt: targetPost.createdAt || new Date().toISOString(),
+      author: unifiedAuthor,
+      comments: targetPost.comments || [],
+      likes: targetPost.likes || []
+    };
+
     setPosts((prevPosts) => [fullyHydratedPost, ...prevPosts]);
   };
+
+
+  const handlePostDeleted = (deletedPostId) => {
+    // Pure state modification: filters out the dropped post from the array container instantly
+    setPosts((prevPosts) => 
+      prevPosts.filter((post) => post.id !== deletedPostId)
+    );
+  };
+
 
   if (loading) return <div className={styles.loading} data-testid="feed-loading">Loading your feed...</div>;
   if (error) return <div className={styles.error} data-testid="feed-error">{error}</div>;
@@ -67,7 +83,7 @@ export default function SocialFeed() {
           </p>
         ) : (
           posts.map((post) => (
-            <PostCard key={post.id} post={post} currentUserId={currentUser?.id} />
+            <PostCard key={post.id} post={post} currentUserId={currentUser?.id} onDeleteSuccess={handlePostDeleted} />
           ))
         )}
       </main>
