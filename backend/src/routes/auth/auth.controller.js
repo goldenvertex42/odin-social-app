@@ -171,34 +171,81 @@ export const googleAuthCallback = async (req, res, next) => {
 // 6. INSTANT RECRUITER GUEST CONTROLLER
 export const loginGuestUser = async (req, res, next) => {
   try {
-    const uniqueId = Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
-    const guestUsername = `recruiter_guest_${uniqueId}`;
-    const guestEmail = `${guestUsername}@guest.odin.local`;
-
-    const guestAvatar = getGravatarUrl(guestEmail);
-
-    const newGuest = await prisma.user.create({
-      data: {
-        email: guestEmail,
-        username: guestUsername,
-        displayName: "✨ Recruiter Guest Profile",
-        avatarUrl: guestAvatar,
-        bio: "Logged in via instant guest token access. Feel free to explore!",
-        colorPalette: "cyberpunk",
-        colorScheme: "dark",
-        isOnline: true,
-        isGuest: true,
+    const guestUser = await prisma.user.findUnique({
+      where: { 
+        email: 'recruiter@socialsphere.com' 
       },
       select: {
-        id: true, email: true, username: true, displayName: true,
-        avatarUrl: true, bio: true, colorPalette: true, colorScheme: true,
-        isOnline: true, isGuest: true, createdAt: true
+        id: true,
+        email: true,
+        username: true,
+        displayName: true,
+        avatarUrl: true,
+        bio: true,
+        colorPalette: true,
+        colorScheme: true,
+        isOnline: true,
+        isGuest: true,
+        createdAt: true
       }
     });
 
-    const token = generateToken(newGuest.id);
-    return res.status(201).json({ message: 'Guest workspace initialized successfully.', token, user: newGuest });
+    if (!guestUser) {
+      const fallbackGuest = await prisma.user.create({
+        data: {
+          email: 'recruiter@socialsphere.com',
+          username: 'recruiter_guest',
+          displayName: 'Hiring Manager Guest',
+          passwordHash: '$2b$10$2TC9RtF/OEaleV7xnxZ75uqxwfQ3HPr.FLbS4MgT3S6Lk7YwzXybe',
+          avatarUrl: getGravatarUrl(email),
+          bio: 'Explore mode activated. Previewing system architecture and decoupled state machines.',
+          colorPalette: 'default',
+          colorScheme: 'light',
+          isOnline: true,
+          isGuest: true,
+        },
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          displayName: true,
+          avatarUrl: true,
+          bio: true,
+          colorPalette: true,
+          colorScheme: true,
+          isOnline: true,
+          isGuest: true,
+          createdAt: true
+        }
+      });
+
+      const token = generateToken(fallbackGuest.id);
+      return res.status(200).json({
+        message: 'Guest workspace initialized via fallback provisioning.',
+        token,
+        user: fallbackGuest
+      });
+    }
+
+    // 3. Mark the seeded profile online dynamically during their active session
+    if (!guestUser.isOnline) {
+      await prisma.user.update({
+        where: { id: guestUser.id },
+        data: { isOnline: true }
+      });
+      guestUser.isOnline = true;
+    }
+
+    // 4. Issue your system authentication access token
+    const token = generateToken(guestUser.id);
+
+    return res.status(200).json({
+      message: 'Guest workspace initialized successfully.',
+      token,
+      user: guestUser
+    });
   } catch (error) {
     next(error);
   }
 };
+

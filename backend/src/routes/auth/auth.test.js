@@ -1,25 +1,33 @@
-import request from 'supertest';
-import app from '../../app.js';
-import { clearDatabase, generateTestToken } from '../../../tests/helpers.js';
-import { prisma } from '../../../../db/src/index.js';
+import { jest, beforeEach, describe, it, expect, afterAll } from '@jest/globals';
 
 describe('Authentication Routing Integration Tests', () => {
-  // Wipe out our test database layout before starting our tests
-  beforeEach(async () => {
-    await clearDatabase();
-  });
-
-  // Disconnect our client connection safely to prevent Jest open handle warnings
-  afterAll(async () => {
-    await prisma.$disconnect();
-  });
-
+  let request, app, clearDatabase, generateTestToken, prisma;
   const testUserPayload = { 
     email: 'test_recruiter@odin.local', 
     username: 'test_dev_user', 
     password: 'OdinPassword123!', 
     displayName: 'Odin Developer' 
   };
+
+  beforeEach(async () => {
+    const helpers = await import('../../../tests/helpers.js');
+    clearDatabase = helpers.clearDatabase;
+    generateTestToken = helpers.generateTestToken;
+
+    await clearDatabase();
+
+    request = (await import('supertest')).default;
+    app = (await import('../../app.js')).default;
+    
+    const dbModule = await import('../../../../db/src/index.js');
+    prisma = dbModule.prisma;
+  });
+
+  afterAll(async () => {
+    if (prisma) {
+      await prisma.$disconnect();
+    }
+  });
 
   // 1. TEST REGISTRATION
   describe('POST /api/auth/register', () => {
@@ -33,9 +41,8 @@ describe('Authentication Routing Integration Tests', () => {
       expect(res.body.user.email).toBe(testUserPayload.email);
       expect(res.body.user.colorPalette).toBe('default');
       expect(res.body.user.colorScheme).toBe('light');
-      // Asserting flexible case-agnostic domain checking for your Gravatar MP updates
       expect(res.body.user.avatarUrl.toLowerCase()).toContain('gravatar.com');
-      expect(res.body.user).not.toHaveProperty('passwordHash'); // Ensure secure serialization
+      expect(res.body.user).not.toHaveProperty('passwordHash'); 
     });
 
     it('should prevent registration if fields are missing', async () => {
@@ -76,27 +83,46 @@ describe('Authentication Routing Integration Tests', () => {
 
   // 3. TEST RECRUITER GUEST SIGN-IN
   describe('POST /api/auth/guest', () => {
-    it('should instantly generate an online recruiter guest with custom defaults', async () => {
+    it('should instantly resolve the static recruiter guest with custom defaults', async () => {
+      await prisma.user.create({
+        data: {
+          email: 'recruiter@socialsphere.com',
+          username: 'recruiter_guest',
+          displayName: 'Hiring Manager Guest',
+          passwordHash: '$2b$10$2TC9RtF/OEaleV7xnxZ75uqxwfQ3HPr.FLbS4MgT3S6Lk7YwzXybe',
+          avatarUrl: 'https://gravatar.com',
+          bio: 'Explore mode activated. Previewing system architecture and decoupled state machines.',
+          colorPalette: 'default',
+          colorScheme: 'light',
+          isOnline: false,
+          isGuest: true,
+        }
+      });
+
       const res = await request(app).post('/api/auth/guest');
-      
-      expect(res.statusCode).toBe(201);
+
+      expect(res.statusCode).toBe(200);
       expect(res.body).toHaveProperty('token');
       expect(res.body.user.isGuest).toBe(true);
       expect(res.body.user.isOnline).toBe(true);
-      expect(res.body.user.colorPalette).toBe('cyberpunk');
-      expect(res.body.user.colorScheme).toBe('dark');
+      expect(res.body.user.colorPalette).toBe('default');
+      expect(res.body.user.colorScheme).toBe('light');
     });
   });
+
 
   // 4. TEST ID PROFILE SYNC (GET /ME)
   describe('GET /api/auth/me', () => {
     it('should securely fetch user profile attributes when a valid token header is set', async () => {
       const dbUser = await prisma.user.create({
-        data: { email: testUserPayload.email, username: testUserPayload.username, displayName: testUserPayload.displayName }
+        data: { 
+          email: testUserPayload.email, 
+          username: testUserPayload.username, 
+          displayName: testUserPayload.displayName 
+        }
       });
 
       const token = generateTestToken(dbUser.id);
-
       const res = await request(app)
         .get('/api/auth/me')
         .set('Authorization', `Bearer ${token}`);
@@ -112,27 +138,25 @@ describe('Authentication Routing Integration Tests', () => {
     });
   });
 
-  /* --- NEW SEPARATE SECTION: VALIDATE LOGOUT TERMINATIONS --- */
+  // 5. TEST LOGOUT TERMINATIONS
   describe('POST /api/auth/logout', () => {
     it('should allow an active user to terminate their session successfully', async () => {
       const dbUser = await prisma.user.create({
         data: { 
           email: 'logging_out@odin.local', 
           username: 'logout_user', 
-          displayName: 'Logout Dev',
-          isOnline: true // Initialized as true
+          displayName: 'Logout Dev', 
+          isOnline: true 
         }
       });
 
       const token = generateTestToken(dbUser.id);
-
       const res = await request(app)
         .post('/api/auth/logout')
         .set('Authorization', `Bearer ${token}`);
 
       expect(res.statusCode).toBe(200);
-      
-      // Verify database updates status flag natively to false
+
       const updatedUser = await prisma.user.findUnique({ where: { id: dbUser.id } });
       expect(updatedUser.isOnline).toBe(false);
     });
