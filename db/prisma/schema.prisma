@@ -47,7 +47,7 @@ model Follow {
   id          String       @id @default(uuid())
   followerId  String
   followingId String
-  status      FollowStatus @default(PENDING) // Handles request workflow (Accept/Decline)
+  status      FollowStatus @default(NOT_FOLLOWING) // Handles request workflow (Accept/Decline)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
@@ -58,8 +58,10 @@ model Follow {
 }
 
 enum FollowStatus {
-  PENDING
-  ACCEPTED
+  NOT_FOLLOWING
+  REQUEST_RECEIVED
+  REQUEST_SENT
+  FOLLOWING
 }
 
 /// 3. POST MODEL
