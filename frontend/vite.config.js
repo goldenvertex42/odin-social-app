@@ -51,10 +51,8 @@ export default defineConfig(({ mode }) => {
       
       /* 🚀 MODERN COMPONENT TESTING WORKFLOW LOCK */
       pool: 'threads',
-      poolOptions: {
-        threads: {
-          singleThread: true // Keeps tests serial to prevent shared database/fetch state collision leaks
-        }
+      threads: {
+        singleThread: true // Keeps tests serial to prevent shared database/fetch state collision leaks
       }
     },
   };
