@@ -3,14 +3,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { MemoryRouter } from 'react-router';
 import PostCard from './PostCard';
 
-// Mock custom fetch utility engine
 vi.mock('../../../utils/api/api', () => ({
   customFetch: vi.fn()
 }));
-
 import { customFetch } from '../../../utils/api/api';
 
-// Mock nested child thread component to cleanly isolate testing scope parameters
 vi.mock('../CommentThread/CommentThread', () => ({
   default: () => <div data-testid="mock-comment-thread">Nested Comment Thread Canvas</div>
 }));
@@ -22,10 +19,7 @@ describe('PostCard Feature Component Module', () => {
     imageUrl: 'https://cloudinary.com',
     authorId: 'author-uuid-11',
     createdAt: new Date().toISOString(),
-    author: {
-      displayName: 'Diana Prince',
-      avatarUrl: 'https://cloudinary.com'
-    },
+    author: { displayName: 'Diana Prince', avatarUrl: 'https://cloudinary.com' },
     comments: [
       { id: 'comment-1', content: 'Cool post.' }
     ],
@@ -39,7 +33,7 @@ describe('PostCard Feature Component Module', () => {
   });
 
   afterEach(() => {
-    cleanup(); // Completely purge the JSDOM context tree after each test block
+    cleanup();
   });
 
   it('renders author profile structures, content text strings, and layout shapes cleanly', () => {
@@ -56,16 +50,16 @@ describe('PostCard Feature Component Module', () => {
   });
 
   it('applies explicit color styling states if the post is already liked by the active session user', () => {
-    // Current user matches user inside the likes list
     render(
       <MemoryRouter>
         <PostCard post={mockPostData} currentUserId="user-uuid-abc" />
       </MemoryRouter>
     );
 
-    const button = screen.getByRole('button', { name: /unlike post/i });
+    const button = screen.getByRole('button', { name: /Unlike post/i });
     expect(button.className).toContain('activeLikedState');
-    expect(screen.getByText(/liked \(1\)/i)).toBeInTheDocument();
+    expect(button).toHaveTextContent(/Liked/i);
+    expect(button).toHaveTextContent(/\(1\)/);
   });
 
   it('triggers the customFetch API engine when clicking the post level like toggle action button', async () => {
@@ -74,18 +68,16 @@ describe('PostCard Feature Component Module', () => {
       { id: 'like-2', postId: 'post-uuid-99', userId: 'user-uuid-xyz' }
     ];
 
-    // 1. Force explicit data contracts on the post prop so likes array checks pass on load
     const robustMockPost = {
       id: 'post-uuid-99',
       content: 'Mock post content string data text asset',
       authorId: 'user-uuid-abc',
       createdAt: new Date().toISOString(),
-      likes: [], // Explicit initial empty array so button is enabled
+      likes: [],
       comments: [],
       author: { displayName: 'Odin Alpha', username: 'alpha_odin', avatarUrl: null }
     };
 
-    // 2. Explicitly spy on the direct module export to bypass import binding caching issues
     vi.mocked(customFetch).mockResolvedValueOnce({
       ok: true,
       json: async () => updatedLikesPayload
@@ -97,20 +89,50 @@ describe('PostCard Feature Component Module', () => {
       </MemoryRouter>
     );
 
-    // Find the button explicitly by role and trigger click
-    const button = screen.getByRole('button', { name: /like post/i });
-    expect(button).not.toBeDisabled(); // Double-check safety assertion
-    
+    const button = screen.getByRole('button', { name: /Like post/i });
+    expect(button).not.toBeDisabled();
+
     fireEvent.click(button);
 
     await waitFor(() => {
       expect(customFetch).toHaveBeenCalledTimes(1);
     });
-    
+
     expect(customFetch).toHaveBeenCalledWith('/api/likes/post/post-uuid-99', { method: 'POST' });
 
-    // UI state recalculates values and updates live text content streams automatically
-    const updatedLabel = await screen.findByText(/liked \(2\)/i);
-    expect(updatedLabel).toBeInTheDocument();
+    await waitFor(() => {
+      expect(button).toHaveTextContent(/Like/i);
+      expect(button).toHaveTextContent(/\(2\)/);
+    });
+  });
+
+  it('renders a delete button and handles network actions when currentUserId matches the authorId', async () => {
+    vi.mocked(customFetch).mockResolvedValueOnce({
+      ok: true,
+      status: 204,
+      text: async () => ''
+    });
+
+    const deleteMockCallback = vi.fn();
+
+    render(
+      <MemoryRouter>
+        <PostCard 
+          post={mockPostData} 
+          currentUserId="author-uuid-11"
+          onDeleteSuccess={deleteMockCallback} 
+        />
+      </MemoryRouter>
+    );
+
+    const deleteBtn = screen.getByTestId('delete-post-btn');
+    expect(deleteBtn).toBeInTheDocument();
+
+    fireEvent.click(deleteBtn);
+
+    await waitFor(() => {
+      expect(customFetch).toHaveBeenCalledWith('/api/posts/post-uuid-99', { method: 'DELETE' });
+      expect(deleteMockCallback).toHaveBeenCalledWith('post-uuid-99');
+    });
   });
 });

@@ -25,11 +25,20 @@
   outline-offset: 2px;
 }
 
+/* Fixed: Push items apart horizontally to separate identity metadata from right-side deletion buttons */
 .cardHeader {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  justify-content: space-between;
+  width: 100%;
   margin-bottom: var(--spacing-md);
+}
+
+/* Fixed: Re-establish horizontal orientation so name and avatar sit side-by-side */
+.userInfoBlock {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 .avatarLink {
@@ -81,6 +90,41 @@
 .postTimestamp {
   font-size: var(--font-xs);
   color: var(--text-muted);
+}
+
+/* Added: Accessible, structured right-side deletion layout anchor triggers */
+.deleteButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  width: 36px;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.deleteButton:hover:not(:disabled) {
+  color: var(--color-error);
+  background-color: rgba(239, 68, 68, 0.08);
+}
+
+.deleteButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.deleteButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.trashIcon {
+  flex-shrink: 0;
 }
 
 .cardBody {
@@ -177,18 +221,16 @@
   width: 16px !important;
   height: 16px !important;
   flex-shrink: 0;
-  stroke-width: 2.25px; /* Premium uniform line weight depth */
+  stroke-width: 2.25px;
   display: inline-block;
   transition: transform 0.15s ease;
 }
 
-.likeActionButton:hover .actionIcon,
-.threadLinkBtn:hover .actionIcon {
-  transform: scale(1.15) rotate(-5deg); /* Playful micro-interaction on hover */
+.likeActionButton:hover .actionIcon, .threadLinkBtn:hover .actionIcon {
+  transform: scale(1.15) rotate(-5deg);
 }
 
 .actionLabel {
   font-size: var(--font-sm);
   line-height: 1;
 }
-
