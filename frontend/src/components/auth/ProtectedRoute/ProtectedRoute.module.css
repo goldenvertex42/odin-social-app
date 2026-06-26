@@ -8,7 +8,6 @@
   align-items: center;
   height: 100vh;
   background-color: var(--bg-app);
-  font-family: system-ui, sans-serif;
 }
 
 .spinner {
@@ -24,11 +23,13 @@
   margin-top: var(--spacing-md);
   font-size: var(--font-sm);
   color: var(--text-muted);
-  font-weight: 500;
+  font-weight: var(--weight-medium);
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ==========================================================================
@@ -36,11 +37,11 @@
    ========================================================================== */
 .appContainer {
   display: grid;
-  grid-template-rows: var(--header-height, 60px) 1fr var(--mobile-nav-height, 60px);
+  grid-template-rows: var(--nav-height, 60px) 1fr var(--nav-height, 60px);
   grid-template-columns: 1fr;
-  grid-template-areas:
-    "header"
-    "main"
+  grid-template-areas: 
+    "header" 
+    "main" 
     "sidebar";
   min-height: 100vh;
   box-sizing: border-box;
@@ -59,19 +60,18 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: var(--mobile-nav-height, 60px);
+  height: var(--nav-height, 60px);
   z-index: 90;
-  border-top: 1px solid var(--border-main, #e0e0e0);
+  border-top: 1px solid var(--border-main);
   background-color: var(--bg-app);
 }
 
 .mainContentArea {
   grid-area: main;
-  padding: 16px;
+  padding: var(--spacing-md);
   overflow-y: auto;
   background-color: var(--bg-app);
-  /* Prevents content layout from hiding behind sticky mobile toolbar */
-  padding-bottom: calc(var(--mobile-nav-height, 60px) + 16px);
+  padding-bottom: calc(var(--nav-height, 60px) + var(--spacing-md));
 }
 
 /* ==========================================================================
@@ -79,25 +79,25 @@
    ========================================================================== */
 @media (min-width: 769px) {
   .appContainer {
-    grid-template-rows: var(--header-height, 60px) 1fr;
+    grid-template-rows: var(--nav-height, 60px) 1fr;
     grid-template-columns: var(--sidebar-width, 240px) 1fr;
-    grid-template-areas:
-      "header  header"
+    grid-template-areas: 
+      "header header" 
       "sidebar main";
   }
 
   .sidebarArea {
     position: sticky;
-    top: var(--header-height, 60px);
+    top: var(--nav-height, 60px);
     left: 0;
     width: var(--sidebar-width, 240px);
-    height: calc(100vh - var(--header-height, 60px));
+    height: calc(100vh - var(--nav-height, 60px));
     border-top: none;
-    border-right: 1px solid var(--border-main, #e0e0e0);
+    border-right: 1px solid var(--border-main);
   }
 
   .mainContentArea {
-    padding: 32px;
-    padding-bottom: 32px;
+    padding: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
   }
 }
