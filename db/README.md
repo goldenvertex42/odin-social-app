@@ -1,21 +1,38 @@
-# DB Workspace Package (`db`)
+# Relational Database Layer: Schema Modeling and Migration Engine
 
-This workspace handles the application data layer. It isolates database model configurations and implements Prisma 7's mandatory JavaScript driver adapters.
+This directory contains the domain logic layer responsible for data persistence, schema mutations, and constraint mapping using Prisma ORM.
 
-## Core Stack
+## Relational Schema Architecture
 
-- **Prisma 7**: Database ORM
-- **pg (node-postgres)**: Native PostgreSQL TCP socket connection pool
-- **@prisma/adapter-pg**: Middleware engine connecting Prisma to the `pg` pool
+The database is built on top of a highly optimized PostgreSQL relational instance, enforcing data integrity through relational keys, cascading deletion handlers, and unique indexing strategies.
 
-## Architecture
+### Core Entity Definitions
 
-This package exports a single instantiated `prisma` client. It bypasses Prisma 7's removed direct engine connection rules by feeding a native connection pool right into the constructor.
+* **User**: Tracks member credentials, profile content, active workspace preferences, and application session presence parameters.
+* **Post**: Contains text bodies, generated image references, author relational bindings, and timestamp markers.
+* **Comment**: Embedded transactional strings linked to posts, managing chronological discussion tracks.
+* **PostLike / CommentLike**: Junction tables utilizing composite primary indexing models to map engagement fields cleanly while eliminating duplicate entry overflows.
+* **Follow**: Tracks multi-stage social connection networks, managing an internal status state array (`PENDING`, `ACCEPTED`).
 
-```javascript
-import { prisma } from 'db';
-// Ready for CRUD operations instantly across other workspaces
+## Performance and Optimization Strategies
+
+### 1. Composite Unique Indexing
+Engagement toggles map queries through multi-column indexes to look up values instantly without exhausting the system's runtime resources:
+```prisma
+model PostLike {
+  postId String
+  userId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([postId, userId])
+}
 ```
 
-## Local Development Quirks
-To prevent module resolution issues and missing `prisma/config` errors inside nested monorepos, **always execute database operations from the project root folder** using the root utility scripts (`npm run db:generate`, `npm run db:push`).
+### 2. Cascading Deletion Safety Chains
+To prevent database row bloat and orphan references, post modifications automatically handle nested dependency data wipes down the cascade line whenever a post or comment node is purged by its creator.
+
+## Available Utility Commands
+
+* `npm run migrate:dev`: Generates SQL tracking sheets and updates the active developer PostgreSQL container structure.
+* `npm run studio`: Fires up a visual browser client dashboard to inspect local tables and database seeds directly.

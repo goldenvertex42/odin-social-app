@@ -1,22 +1,29 @@
-# Vite + React Frontend Workspace (`frontend`)
+# Frontend Architecture: High-Performance Single-Page React Application
 
-This workspace houses the client-side user interface for the monorepo application. It is scaffolded with **Vite** and **React**, stripped of default clutter, and optimized to work seamlessly alongside the shared backend architecture.
+The SocialSphere frontend is a highly responsive client user interface engineered using modern React Router v7 paradigms, decoupled UI state context providers, and themeable component style sheets.
 
-## Core Features
+## Technical Architecture Highlights
 
-- **Lightweight Structure**: All default Vite assets, styles, and logos have been removed to keep the template boilerplate minimal and clean.
-- **Pre-configured API Integration**: Features an instant end-to-end `fetch` handshake component inside `App.jsx` to test local cross-origin communications with the Express server right out of the box.
-- **Optimized Port Alignment**: Hardcoded to utilize Vite's standard local dev port (`5173`), matching the dynamic backend CORS configuration perfectly.
+### 1. Anti-Loop Network Interceptor Layer
+The custom `customFetch` client engine eliminates unhandled rendering crashes by returning structured response contracts instead of throwing unexpected exceptions. If the API returns a 401 Unauthorized code, the interceptor immediately clears invalid session tokens from local storage and safely moves the viewport back to the login path, cutting off infinite recursive request loops at the perimeter.
 
-## Architecture & Folders
+### 2. Single Responsibility UI Decomposition
+The application rejects large monolithic layout structures. Complex views, such as the account dashboard, are split into isolated, focused child sub-components:
+* `AvatarUpload`: Tracks `FileReader` calculation buffers and local image previews.
+* `ThemePreview`: Repaints custom color properties onto document roots without triggering global state leaks.
+* `PasswordUpdate`: Collects data values and verifies matching string constraints independently.
 
-- `/public`: Empty asset folder preserved for static resources (images, icons, manifests) via a hidden `.gitkeep` file.
-- `/src`: Ultra-clean React compilation target containing only your primary rendering layout files (`main.jsx` and `App.jsx`).
+### 3. Fluid CSS Tokenization and Accessibility (a11y)
+The app features six design configurations driven entirely by CSS Custom Properties tied to `data-` HTML tags. Every palette uses carefully calculated color combinations to pass WCAG AA contrast guidelines (minimum 4.5:1 ratio). Interactive controls also include explicit, non-blurry `:focus-visible` keyboard rings to ensure perfect accessibility mapping for screen readers and keyboard operators.
 
-## Local Execution
+### 4. Vector Icon Standardization
+SocialSphere uses vector paths from `lucide-react` instead of raw browser emojis. This ensures icons render with exact pixel proportions and uniform color states across all desktop browers, iOS viewports, and Android screens alike.
 
-Monorepo orchestration automatically boots this development server concurrently from the root directory via `npm run dev`. If isolated client execution is required, you can target the workspace directly:
+## Continuous Integration Testing Framework
 
+Client interactions are verified using Vitest and React Testing Library. The testing framework uses explicit mock spies to ensure that real-time visual adjustments change form dropdown inputs correctly without conflicting with active document roots.
+
+To run the frontend testing engine:
 ```bash
-npm run dev --workspace=packages/frontend
+npm run test
 ```
