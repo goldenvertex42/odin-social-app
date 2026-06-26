@@ -1,27 +1,32 @@
 .formContainer {
   display: flex;
-  gap: 0.5rem;
-  padding: 0.75rem 0;
-  border-top: 1px solid var(--border-color, #e2e8f0);
-  margin-top: 0.5rem;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) 0;
+  border-top: 1px solid var(--border-main);
+  margin-top: var(--spacing-xs);
   width: 100%;
 }
 
 .commentInput {
   flex: 1;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: 20px;
-  background-color: var(--bg-secondary, #f8fafc);
-  color: var(--text-main, #0f172a);
-  font-size: 0.9rem;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--border-main);
+  border-radius: var(--radius-lg);
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  font-size: var(--font-sm);
   outline: none;
-  transition: border-color 0.2s, background-color 0.2s;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .commentInput:focus {
-  border-color: var(--primary-color, #3b82f6);
-  background-color: var(--bg-card, #ffffff);
+  border-color: var(--color-primary);
+  background-color: var(--bg-surface);
+}
+
+.commentInput:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .commentInput:disabled {
@@ -29,15 +34,25 @@
 }
 
 .submitBtn {
-  background-color: var(--primary-color, #3b82f6);
-  color: white;
+  background-color: var(--color-primary);
+  color: var(--btn-action-text, #ffffff);
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-full);
+  font-size: var(--font-xs);
+  font-weight: var(--weight-semibold);
   cursor: pointer;
-  transition: opacity 0.2s;
+  outline: none;
+  transition: background-color 0.2s ease, opacity 0.2s ease, outline 0.2s ease;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.submitBtn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .submitBtn:disabled {

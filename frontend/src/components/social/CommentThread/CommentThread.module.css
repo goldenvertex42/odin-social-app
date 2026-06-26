@@ -1,7 +1,7 @@
 .threadContainer {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs, 8px);
+  gap: var(--spacing-xs);
   width: 100%;
   box-sizing: border-box;
 }
@@ -9,38 +9,44 @@
 .commentListGrid {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--spacing-xs);
 }
 
 .threadToggleAction {
   align-self: flex-start;
   background: transparent;
   border: none;
-  color: var(--color-primary, #0066cc);
-  font-size: var(--font-xs, 0.8rem);
-  font-weight: 600;
+  color: var(--color-primary);
+  font-size: var(--font-xs);
+  font-weight: var(--weight-semibold);
   cursor: pointer;
-  padding: 6px var(--spacing-sm, 12px);
-  border-radius: var(--radius-sm, 4px);
+  padding: 6px var(--spacing-sm);
+  border-radius: var(--radius-sm);
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  outline: none;
+  transition: background-color 0.2s ease, color 0.2s ease, outline 0.2s ease;
 }
 
 .threadToggleAction:hover {
-  background-color: var(--bg-hover, #f5f5f5);
+  background-color: var(--bg-hover);
   text-decoration: underline;
 }
 
+.threadToggleAction:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 .btnIcon {
-  font-size: 0.65rem;
+  font-size: var(--font-xs);
 }
 
 .emptyText {
-  font-size: var(--font-sm, 0.85rem);
-  color: var(--text-muted, #888888);
+  font-size: var(--font-sm);
+  color: var(--text-muted);
   font-style: italic;
   margin: 0;
-  padding: var(--spacing-xs, 8px) 0;
+  padding: var(--spacing-xs) 0;
 }

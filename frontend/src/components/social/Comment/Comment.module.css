@@ -1,64 +1,71 @@
 .commentContainer {
-  background-color: var(--bg-app, #f8f9fa);
-  border: 1px solid var(--border-main, #e0e0e0);
-  border-radius: var(--radius-sm, 6px);
-  padding: var(--spacing-sm, 12px);
-  margin-bottom: 8px;
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-main);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
   box-sizing: border-box;
 }
 
 .commentHeader {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs, 8px);
-  margin-bottom: var(--spacing-xs, 6px);
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
 }
 
 .commentAvatar {
   width: 28px;
   height: 28px;
-  border-radius: var(--radius-full, 50%);
+  border-radius: var(--radius-full);
   object-fit: cover;
-  border: 1px solid var(--border-main, #e0e0e0);
+  border: 1px solid var(--border-main);
 }
 
 .metaBlock {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs, 8px);
+  gap: var(--spacing-xs);
 }
 
 .authorProfileLink {
-  font-weight: 600;
-  font-size: var(--font-sm, 0.85rem);
+  font-weight: var(--weight-semibold);
+  font-size: var(--font-sm);
   text-decoration: none;
-  color: var(--color-primary, #111111);
+  color: var(--text-main);
+  outline: none;
+  border-radius: var(--radius-sm);
 }
 
 .authorProfileLink:hover {
   text-decoration: underline;
 }
 
+.authorProfileLink:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 .timestamp {
-  font-size: var(--font-xs, 0.75rem);
-  color: var(--text-muted, #888888);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
 }
 
 .commentBody {
-  padding-left: 36px; /* Align with header content spacing */
-  margin-bottom: var(--spacing-xs, 6px);
+  padding-left: calc(28px + var(--spacing-xs));
+  margin-bottom: var(--spacing-xs);
 }
 
 .contentParagraph {
-  font-size: var(--font-sm, 0.9rem);
+  font-size: var(--font-sm);
   line-height: 1.4;
-  color: var(--color-primary, #111111);
+  color: var(--text-main);
   margin: 0;
   white-space: pre-wrap;
 }
 
 .commentFooter {
-  padding-left: 36px;
+  padding-left: calc(28px + var(--spacing-xs));
 }
 
 .likeButton {
@@ -68,24 +75,39 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 4px var(--spacing-xs, 8px);
-  border-radius: var(--radius-sm, 4px);
-  color: var(--text-muted, #888888);
-  font-size: var(--font-xs, 0.75rem);
-  font-weight: 500;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  padding: 4px var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: var(--font-xs);
+  font-weight: var(--weight-medium);
+  outline: none;
+  transition: background-color 0.2s ease, color 0.2s ease, outline 0.2s ease;
 }
 
 .likeButton:hover {
-  background-color: var(--bg-hover, #f5f5f5);
-  color: var(--color-primary, #111111);
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+}
+
+.likeButton:hover .heartIcon {
+  transform: scale(1.15);
+}
+
+.likeButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .activeLikedState {
-  color: #e0245e;
-  font-weight: 700;
+  color: var(--color-primary);
+  font-weight: var(--weight-bold);
 }
 
 .heartIcon {
-  font-size: 0.85rem;
+  width: 14px !important;
+  height: 14px !important;
+  flex-shrink: 0;
+  stroke-width: 2.25px; /* Clean, bold silhouette line depth weights */
+  display: inline-block;
+  transition: transform 0.15s ease;
 }
