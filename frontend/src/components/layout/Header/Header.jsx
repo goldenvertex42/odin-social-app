@@ -24,6 +24,7 @@ export default function Header() {
                 src={user.avatarUrl} 
                 alt={`${user.displayName || user.username}'s profile`} 
                 className={styles.userAvatar} 
+                referrerPolicy="no-referrer"
               />
               <span className={styles.userNameDisplay}>
                 Hello, <strong className={styles.boldName}>{user.displayName || user.username}</strong>

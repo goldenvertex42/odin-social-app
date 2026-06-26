@@ -19,7 +19,7 @@ export default function AvatarUploadField({ initialAvatar, onFileSelected }) {
     <section className={styles.sectionContainer}>
       <h2 className={styles.heading}>Profile Picture</h2>
       <div className={styles.flexWrapper}>
-        <img src={preview} alt="Avatar preview" className={styles.avatarImage} />
+        <img src={preview} alt="Avatar preview" className={styles.avatarImage} referrerPolicy="no-referrer" />
         <div className={styles.controls}>
           <label className={styles.uploadLabel}>
             Change Picture
