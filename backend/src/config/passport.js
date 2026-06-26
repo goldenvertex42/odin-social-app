@@ -81,6 +81,7 @@ passport.use(
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: 'http://localhost:3000/api/auth/google/callback',
+      proxy: true // Ensures HTTPS resolution tracks safely inside cloud configurations
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -89,13 +90,19 @@ passport.use(
           return done(new Error('No email returned from Google'), null);
         }
 
-        // 1. Extract the high-res Google profile photo if it exists
-        let googleAvatarUrl = profile.photos && profile.photos[0] ? profile.photos[0].value : null;
-        if (googleAvatarUrl && googleAvatarUrl.includes('=s96-c')) {
-          googleAvatarUrl = googleAvatarUrl.replace('=s96-c', '=s400-c'); // Force higher resolution
+        // 1. Defensively extract the Google photo URL supporting multiple library variants
+        let googleAvatarUrl = null;
+        if (profile.photos && profile.photos[0]) {
+          // Extracts the standard value key path property cleanly
+          googleAvatarUrl = profile.photos[0].value || profile.photos[0].url || null;
         }
 
-        // 2. Determine final avatar choice (Google image vs. Gravatar fallback)
+        // Force a crisp, high-resolution square crop modifier if a match is caught
+        if (googleAvatarUrl && googleAvatarUrl.includes('=s96-c')) {
+          googleAvatarUrl = googleAvatarUrl.replace('=s96-c', '=s400-c');
+        }
+
+        // 2. Select final fallback avatar URL
         const finalAvatarUrl = googleAvatarUrl || getGravatarUrl(email);
 
         let user = await prisma.user.findFirst({
@@ -109,14 +116,15 @@ passport.use(
 
         // CASE A: User record already occupies a database row
         if (user) {
-          // If they are a local user linking Google for the first time
           if (!user.googleId) {
             user = await prisma.user.update({
               where: { id: user.id },
-              data: { 
-                googleId: profile.id, 
-                // Upgrade to Google photo if their old avatar was missing or a generic fallback
-                avatarUrl: user.avatarUrl && !user.avatarUrl.includes('gravatar.com') ? user.avatarUrl : finalAvatarUrl 
+              data: {
+                googleId: profile.id,
+                // Apply Google photo if old avatar was missing or a generic gravatar fallback
+                avatarUrl: user.avatarUrl && !user.avatarUrl.includes('gravatar.com') 
+                  ? user.avatarUrl 
+                  : finalAvatarUrl
               }
             });
           }
@@ -126,17 +134,19 @@ passport.use(
         // CASE B: Brand new OAuth registration node creation
         const baseUsername = profile.displayName.toLowerCase().replace(/[^a-z0-9]/g, '');
         const randomString = Math.random().toString(36).substring(2, 6);
-        const usernamePlaceholder = `${baseUsername}_${randomString}`;
+        const usernamePlaceholder = baseUsername ? `${baseUsername}_${randomString}` : `user_${randomString}`;
 
         user = await prisma.user.create({
           data: {
             email: email,
             googleId: profile.id,
-            displayName: profile.displayName,
+            displayName: profile.displayName || 'Community Member',
             username: usernamePlaceholder,
-            avatarUrl: finalAvatarUrl, // Natively assigns Google photo or custom Gravatar retro layout
+            avatarUrl: finalAvatarUrl,
+            bio: 'Joined via Google. Welcome to my SocialSphere workspace context landscape!',
             colorPalette: 'default',
-            colorScheme: 'light'
+            colorScheme: 'light',
+            passwordHash: 'oauth_managed_external_identity_token_lock'
           }
         });
 
@@ -147,6 +157,7 @@ passport.use(
     }
   )
 );
+
 
 
 export default passport;
