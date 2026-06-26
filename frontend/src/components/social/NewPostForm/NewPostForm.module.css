@@ -1,36 +1,46 @@
 .formContainer {
-  background: var(--bg-card, #ffffff);
-  border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-main);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--spacing-sm);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .textarea {
   width: 100%;
   min-height: 80px;
-  padding: 0.75rem;
-  border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: 8px;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--border-main);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-app);
+  color: var(--text-main);
   resize: vertical;
   font-family: inherit;
-  font-size: 1rem;
+  font-size: var(--font-base);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .textarea:focus {
-  outline: none;
-  border-color: var(--primary-color, #3b82f6);
+  border-color: var(--color-primary);
+}
+
+.textarea:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .previewContainer {
   position: relative;
   display: inline-block;
   max-width: 100%;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
+  border: 1px solid var(--border-main);
 }
 
 .previewImage {
@@ -42,40 +52,87 @@
 
 .removeImageBtn {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
+  top: var(--spacing-xs);
+  right: var(--spacing-xs);
+  background: #000000;
+  color: #ffffff;
   border: none;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   width: 28px;
   height: 28px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.85rem;
+  outline: none;
+  transition: background-color 0.2s ease, transform 0.15s ease, outline 0.2s ease;
+}
+
+.removeImageBtn:hover {
+  background-color: var(--color-error);
+  transform: scale(1.05);
+}
+
+.removeImageBtn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.closeIcon {
+  width: 14px !important;
+  height: 14px !important;
+  flex-shrink: 0;
+  stroke-width: 2.5px;
+  display: inline-block;
 }
 
 .actionBar {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding-top: var(--spacing-xs);
 }
 
 .uploadLabel {
-  background-color: var(--bg-secondary, #f1f5f9);
-  color: var(--text-main, #334155);
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background-color 0.2s;
+  font-size: var(--font-sm);
+  font-weight: var(--weight-medium);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  border: 1px solid var(--border-main);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
 }
 
 .uploadLabel:hover {
-  background-color: var(--border-color, #e2e8f0);
+  background-color: var(--bg-hover);
+  color: var(--color-primary);
+}
+
+.uploadLabel:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.cameraIcon {
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0;
+  stroke-width: 2px;
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.uploadLabel:hover .cameraIcon {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+.uploadLabelText {
+  line-height: 1;
 }
 
 .fileInput {
@@ -83,17 +140,28 @@
 }
 
 .submitBtn {
-  background-color: var(--primary-color, #3b82f6);
-  color: white;
+  background-color: var(--color-primary);
+  color: var(--btn-action-text, #ffffff);
   border: none;
-  padding: 0.5rem 1.25rem;
-  border-radius: 6px;
-  font-weight: 600;
+  padding: var(--spacing-xs) var(--spacing-lg);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-sm);
+  font-weight: var(--weight-semibold);
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  outline: none;
+  transition: background-color 0.2s ease, opacity 0.2s ease, outline 0.2s ease;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.submitBtn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .submitBtn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }

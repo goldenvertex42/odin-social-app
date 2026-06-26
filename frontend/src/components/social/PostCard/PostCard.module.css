@@ -1,25 +1,55 @@
 .cardContainer {
-  background-color: var(--bg-card, #ffffff);
-  border: 1px solid var(--border-main, #e0e0e0);
-  border-radius: var(--radius-md, 8px);
-  padding: var(--spacing-lg, 20px);
-  margin-bottom: var(--spacing-md, 16px);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-main);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
   box-sizing: border-box;
+  box-shadow: 0 4px 12px var(--shadow-color);
+  outline: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, outline 0.15s ease;
+}
+
+.clickableCard {
+  cursor: pointer;
+}
+
+.clickableCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px var(--shadow-color);
+}
+
+/* Explicit focus indication if tab-navigating the global card component body */
+.clickableCard:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .cardHeader {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm, 12px);
-  margin-bottom: var(--spacing-md, 16px);
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.avatarLink {
+  display: block;
+  border-radius: var(--radius-full);
+  outline: none;
+  transition: outline 0.15s ease;
+}
+
+.avatarLink:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .authorAvatar {
   width: 44px;
   height: 44px;
-  border-radius: var(--radius-full, 50%);
+  border-radius: var(--radius-full);
   object-fit: cover;
-  border: 1px solid var(--border-main, #e0e0e0);
+  border: 1px solid var(--border-main);
 }
 
 .metaText {
@@ -29,37 +59,46 @@
 }
 
 .authorProfileLink {
-  font-weight: 600;
-  font-size: var(--font-md, 1rem);
+  font-weight: var(--weight-semibold);
+  font-size: var(--font-base);
   text-decoration: none;
-  color: var(--color-primary, #111111);
+  color: var(--text-main);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: color 0.15s ease, outline 0.15s ease;
 }
 
 .authorProfileLink:hover {
   text-decoration: underline;
+  color: var(--color-primary);
+}
+
+.authorProfileLink:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .postTimestamp {
-  font-size: var(--font-xs, 0.75rem);
-  color: var(--text-muted, #888888);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
 }
 
 .cardBody {
-  margin-bottom: var(--spacing-md, 16px);
+  margin-bottom: var(--spacing-md);
 }
 
 .textContent {
   white-space: pre-wrap;
   line-height: 1.5;
-  color: var(--color-primary, #111111);
+  color: var(--text-main);
   margin: 0;
 }
 
 .imageWrapper {
-  margin-top: var(--spacing-sm, 12px);
-  border-radius: var(--radius-sm, 6px);
+  margin-top: var(--spacing-sm);
+  border-radius: var(--radius-sm);
   overflow: hidden;
-  border: 1px solid var(--border-main, #e0e0e0);
+  border: 1px solid var(--border-main);
 }
 
 .mediaAsset {
@@ -70,84 +109,86 @@
 }
 
 .cardFooter {
-  border-top: 1px solid var(--border-main, #e0e0e0);
-  border-bottom: 1px solid var(--border-main, #e0e0e0);
-  padding: var(--spacing-xs, 8px) 0;
-  margin-bottom: var(--spacing-md, 16px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border-main);
+  border-bottom: 1px solid var(--border-main);
+  padding: var(--spacing-xs) 0;
+  margin-bottom: var(--spacing-md);
 }
 
-.likeActionButton {
+.likeActionButton, .threadLinkBtn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 8px var(--spacing-md, 16px);
-  border-radius: var(--radius-sm, 4px);
-  color: var(--text-muted, #888888);
-  font-weight: 500;
-  font-size: var(--font-sm, 0.9rem);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-sm);
+  outline: none;
+  transition: background-color 0.2s ease, color 0.2s ease, outline 0.2s ease;
+}
+
+.likeActionButton {
+  color: var(--text-muted);
+  font-weight: var(--weight-medium);
 }
 
 .likeActionButton:hover {
-  background-color: var(--bg-hover, #f5f5f5);
-  color: var(--color-primary, #111111);
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+}
+
+.likeActionButton:focus-visible, .threadLinkBtn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .activeLikedState {
-  color: #e0245e; /* Standout active tracking indicator */
-  font-weight: 700;
-}
-
-.commentThreadSection {
-  margin-top: var(--spacing-md, 16px);
-}
-
-.commentStreamTitle {
-  font-size: var(--font-sm, 0.9rem);
-  font-weight: 600;
-  color: var(--color-primary, #111111);
-  margin: 0 0 var(--spacing-sm, 12px) 0;
-}
-
-.clickableCard {
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.clickableCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px var(--shadow-color, rgba(0, 0, 0, 0.05));
-}
-
-.avatarLink {
-  display: block;
-}
-
-.cardFooter {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 1px solid var(--border-color, #e2e8f0);
-  padding-top: 0.75rem;
+  color: var(--color-primary);
+  font-weight: var(--weight-bold);
 }
 
 .threadLinkBtn {
-  background: none;
-  border: none;
-  color: var(--text-secondary, #64748b);
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 6px;
-  transition: color 0.2s, background-color 0.2s;
+  color: var(--text-muted);
+  font-weight: var(--weight-medium);
 }
 
 .threadLinkBtn:hover {
-  color: var(--primary-color, #3b82f6);
-  background-color: var(--bg-secondary, #f1f5f9);
+  color: var(--color-primary);
+  background-color: var(--bg-hover);
+}
+
+.commentThreadSection {
+  margin-top: var(--spacing-md);
+}
+
+.commentStreamTitle {
+  font-size: var(--font-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text-main);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.actionIcon {
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0;
+  stroke-width: 2.25px; /* Premium uniform line weight depth */
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+
+.likeActionButton:hover .actionIcon,
+.threadLinkBtn:hover .actionIcon {
+  transform: scale(1.15) rotate(-5deg); /* Playful micro-interaction on hover */
+}
+
+.actionLabel {
+  font-size: var(--font-sm);
+  line-height: 1;
 }
 
