@@ -10,7 +10,7 @@
 
 .traySection {
   background-color: var(--bg-app);
-  border: 1px dashed var(--color-primary);
+  border: 1px dashed var(--border-main);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
 }
@@ -37,7 +37,7 @@
   font-size: var(--font-base);
 }
 
-.error {
+.centeredState.error {
   color: var(--color-error);
 }
 
@@ -47,4 +47,39 @@
   text-align: center;
   padding: var(--spacing-lg);
   font-style: italic;
+}
+
+.trayLayoutSubgrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  width: 100%;
+}
+
+.subTray {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+.subHeading {
+  font-size: var(--font-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+/* Desktop Viewport Alignment Override Enhancement */
+@media (min-width: 860px) {
+  .trayLayoutSubgrid {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  
+  .subTray {
+    flex: 1;
+  }
 }

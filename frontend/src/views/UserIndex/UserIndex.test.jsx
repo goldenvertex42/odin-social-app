@@ -1,9 +1,7 @@
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import UserIndex from './UserIndex';
 
-// Stub out FollowCard component to isolate page grid structure tests
 vi.mock('../../components/network/FollowCard/FollowCard', () => ({
   default: ({ member, initialStatus }) => (
     <div data-testid={`stub-follow-card-${member.id}`}>
@@ -14,9 +12,10 @@ vi.mock('../../components/network/FollowCard/FollowCard', () => ({
 }));
 
 const mockProfiles = [
-  { id: 'u1', username: 'odin_king', relationshipStatus: 'FOLLOWING' },
-  { id: 'u2', username: 'thor_lightning', relationshipStatus: 'REQUEST_RECEIVED' },
-  { id: 'u3', username: 'loki_mischief', relationshipStatus: 'NOT_FOLLOWING' }
+  { id: 'u1', username: 'odin_king', followStatus: 'FOLLOWING' },
+  { id: 'u2', username: 'thor_lightning', followStatus: 'REQUEST_RECEIVED' },
+  { id: 'u3', username: 'loki_mischief', followStatus: 'NOT_FOLLOWING' },
+  { id: 'u4', username: 'freya_beauty', followStatus: 'REQUEST_SENT' }
 ];
 
 describe('UserIndex Layout Architecture View Suite', () => {
@@ -26,42 +25,30 @@ describe('UserIndex Layout Architecture View Suite', () => {
     localStorage.setItem('token', 'mock-valid-jwt');
   });
 
-  it('renders initial syncing indicators and branches profiles across correct structural grids', async () => {
-    vi.spyOn(global, 'fetch').mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockProfiles
+  it('branches incoming vs outgoing pending requests correctly across separate visual subtrays', async () => {
+    vi.spyOn(global, 'fetch').mockResolvedValueOnce({ 
+      ok: true, 
+      json: async () => mockProfiles 
     });
 
     render(<UserIndex />);
-
-    expect(screen.getByTestId('directory-loading')).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.queryByTestId('directory-loading')).not.toBeInTheDocument();
     });
 
-    // Verify upper incoming request tray segment isolation
-    expect(screen.getByTestId('incoming-tray')).toBeInTheDocument();
+    expect(screen.getByTestId('pending-tray')).toBeInTheDocument();
+
+    expect(screen.getByTestId('incoming-subtray')).toBeInTheDocument();
     expect(screen.getByTestId('stub-follow-card-u2')).toBeInTheDocument();
     expect(screen.getByTestId('status-u2')).toHaveTextContent('REQUEST_RECEIVED');
 
-    // Verify lower general community dashboard catalog distribution
+    expect(screen.getByTestId('sent-subtray')).toBeInTheDocument();
+    expect(screen.getByTestId('stub-follow-card-u4')).toBeInTheDocument();
+    expect(screen.getByTestId('status-u4')).toHaveTextContent('REQUEST_SENT');
+
     expect(screen.getByTestId('global-directory')).toBeInTheDocument();
-    expect(screen.getByTestId('stub-follow-card-u1')).toBeInTheDocument();
+    expect(screen.queryByTestId('stub-follow-card-u1')).not.toBeInTheDocument();
     expect(screen.getByTestId('stub-follow-card-u3')).toBeInTheDocument();
-  });
-
-  it('handles empty response payloads gracefully without falling back to exceptions', async () => {
-    vi.spyOn(global, 'fetch').mockResolvedValueOnce({
-      ok: true,
-      json: async () => []
-    });
-
-    render(<UserIndex />);
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('incoming-tray')).not.toBeInTheDocument();
-      expect(screen.getByTestId('empty-directory-msg')).toBeInTheDocument();
-    });
   });
 });

@@ -15,13 +15,14 @@ export default function UserIndex() {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      // Hits your explicit Directory Index endpoint mapping
+      
       const response = await fetch('/api/users', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
+      
       if (!response.ok) throw new Error('Failed to retrieve user directory states.');
       const data = await response.json();
       setProfiles(Array.isArray(data) ? data : []);
@@ -33,58 +34,95 @@ export default function UserIndex() {
   };
 
   const handleStatusChange = (userId, newStatus) => {
-    // Dynamically update the targeted profile node state inside our main layout state array
     setProfiles((prevProfiles) =>
-      prevProfiles.map((p) => (p.id === userId ? { ...p, relationshipStatus: newStatus } : p))
+      prevProfiles.map((p) =>
+        p.id === userId ? { ...p, followStatus: newStatus } : p
+      )
     );
   };
 
-  // Filter profiles into their respective workspace trays based on their status machine flags
-  const incomingRequests = profiles.filter((p) => p.relationshipStatus === 'REQUEST_RECEIVED');
-  const standardDirectory = profiles.filter((p) => p.relationshipStatus !== 'REQUEST_RECEIVED');
+  // UPPER PANEL FILTERS: Segregate incoming vs outgoing engagement states
+  const incomingRequests = profiles.filter((p) => p.followStatus === 'REQUEST_RECEIVED');
+  const sentRequests = profiles.filter((p) => p.followStatus === 'REQUEST_SENT');
+
+  // LOWER PANEL FILTER: Pure Exploration Mode (Exclude active connections and pending interactions)
+  const standardDirectory = profiles.filter(
+    (p) => p.followStatus !== 'REQUEST_RECEIVED' && 
+           p.followStatus !== 'FOLLOWING' && 
+           p.followStatus !== 'REQUEST_SENT'
+  );
+
+  const hasPendingActivity = incomingRequests.length > 0 || sentRequests.length > 0;
 
   if (loading) return <div className={styles.centeredState} data-testid="directory-loading">Syncing membership records...</div>;
-  if (error) return <div className={styles.centeredState} className={styles.error} data-testid="directory-error">{error}</div>;
+  if (error) return <div className={`${styles.centeredState} ${styles.error}`} data-testid="directory-error">{error}</div>;
 
   return (
     <div className={styles.pageContainer}>
-      {/* UPPER TRAY: Dedicated to evaluating and clearing incoming requests */}
-      {incomingRequests.length > 0 && (
-        <section className={styles.traySection} data-testid="incoming-tray" aria-label="Pending incoming requests tray">
-          <h2 className={styles.sectionHeading}>
-            🤝 Connection Requests ({incomingRequests.length})
-          </h2>
-          <div className={styles.gridArray}>
-            {incomingRequests.map((member) => (
-              <FollowCard
-                key={member.id}
-                member={member}
-                initialStatus="REQUEST_RECEIVED"
-                onStatusChange={handleStatusChange}
-              />
-            ))}
+      
+      {/* UNIFIED UPPER PANEL: Active Pending Network Tray */}
+      {hasPendingActivity && (
+        <section className={styles.traySection} data-testid="pending-tray" aria-label="Pending connections dashboard">
+          <h2 className={styles.sectionHeading}>Pending Connections</h2>
+          <div className={styles.trayLayoutSubgrid}>
+            
+            {/* SUB-SECTION A: Incoming Actions */}
+            {incomingRequests.length > 0 && (
+              <div className={styles.subTray} data-testid="incoming-subtray">
+                <h3 className={styles.subHeading}>Received Requests ({incomingRequests.length})</h3>
+                <div className={styles.gridArray}>
+                  {incomingRequests.map((member) => (
+                    <FollowCard
+                      key={member.id}
+                      member={member}
+                      initialStatus="REQUEST_RECEIVED"
+                      onStatusChange={handleStatusChange}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* SUB-SECTION B: Outbound Actions */}
+            {sentRequests.length > 0 && (
+              <div className={styles.subTray} data-testid="sent-subtray">
+                <h3 className={styles.subHeading}>Sent Requests ({sentRequests.length})</h3>
+                <div className={styles.gridArray}>
+                  {sentRequests.map((member) => (
+                    <FollowCard
+                      key={member.id}
+                      member={member}
+                      initialStatus="REQUEST_SENT"
+                      onStatusChange={handleStatusChange}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
           </div>
         </section>
       )}
 
-      {/* LOWER TRAY: Global Member Dashboard */}
+      {/* LOWER PANEL: Global Discovery Feed */}
       <section className={styles.directorySection} data-testid="global-directory" aria-label="Global community directory">
         <h2 className={styles.sectionHeading}>Explore Community Members</h2>
         {standardDirectory.length === 0 ? (
-          <p className={styles.emptyMessage} data-testid="empty-directory-msg">No profiles found in the system registry.</p>
+          <p className={styles.emptyMessage} data-testid="empty-directory-msg">No new profiles found in the system registry.</p>
         ) : (
           <div className={styles.gridArray}>
             {standardDirectory.map((member) => (
               <FollowCard
                 key={member.id}
                 member={member}
-                initialStatus={member.relationshipStatus || 'NOT_FOLLOWING'}
+                initialStatus={member.followStatus || 'NOT_FOLLOWING'}
                 onStatusChange={handleStatusChange}
               />
             ))}
           </div>
         )}
       </section>
+
     </div>
   );
 }
