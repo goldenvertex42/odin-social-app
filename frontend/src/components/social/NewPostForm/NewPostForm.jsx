@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { customFetch } from '../../../utils/api/api';
 import styles from './NewPostForm.module.css';
 
 import { Image, X } from 'lucide-react';
@@ -35,25 +36,24 @@ export default function NewPostForm({ onPostCreated }) {
 
     try {
       setIsSubmitting(true);
-      const token = localStorage.getItem('token');
-      
       const formData = new FormData();
       formData.append('content', content);
+      
       if (imageFile) {
         formData.append('image', imageFile);
       }
 
-      const response = await fetch('/api/posts', {
+      // Aligned: Swapped manual fetch loop for your unified customFetch interceptor token layer
+      const response = await customFetch('/api/posts', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
         body: formData
       });
 
       if (!response.ok) throw new Error('Failed to publish your post.');
-      const newPost = await response.json();
-      onPostCreated(newPost);
+      const data = await response.json();
+      
+      // 🎯 FIXED: Extract the nested post record node explicitly from the server object envelope
+      onPostCreated(data.post); 
       
       setContent('');
       handleRemoveImage();
@@ -63,6 +63,7 @@ export default function NewPostForm({ onPostCreated }) {
       setIsSubmitting(false);
     }
   };
+
 
   return (
     <form onSubmit={handleSubmit} className={styles.formContainer} data-testid="new-post-form">
