@@ -8,7 +8,8 @@ import {
   sendFollowRequest, 
   acceptFollowRequest, 
   removeFollowRelationship,
-  updateProfile
+  updateProfile,
+  deleteAccount
 } from './user.controller.js';
 
 const router = Router();
@@ -23,5 +24,6 @@ router.patch('/:id/accept', requireAuth, acceptFollowRequest);
 router.delete('/:id/cancel', requireAuth, removeFollowRelationship);
 
 router.put('/profile', requireAuth, upload.single('avatar'), updateProfile);
+router.delete('/profile', requireAuth, deleteAccount);
 
 export default router;

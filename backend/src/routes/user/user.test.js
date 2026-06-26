@@ -1,6 +1,5 @@
 import { jest, beforeEach, describe, it, expect, afterAll } from '@jest/globals';
 
-// 1. Unified ESM Mock that injects 'config' everywhere it could possibly be read
 jest.unstable_mockModule('cloudinary', () => {
   const mockConfig = jest.fn();
   const mockUploader = {
@@ -8,69 +7,70 @@ jest.unstable_mockModule('cloudinary', () => {
       end: jest.fn(() => {
         callback(null, { secure_url: 'https://cloudinary.com' });
       })
-    }))
+    })),
+    destroy: jest.fn().mockResolvedValue({ result: 'ok' })
   };
   const v2Mock = { config: mockConfig, uploader: mockUploader };
-  return {
-    v2: v2Mock,
-    default: { config: mockConfig, v2: v2Mock }
-  };
+  return { v2: v2Mock, default: { config: mockConfig, v2: v2Mock } };
 });
 
-// 2. NOW safely import your local application files underneath
-const request = (await import('supertest')).default;
-const app = (await import('../../app.js')).default;
-const { clearDatabase, generateTestToken } = await import('../../../tests/helpers.js');
-const { prisma } = await import('../../../../db/src/index.js');
-
 describe('User Social Graph Integration Tests', () => {
+  let request, app, clearDatabase, generateTestToken, prisma;
   let userA, userB, tokenA, tokenB;
 
   beforeEach(async () => {
+    const helpers = await import('../../../tests/helpers.js');
+    clearDatabase = helpers.clearDatabase;
+    generateTestToken = helpers.generateTestToken;
+
     await clearDatabase();
 
-    // Seed User A with lowercase design defaults
+    request = (await import('supertest')).default;
+    app = (await import('../../app.js')).default;
+    
+    const dbModule = await import('../../../../db/src/index.js');
+    prisma = dbModule.prisma;
+
     userA = await prisma.user.create({
-      data: {
-        email: 'alpha@odin.local',
-        username: 'user_alpha',
-        displayName: 'Odin Alpha',
-        passwordHash: 'mock_hash',
-        colorPalette: 'default',
-        colorScheme: 'light',
-        avatarUrl: 'https://dicebear.com',
-        isOnline: true
+      data: { 
+        email: 'alpha@odin.local', 
+        username: 'user_alpha', 
+        displayName: 'Odin Alpha', 
+        passwordHash: 'mock_hash', 
+        colorPalette: 'default', 
+        colorScheme: 'light', 
+        avatarUrl: 'https://dicebear.com', 
+        isOnline: true 
       },
     });
 
-    // Seed User B
     userB = await prisma.user.create({
-      data: {
-        email: 'beta@odin.local',
-        username: 'user_beta',
-        displayName: 'Odin Beta',
-        passwordHash: 'mock_hash',
-        colorPalette: 'default',
-        colorScheme: 'light',
-        avatarUrl: 'https://dicebear.com',
-        isOnline: false
+      data: { 
+        email: 'beta@odin.local', 
+        username: 'user_beta', 
+        displayName: 'Odin Beta', 
+        passwordHash: 'mock_hash', 
+        colorPalette: 'default', 
+        colorScheme: 'light', 
+        avatarUrl: 'https://dicebear.com', 
+        isOnline: false 
       },
     });
 
-    // Generate tokens utilizing your existing helper signature
     tokenA = generateTestToken(userA.id);
     tokenB = generateTestToken(userB.id);
   });
 
   afterAll(async () => {
-    await prisma.$disconnect();
+    if (prisma) {
+      await prisma.$disconnect();
+    }
   });
 
   describe('GET /api/users - Fetch All Users Pipeline', () => {
     it('should fetch all users except self and track active followStatus strings', async () => {
-      // Create a pending join row from User A to User B
-      await prisma.follow.create({
-        data: { followerId: userA.id, followingId: userB.id, status: 'PENDING' }
+      await prisma.follow.create({ 
+        data: { followerId: userA.id, followingId: userB.id, status: 'REQUEST_SENT' } 
       });
 
       const res = await request(app)
@@ -81,12 +81,11 @@ describe('User Social Graph Integration Tests', () => {
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(1);
       expect(res.body[0].id).toBe(userB.id);
-      expect(res.body[0].followStatus).toBe('PENDING');
+      expect(res.body[0].followStatus).toBe('REQUEST_SENT');
       expect(res.body[0]).not.toHaveProperty('receivedFollows');
     });
   });
 
-  /* --- NEW COMPREHENSIVE TESTING SECTION FOR GET /api/users/:id --- */
   describe('GET /api/users/:id - Fetch Single User Profile Data Matrix', () => {
     it('should cleanly return self profile configurations with SELF relationship status', async () => {
       const res = await request(app)
@@ -100,9 +99,8 @@ describe('User Social Graph Integration Tests', () => {
     });
 
     it('should return an external profile marked as REQUEST_SENT when outbound request is pending', async () => {
-      // User A requests to follow User B
-      await prisma.follow.create({
-        data: { followerId: userA.id, followingId: userB.id, status: 'PENDING' }
+      await prisma.follow.create({ 
+        data: { followerId: userA.id, followingId: userB.id, status: 'REQUEST_SENT' } 
       });
 
       const res = await request(app)
@@ -112,14 +110,12 @@ describe('User Social Graph Integration Tests', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body.id).toBe(userB.id);
       expect(res.body.relationshipStatus).toBe('REQUEST_SENT');
-      // Ensure private inner relational arrays are stripped out
       expect(res.body).not.toHaveProperty('receivedFollows');
     });
 
     it('should return an external profile marked as FOLLOWING when follow link is accepted', async () => {
-      // User A follows User B successfully
-      await prisma.follow.create({
-        data: { followerId: userA.id, followingId: userB.id, status: 'ACCEPTED' }
+      await prisma.follow.create({ 
+        data: { followerId: userA.id, followingId: userB.id, status: 'FOLLOWING' } 
       });
 
       const res = await request(app)
@@ -140,36 +136,36 @@ describe('User Social Graph Integration Tests', () => {
   });
 
   describe('GET /api/users/:id/relationship', () => {
-    it('should return NONE when no database row connects the users', async () => {
+    it('should return NOT_FOLLOWING when no database row connects the users', async () => {
       const res = await request(app)
         .get(`/api/users/${userB.id}/relationship`)
         .set('Authorization', `Bearer ${tokenA}`);
 
       expect(res.statusCode).toBe(200);
-      expect(res.body.relationshipState).toBe('NONE');
+      expect(res.body.relationshipState).toBe('NOT_FOLLOWING');
     });
   });
 
   describe('POST /api/users/:id/follow', () => {
-    it('should initialize an outbound follow record explicitly marked as PENDING', async () => {
+    it('should initialize an outbound follow record explicitly marked as REQUEST_SENT', async () => {
       const res = await request(app)
         .post(`/api/users/${userB.id}/follow`)
         .set('Authorization', `Bearer ${tokenA}`);
 
       expect(res.statusCode).toBe(201);
-      expect(res.body.status).toBe('PENDING');
+      expect(res.body.status).toBe('REQUEST_SENT');
 
-      const dbRow = await prisma.follow.findUnique({
-        where: { followerId_followingId: { followerId: userA.id, followingId: userB.id } }
+      const dbRow = await prisma.follow.findUnique({ 
+        where: { followerId_followingId: { followerId: userA.id, followingId: userB.id } } 
       });
-      expect(dbRow.status).toBe('PENDING');
+      expect(dbRow.status).toBe('REQUEST_SENT');
     });
   });
 
   describe('PATCH /api/users/:id/accept', () => {
-    it('should accept an inbound request and elevate status to ACCEPTED', async () => {
-      await prisma.follow.create({
-        data: { followerId: userA.id, followingId: userB.id, status: 'PENDING' }
+    it('should accept an inbound request and elevate status to FOLLOWING', async () => {
+      await prisma.follow.create({ 
+        data: { followerId: userA.id, followingId: userB.id, status: 'REQUEST_SENT' } 
       });
 
       const res = await request(app)
@@ -178,17 +174,17 @@ describe('User Social Graph Integration Tests', () => {
 
       expect(res.statusCode).toBe(200);
 
-      const dbRow = await prisma.follow.findUnique({
-        where: { followerId_followingId: { followerId: userA.id, followingId: userB.id } }
+      const dbRow = await prisma.follow.findUnique({ 
+        where: { followerId_followingId: { followerId: userA.id, followingId: userB.id } } 
       });
-      expect(dbRow.status).toBe('ACCEPTED');
+      expect(dbRow.status).toBe('FOLLOWING');
     });
   });
 
   describe('DELETE /api/users/:id/cancel', () => {
-    it('should completely purge the follow row from the database', async () => {
-      await prisma.follow.create({
-        data: { followerId: userA.id, followingId: userB.id, status: 'ACCEPTED' }
+    it('should completely soft-reset the follow status row to NOT_FOLLOWING in the database', async () => {
+      await prisma.follow.create({ 
+        data: { followerId: userA.id, followingId: userB.id, status: 'FOLLOWING' } 
       });
 
       const res = await request(app)
@@ -197,10 +193,10 @@ describe('User Social Graph Integration Tests', () => {
 
       expect(res.statusCode).toBe(200);
 
-      const dbRow = await prisma.follow.findUnique({
-        where: { followerId_followingId: { followerId: userA.id, followingId: userB.id } }
+      const dbRow = await prisma.follow.findUnique({ 
+        where: { followerId_followingId: { followerId: userA.id, followingId: userB.id } } 
       });
-      expect(dbRow).toBeNull();
+      expect(dbRow.status).toBe('NOT_FOLLOWING');
     });
   });
 
