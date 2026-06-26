@@ -1,49 +1,48 @@
 .commentContainer {
-  background-color: var(--bg-app);
+  background: var(--bg-surface);
   border: 1px solid var(--border-main);
-  border-radius: var(--radius-sm);
-  padding: var(--spacing-sm);
-  margin-bottom: var(--spacing-xs);
-  box-sizing: border-box;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
 }
 
 .commentHeader {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-xs);
+  justify-content: space-between;
+  width: 100%;
+}
+
+.userInfoBlock {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 .commentAvatar {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--radius-full);
   object-fit: cover;
-  border: 1px solid var(--border-main);
 }
 
 .metaBlock {
   display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
+  flex-direction: column;
 }
 
 .authorProfileLink {
-  font-weight: var(--weight-semibold);
   font-size: var(--font-sm);
-  text-decoration: none;
+  font-weight: var(--weight-semibold);
   color: var(--text-main);
-  outline: none;
-  border-radius: var(--radius-sm);
+  text-decoration: none;
 }
 
 .authorProfileLink:hover {
+  color: var(--color-primary);
   text-decoration: underline;
-}
-
-.authorProfileLink:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
 }
 
 .timestamp {
@@ -52,62 +51,66 @@
 }
 
 .commentBody {
-  padding-left: calc(28px + var(--spacing-xs));
-  margin-bottom: var(--spacing-xs);
+  font-size: var(--font-sm);
+  color: var(--text-main);
+  line-height: 1.5;
 }
 
 .contentParagraph {
-  font-size: var(--font-sm);
-  line-height: 1.4;
-  color: var(--text-main);
   margin: 0;
-  white-space: pre-wrap;
 }
 
 .commentFooter {
-  padding-left: calc(28px + var(--spacing-xs));
+  display: flex;
+  align-items: center;
+  margin-top: var(--spacing-xs);
 }
 
 .likeButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 4px var(--spacing-xs);
-  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
   color: var(--text-muted);
-  font-size: var(--font-xs);
-  font-weight: var(--weight-medium);
-  outline: none;
-  transition: background-color 0.2s ease, color 0.2s ease, outline 0.2s ease;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  transition: color 0.2s ease;
 }
 
 .likeButton:hover {
-  background-color: var(--bg-hover);
-  color: var(--text-main);
-}
-
-.likeButton:hover .heartIcon {
-  transform: scale(1.15);
-}
-
-.likeButton:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  color: var(--color-error);
 }
 
 .activeLikedState {
-  color: var(--color-primary);
-  font-weight: var(--weight-bold);
+  color: var(--color-error);
 }
 
-.heartIcon {
-  width: 14px !important;
-  height: 14px !important;
-  flex-shrink: 0;
-  stroke-width: 2.25px; /* Clean, bold silhouette line depth weights */
-  display: inline-block;
-  transition: transform 0.15s ease;
+.deleteButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.deleteButton:hover:not(:disabled) {
+  color: var(--color-error);
+  background-color: rgba(239, 68, 68, 0.08);
+}
+
+.deleteButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.deleteButton:focus-visible, .likeButton:focus-visible, .authorProfileLink:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }

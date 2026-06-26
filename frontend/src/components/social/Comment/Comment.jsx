@@ -1,84 +1,78 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
+import { Trash2 } from 'lucide-react';
 import { customFetch } from '../../../utils/api/api';
+import CommentActions from './CommentActions';
 import styles from './Comment.module.css';
 
-import { Heart } from 'lucide-react';
+export default function Comment({ comment, currentUserId, postOwnerId, onDeleteSuccess }) {
+  const [isDeleting, setIsDeleting] = useState(false);
 
-export default function Comment({ comment, currentUserId }) {
-  const [likes, setLikes] = useState(Array.isArray(comment.likes) ? comment.likes : []);
-  const [isLiking, setIsLiking] = useState(false);
+  const targetCurrentUserId = typeof currentUserId === 'object' ? currentUserId?.id : currentUserId;
+  const commentAuthorId = typeof comment.authorId === 'object' ? comment.authorId?.id : comment.authorId;
+  const parentPostOwnerId = typeof postOwnerId === 'object' ? postOwnerId?.id : postOwnerId;
 
-  // Check if the current user has already liked this comment record
-  const hasLiked = likes.some(like => {
-    const likeUserId = typeof like.userId === 'object' ? like.userId?.id : like.userId;
-    const targetUserId = typeof currentUserId === 'object' ? currentUserId?.id : currentUserId;
-    return String(likeUserId) === String(targetUserId);
-  });
+  // Access Guard Evaluation
+  const canDelete = String(targetCurrentUserId) === String(commentAuthorId) || 
+                    String(targetCurrentUserId) === String(parentPostOwnerId);
 
-  const handleCommentLikeToggle = async () => {
-    if (isLiking) return;
-    setIsLiking(true);
+  const handleDeleteComment = async () => {
+    if (isDeleting) return;
+    setIsDeleting(true);
     try {
-      const response = await customFetch(`/api/likes/comment/${comment.id}`, { method: 'POST' });
-      const data = await response.json();
-      
-      // UNPACK & UPDATE: Robustly match both direct arrays or response envelopes
-      if (Array.isArray(data)) {
-        setLikes(data);
-      } else if (data && typeof data.liked !== 'undefined') {
-        // If server returns { liked: true/false }, update array footprints locally
-        if (data.liked) {
-          setLikes((prev) => [...prev, { commentId: comment.id, userId: currentUserId }]);
-        } else {
-          setLikes((prev) => prev.filter(like => String(like.userId) !== String(currentUserId)));
-        }
+      const response = await customFetch(`/api/comments/${comment.id}`, { method: 'DELETE' });
+      if (response.ok && onDeleteSuccess) {
+        onDeleteSuccess(comment.id);
       }
     } catch (err) {
-      console.error('Failed to toggle comment level like state:', err);
+      console.error('System failed to execute comment drop target:', err);
     } finally {
-      setIsLiking(false);
+      setIsDeleting(false);
     }
   };
 
   return (
     <div className={styles.commentContainer} data-testid="comment-node">
       <header className={styles.commentHeader}>
-        <img 
-          src={comment.author?.avatarUrl || '/default-avatar.svg'} 
-          alt={`${comment.author?.displayName || 'User'}'s profile avatar`} 
-          className={styles.commentAvatar} 
-        />
-        <div className={styles.metaBlock}>
-          <Link to={`/users/${comment.authorId}`} className={styles.authorProfileLink}>
-            {comment.author?.displayName || 'Unknown User'}
-          </Link>
-          <span className={styles.timestamp}>
-            {new Date(comment.createdAt).toLocaleDateString()}
-          </span>
+        <div className={styles.userInfoBlock}>
+          <img 
+            src={comment.author?.avatarUrl} 
+            alt={`${comment.author?.displayName || 'User'}'s profile avatar`} 
+            className={styles.commentAvatar} 
+            referrerPolicy="no-referrer" 
+          />
+          <div className={styles.metaBlock}>
+            <Link to={`/users/${commentAuthorId}`} className={styles.authorProfileLink}>
+              {comment.author?.displayName || 'Unknown User'}
+            </Link>
+            <span className={styles.timestamp}>
+              {new Date(comment.createdAt).toLocaleDateString()}
+            </span>
+          </div>
         </div>
+
+        {canDelete && (
+          <button
+            onClick={handleDeleteComment}
+            disabled={isDeleting}
+            className={styles.deleteButton}
+            aria-label={isDeleting ? "Deleting comment..." : "Delete comment"}
+            data-testid="delete-comment-btn"
+          >
+            <Trash2 className={styles.trashIcon} size={14} aria-hidden="true" />
+          </button>
+        )}
       </header>
       
       <div className={styles.commentBody}>
         <p className={styles.contentParagraph}>{comment.content}</p>
       </div>
       
-      <footer className={styles.commentFooter}>
-        <button 
-          onClick={handleCommentLikeToggle} 
-          disabled={isLiking} 
-          className={`${styles.likeButton} ${hasLiked ? styles.activeLikedState : ''}`} 
-          aria-label={hasLiked ? "Unlike comment" : "Like comment"} 
-        >
-          <Heart 
-            className={styles.heartIcon} 
-            size={14} 
-            aria-hidden="true" 
-            fill={hasLiked ? "currentColor" : "none"} 
-          />
-          <span className={styles.likeCounter}>{likes.length}</span>
-        </button>
-      </footer>
+      <CommentActions 
+        commentId={comment.id}
+        initialLikes={comment.likes}
+        currentUserId={currentUserId}
+      />
     </div>
   );
 }
