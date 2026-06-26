@@ -7,7 +7,6 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Synchronize dynamic session token data strings into state structures
   const syncIdentity = useCallback(async () => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -15,13 +14,19 @@ export function AuthProvider({ children }) {
       setLoading(false);
       return;
     }
-
     try {
       const res = await customFetch('/api/auth/me');
-      const data = await res.json();
-      setUser(data);
+      
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data);
+      } else {
+        localStorage.removeItem('token');
+        setUser(null);
+      }
     } catch (err) {
       // Clear poisoned or expired token references cleanly
+      console.error("Background identity sync failed safely:", err);
       localStorage.removeItem('token');
       setUser(null);
     } finally {
@@ -33,51 +38,52 @@ export function AuthProvider({ children }) {
     syncIdentity();
   }, [syncIdentity]);
 
-  // Handle traditional credential form logins
   const login = async (email, password) => {
-  setLoading(true);
-  try {
-    const res = await customFetch('/api/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await res.json();
-    
-    localStorage.setItem('token', data.token);
-    
-    // This populates the global layout parameters BEFORE lifting the loader!
-    setUser(data.user);
-    await syncIdentity(); 
-    
-    setLoading(false);
-    return data.user;
-  } catch (err) {
-    setLoading(false);
-    throw err;
-  }
-};
+    setLoading(true);
+    try {
+      const res = await customFetch('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+      
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData?.message || 'Login rejected by authentication server.');
+      }
 
-// Handle transient recruiter layout skips
-const loginGuest = async () => {
-  setLoading(true);
-  try {
-    const res = await customFetch('/api/auth/guest', { method: 'POST' });
-    const data = await res.json();
-    
-    localStorage.setItem('token', data.token);
-    
-    setUser(data.user);
-    await syncIdentity(); 
-    
-    setLoading(false);
-    return data.user;
-  } catch (err) {
-    setLoading(false);
-    throw err;
-  }
-};
+      const data = await res.json();
+      localStorage.setItem('token', data.token);
+      
+      setUser(data.user);
+      setLoading(false);
+      return data.user;
+    } catch (err) {
+      setLoading(false);
+      throw err;
+    }
+  };
 
-  // Gracefully terminate sessions and mutate network presence states back to false
+  const loginGuest = async () => {
+    setLoading(true);
+    try {
+      const res = await customFetch('/api/auth/guest', { method: 'POST' });
+      
+      if (!res.ok) {
+        throw new Error('Failed to initialize a transient guest worker workspace.');
+      }
+
+      const data = await res.json();
+      localStorage.setItem('token', data.token);
+      
+      setUser(data.user);
+      setLoading(false);
+      return data.user;
+    } catch (err) {
+      setLoading(false);
+      throw err;
+    }
+  };
+
   const logout = async () => {
     setLoading(true);
     try {
@@ -93,13 +99,13 @@ const loginGuest = async () => {
     }
   };
 
-  const value = {
-    user,
-    loading,
-    login,
-    loginGuest,
-    logout,
-    refreshUser: syncIdentity
+  const value = { 
+    user, 
+    loading, 
+    login, 
+    loginGuest, 
+    logout, 
+    refreshUser: syncIdentity 
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

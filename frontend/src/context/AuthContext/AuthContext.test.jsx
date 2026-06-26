@@ -4,11 +4,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { AuthProvider, useAuth } from './AuthContext';
 import * as apiModule from '../../utils/api/api';
 
-// A mock consumer component to test context values
 function TestConsumer() {
   const { user, loading, login, loginGuest, logout } = useAuth();
   
   if (loading) return <div data-testid="auth-loading">Loading...</div>;
+  
   if (!user) {
     return (
       <div>
@@ -18,7 +18,7 @@ function TestConsumer() {
       </div>
     );
   }
-
+  
   return (
     <div>
       <h1 data-testid="welcome-heading">Welcome {user.username}</h1>
@@ -39,19 +39,22 @@ describe('AuthContext Strict Production Suite', () => {
   });
 
   it('authenticates traditional credentials and syncs user identity', async () => {
-    // Intercept customFetch globally and return data matching login route requirements
     const fetchSpy = vi.spyOn(apiModule, 'customFetch').mockImplementation(async (url) => {
       if (url.includes('/api/auth/login')) {
         return {
+          ok: true,
+          status: 200,
           json: async () => ({ token: 'jwt-alpha', user: { username: 'Odin Alpha' } })
         };
       }
       if (url.includes('/api/auth/me')) {
         return {
+          ok: true,
+          status: 200,
           json: async () => ({ username: 'Odin Alpha' })
         };
       }
-      throw new Error('Not found');
+      return { ok: false, status: 404 };
     });
 
     render(
@@ -60,33 +63,40 @@ describe('AuthContext Strict Production Suite', () => {
       </AuthProvider>
     );
 
-    // Initial syncIdentity finishes (no token in localStorage, falls back quickly)
     await waitFor(() => {
       expect(screen.queryByTestId('auth-loading')).not.toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByTestId('login-btn'));
+    fetchSpy.mockClear();
 
+    fireEvent.click(screen.getByTestId('login-btn'));
+    
     await waitFor(() => {
       expect(screen.getByTestId('welcome-heading')).toHaveTextContent('Welcome Odin Alpha');
     });
+
     expect(localStorage.getItem('token')).toBe('jwt-alpha');
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(fetchSpy).not.toHaveBeenCalledWith('/api/auth/me');
   });
 
   it('executes ephemeral recruiter login bypass routes without state leakage', async () => {
-    // Intercept customFetch globally and return data matching guest route requirements
     const fetchSpy = vi.spyOn(apiModule, 'customFetch').mockImplementation(async (url) => {
       if (url.includes('/api/auth/guest')) {
         return {
+          ok: true,
+          status: 201,
           json: async () => ({ token: 'jwt-recruiter', user: { username: 'Recruiter' } })
         };
       }
       if (url.includes('/api/auth/me')) {
         return {
+          ok: true,
+          status: 200,
           json: async () => ({ username: 'Recruiter' })
         };
       }
-      throw new Error('Not found');
+      return { ok: false, status: 404 };
     });
 
     render(
@@ -99,11 +109,17 @@ describe('AuthContext Strict Production Suite', () => {
       expect(screen.queryByTestId('auth-loading')).not.toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByTestId('guest-btn'));
+    fetchSpy.mockClear();
 
+    fireEvent.click(screen.getByTestId('guest-btn'));
+    
     await waitFor(() => {
       expect(screen.getByTestId('welcome-heading')).toHaveTextContent('Welcome Recruiter');
     });
+
     expect(localStorage.getItem('token')).toBe('jwt-recruiter');
+    
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(fetchSpy).not.toHaveBeenCalledWith('/api/auth/me');
   });
 });
