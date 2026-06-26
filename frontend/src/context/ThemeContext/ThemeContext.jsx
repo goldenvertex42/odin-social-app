@@ -7,51 +7,93 @@ const ThemeContext = createContext(null);
 export function ThemeProvider({ children }) {
   const { user, refreshUser } = useAuth();
 
-  // 1. Initialize instantly into a safe default string (No more test suite crashes!)
   const [colorScheme, setColorScheme] = useState(() => {
-    return localStorage.getItem('workspace-color-scheme') || 'light';
+    if (typeof localStorage !== 'undefined') {
+      const userPreferred = localStorage.getItem('workspace-user-preferred-scheme');
+      if (userPreferred) return userPreferred;
+      
+      const cached = localStorage.getItem('workspace-color-scheme');
+      if (cached) return cached;
+    }
+    
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    
+    return 'light';
   });
 
   const [colorPalette, setColorPalette] = useState(() => {
-    const cached = localStorage.getItem('workspace-color-palette');
+    const cached = typeof localStorage !== 'undefined' ? localStorage.getItem('workspace-color-palette') : null;
     const valid = ['default', 'cyberpunk', 'nord', 'sunset', 'obsidian', 'neonmint'];
     return valid.includes(cached) ? cached : 'default';
   });
 
   const [profileOverridePalette, setProfileOverridePalette] = useState(null);
 
-  // 2. Natively handle system-level dark mode detection ONLY in the real browser environment
   useEffect(() => {
-    const cached = localStorage.getItem('workspace-color-scheme');
-    if (!cached && window.matchMedia) {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (prefersDark) setColorScheme('dark');
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    const handleSystemThemeChange = (e) => {
+      const userPreferred = localStorage.getItem('workspace-user-preferred-scheme');
+      if (!userPreferred) {
+        setColorScheme(e.matches ? 'dark' : 'light');
+      }
+    };
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleSystemThemeChange);
+    } else {
+      mediaQuery.addListener(handleSystemThemeChange);
     }
+
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener('change', handleSystemThemeChange);
+      } else {
+        mediaQuery.removeListener(handleSystemThemeChange);
+      }
+    };
   }, []);
 
-  // 3. Keep your existing DOM attribute sync loops exactly the same
   useEffect(() => {
-    document.documentElement.setAttribute('data-color-scheme', colorScheme);
-    localStorage.setItem('workspace-color-scheme', colorScheme);
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-color-scheme', colorScheme);
+    }
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('workspace-color-scheme', colorScheme);
+    }
   }, [colorScheme]);
 
   useEffect(() => {
-    const activePalette = profileOverridePalette || colorPalette;
-    document.documentElement.setAttribute('data-color-palette', activePalette);
+    if (typeof document !== 'undefined') {
+      const activePalette = profileOverridePalette || colorPalette;
+      document.documentElement.setAttribute('data-color-palette', activePalette);
+    }
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('workspace-color-palette', colorPalette);
+    }
   }, [colorPalette, profileOverridePalette]);
 
-  // Sync state changes from logged-in user profile
   useEffect(() => {
     if (user) {
-      if (user.colorScheme) setColorScheme(user.colorScheme);
+      if (user.colorScheme) {
+        setColorScheme(user.colorScheme);
+        localStorage.setItem('workspace-user-preferred-scheme', user.colorScheme);
+      }
       if (user.colorPalette) setColorPalette(user.colorPalette);
     }
   }, [user]);
 
   const updateTheme = async (newScheme, newPalette) => {
-    if (newScheme) setColorScheme(newScheme);
+    if (newScheme) {
+      setColorScheme(newScheme);
+      localStorage.setItem('workspace-user-preferred-scheme', newScheme);
+    }
     if (newPalette) setColorPalette(newPalette);
-
+    
     if (user) {
       try {
         await customFetch('/api/users/profile', {
@@ -73,13 +115,13 @@ export function ThemeProvider({ children }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ 
-      colorScheme, 
-      colorPalette, 
+    <ThemeContext.Provider value={{
+      colorScheme,
+      colorPalette,
       activePalette: profileOverridePalette || colorPalette,
-      updateTheme, 
+      updateTheme,
       toggleColorScheme,
-      setProfileOverridePalette 
+      setProfileOverridePalette
     }}>
       {children}
     </ThemeContext.Provider>
