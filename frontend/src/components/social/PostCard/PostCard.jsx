@@ -5,7 +5,7 @@ import PostActions from './PostActions';
 import CommentThread from '../CommentThread/CommentThread';
 import styles from './PostCard.module.css';
 
-export default function PostCard({ post, currentUserId, onDeleteSuccess }) {
+export default function PostCard({ post, currentUserId, onDeleteSuccess, headingLevel = 'h2' }) {
   const navigate = useNavigate();
   const location = useLocation();
   const isStandaloneView = location.pathname === `/posts/${post.id}`;
@@ -27,7 +27,8 @@ export default function PostCard({ post, currentUserId, onDeleteSuccess }) {
       <PostHeader 
         post={post} 
         currentUserId={currentUserId} 
-        onDeleteSuccess={onDeleteSuccess} 
+        onDeleteSuccess={onDeleteSuccess}
+        headingLevel={headingLevel} 
       />
 
       <div className={styles.cardBody}>
@@ -43,9 +44,9 @@ export default function PostCard({ post, currentUserId, onDeleteSuccess }) {
       />
 
       <section className={styles.commentThreadSection} aria-label="Post replies stream" onClick={(e) => e.stopPropagation()}>
-        <h4 className={styles.commentStreamTitle}>
+        <h3 className={styles.commentStreamTitle}>
           Comments ({post.comments?.length || 0})
-        </h4>
+        </h3>
         <CommentThread 
           postId={post.id} 
           comments={post.comments} 

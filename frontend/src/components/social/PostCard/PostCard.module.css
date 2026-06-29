@@ -19,13 +19,11 @@
   box-shadow: 0 6px 16px var(--shadow-color);
 }
 
-/* Explicit focus indication if tab-navigating the global card component body */
 .clickableCard:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
-/* Fixed: Push items apart horizontally to separate identity metadata from right-side deletion buttons */
 .cardHeader {
   display: flex;
   align-items: center;
@@ -34,23 +32,25 @@
   margin-bottom: var(--spacing-md);
 }
 
-/* Fixed: Re-establish horizontal orientation so name and avatar sit side-by-side */
-.userInfoBlock {
+.authorProfileBlockLink {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-}
-
-.avatarLink {
-  display: block;
-  border-radius: var(--radius-full);
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--radius-sm);
   outline: none;
   transition: outline 0.15s ease;
 }
 
-.avatarLink:focus-visible {
+.authorProfileBlockLink:focus-visible {
   outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  outline-offset: 4px;
+}
+
+.authorProfileBlockLink:hover .authorProfileNameText {
+  text-decoration: underline;
+  color: var(--color-primary);
 }
 
 .authorAvatar {
@@ -59,6 +59,7 @@
   border-radius: var(--radius-full);
   object-fit: cover;
   border: 1px solid var(--border-main);
+  flex-shrink: 0;
 }
 
 .metaText {
@@ -67,24 +68,11 @@
   gap: 2px;
 }
 
-.authorProfileLink {
+.authorProfileNameText {
   font-weight: var(--weight-semibold);
   font-size: var(--font-base);
-  text-decoration: none;
   color: var(--text-main);
-  border-radius: var(--radius-sm);
-  outline: none;
-  transition: color 0.15s ease, outline 0.15s ease;
-}
-
-.authorProfileLink:hover {
-  text-decoration: underline;
-  color: var(--color-primary);
-}
-
-.authorProfileLink:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  transition: color 0.15s ease;
 }
 
 .postTimestamp {
@@ -92,7 +80,6 @@
   color: var(--text-muted);
 }
 
-/* Added: Accessible, structured right-side deletion layout anchor triggers */
 .deleteButton {
   background: transparent;
   border: none;
@@ -143,6 +130,12 @@
   border-radius: var(--radius-sm);
   overflow: hidden;
   border: 1px solid var(--border-main);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.imageWrapper:hover {
+  transform: scale(1.01);
 }
 
 .mediaAsset {

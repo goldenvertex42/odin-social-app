@@ -4,7 +4,7 @@ import { Trash2 } from 'lucide-react';
 import { customFetch } from '../../../utils/api/api';
 import styles from './PostCard.module.css';
 
-export default function PostHeader({ post, currentUserId, onDeleteSuccess }) {
+export default function PostHeader({ post, currentUserId, onDeleteSuccess, headingLevel = 'h2' }) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const targetCurrentUserId = typeof currentUserId === 'object' ? currentUserId?.id : currentUserId;
@@ -13,7 +13,7 @@ export default function PostHeader({ post, currentUserId, onDeleteSuccess }) {
   const isAuthor = String(targetCurrentUserId) === String(postAuthorId);
 
   const handleDeletePost = async (e) => {
-    e.stopPropagation(); // Stop macro card navigation bubbling redirect
+    e.stopPropagation();
     if (isDeleting) return;
 
     setIsDeleting(true);
@@ -29,26 +29,32 @@ export default function PostHeader({ post, currentUserId, onDeleteSuccess }) {
     }
   };
 
+  const Heading = headingLevel;
+  
   return (
-    <header className={styles.cardHeader}>
-      <div className={styles.userInfoBlock}>
-        <Link to={`/users/${postAuthorId}`} onClick={(e) => e.stopPropagation()} className={styles.avatarLink}>
-          <img 
-            src={post.author?.avatarUrl} 
-            alt={`${post.author?.displayName || 'User'}'s profile avatar`} 
-            className={styles.authorAvatar} 
-            referrerPolicy="no-referrer" 
-          />
-        </Link>
+    <div className={styles.cardHeader}>
+      
+      <Link 
+        to={`/users/${postAuthorId}`} 
+        onClick={(e) => e.stopPropagation()} 
+        className={styles.authorProfileBlockLink}
+        aria-label={`View ${post.author?.displayName || post.author?.username || 'User'}'s profile`}
+      >
+        <img 
+          src={post.author?.avatarUrl} 
+          alt="" 
+          className={styles.authorAvatar} 
+          referrerPolicy="no-referrer" 
+        />
         <div className={styles.metaText}>
-          <Link to={`/users/${postAuthorId}`} onClick={(e) => e.stopPropagation()} className={styles.authorProfileLink}>
+          <Heading className={styles.authorProfileNameText}>
             {post.author?.displayName || post.author?.username || 'Unknown User'}
-          </Link>
+          </Heading>
           <time className={styles.postTimestamp} dateTime={post.createdAt}>
             {new Date(post.createdAt).toLocaleString()}
           </time>
         </div>
-      </div>
+      </Link>
 
       {isAuthor && (
         <button
@@ -61,6 +67,6 @@ export default function PostHeader({ post, currentUserId, onDeleteSuccess }) {
           <Trash2 className={styles.trashIcon} size={16} aria-hidden="true" />
         </button>
       )}
-    </header>
+    </div>
   );
 }
