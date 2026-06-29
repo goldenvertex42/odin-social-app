@@ -33,16 +33,17 @@
   color: var(--text-muted);
   gap: 4px;
   outline: none;
-  transition: background-color 0.2s ease, color 0.2s ease, outline 0.2s ease;
+  
+  border-bottom: 4px solid transparent;
+  transition: background-color 0.2s ease, color 0.2s ease, outline 0.2s ease, border-color 0.2s ease;
 }
 
-/* FIXED: Target Lucide SVG elements to guarantee crisp proportions on mobile bars */
 .navIcon {
   width: 18px !important;
   height: 18px !important;
   flex-shrink: 0;
-  stroke-width: 2px; /* Balanced line weight depth */
-  color: currentColor; /* Inherits text states automatically */
+  stroke-width: 2px;
+  color: currentColor;
   transition: transform 0.2s ease;
 }
 
@@ -53,21 +54,23 @@
 .navLink:hover {
   background-color: var(--bg-sidebar-hover);
   color: var(--text-main);
+  border-bottom-color: var(--color-primary);
 }
 
 .navLink:hover .navIcon {
-  transform: scale(1.05); /* Interactive micro-animation */
+  transform: scale(1.05);
 }
 
 .activeLink {
   color: var(--text-main);
   background-color: var(--bg-sidebar-hover);
   font-weight: var(--weight-semibold);
+  border-bottom-color: var(--color-primary);
 }
 
 .activeLink .navIcon {
-  color: var(--text-main); /* Highlights active link vector path color fields */
-  stroke-width: 2.5px; /* Bolsters border weights on active selections */
+  color: var(--text-main);
+  stroke-width: 2.5px;
 }
 
 .navLink:focus-visible {
@@ -76,8 +79,8 @@
   background-color: var(--bg-sidebar-hover);
 }
 
-/* ==========================================================================
-   DESKTOP ADAPTIVE VIEWPORT OVERRIDES (Vertical Drawer Layouts)
+/* ========================================================================== 
+   DESKTOP ADAPTIVE VIEWPORT OVERRIDES (Vertical Drawer Layouts) 
    ========================================================================== */
 @media (min-width: 769px) {
   .sidebarContainer {
@@ -103,10 +106,21 @@
     border-radius: var(--radius-sm);
     font-size: var(--font-sm);
     gap: var(--spacing-md);
+    
+    border-bottom: none;
+    border-left: 4px solid transparent;
   }
 
   .navIcon {
     width: 20px !important;
-    height: 20px !important; /* Marginally widened scale for desktop context spacing layout rows */
+    height: 20px !important;
+  }
+
+  .navLink:hover {
+    border-left-color: var(--color-primary);
+  }
+
+  .activeLink {
+    border-left-color: var(--color-primary);
   }
 }
