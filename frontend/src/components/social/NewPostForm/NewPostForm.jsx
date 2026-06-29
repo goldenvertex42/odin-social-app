@@ -67,13 +67,18 @@ export default function NewPostForm({ onPostCreated }) {
 
   return (
     <form onSubmit={handleSubmit} className={styles.formContainer} data-testid="new-post-form">
-      <textarea 
-        value={content} 
-        onChange={(e) => setContent(e.target.value)} 
-        placeholder="What's on your mind?" 
-        className={styles.textarea} 
-        maxLength={280} 
-        data-testid="new-post-input" 
+      <label htmlFor="main-post-content" className={styles.visuallyHidden}>
+        What's on your mind? Write a new community post
+      </label>
+
+      <textarea
+        id="main-post-content"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        placeholder="What's on your mind?"
+        className={styles.textarea}
+        data-testid="new-post-input"
+        rows={3}
       />
 
       {imagePreview && (
@@ -92,19 +97,21 @@ export default function NewPostForm({ onPostCreated }) {
       )}
 
       <div className={styles.actionBar}>
-        <label className={styles.uploadLabel} data-testid="upload-label">
+        <label htmlFor="post-image-upload" className={styles.uploadLabel} data-testid="upload-label">
           <Image className={styles.cameraIcon} size={16} aria-hidden="true" />
           <span className={styles.uploadLabelText}>Add Image</span>
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleImageChange} 
-            accept="image/*" 
-            className={styles.fileInput} 
-            data-testid="image-file-input" 
-          />
         </label>
         
+        <input 
+          type="file" 
+          id="post-image-upload"
+          ref={fileInputRef} 
+          onChange={handleImageChange} 
+          accept="image/*" 
+          className={styles.fileInput} 
+          data-testid="image-file-input" 
+        />
+
         <button 
           type="submit" 
           className={styles.submitBtn} 
