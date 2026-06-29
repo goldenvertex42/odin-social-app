@@ -1,45 +1,36 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router';
-import { customFetch } from '../../../utils/api/api';
+import { useRelationship } from '../../../hooks/useRelationship/useRelationship';
 import styles from './FollowCard.module.css';
 import { UserPlus, UserCheck, UserX, UserMinus } from 'lucide-react';
 
 export default function FollowCard({ member, initialStatus, onStatusChange }) {
-  const [status, setStatus] = useState(initialStatus || member.followStatus || 'NOT_FOLLOWING');
-  const [isProcessing, setIsProcessing] = useState(false);
+  const defaultStatus = initialStatus || member.followStatus || 'NOT_FOLLOWING';
+
+  const {
+    relationship,
+    setRelationship,
+    isProcessing,
+    executeRelationshipAction
+  } = useRelationship(member.id, defaultStatus);
 
   useEffect(() => {
-    if (initialStatus) {
-      setStatus(initialStatus);
-    } else if (member.followStatus) {
-      setStatus(member.followStatus);
-    }
-  }, [initialStatus, member.followStatus]);
+    setRelationship(defaultStatus);
+  }, [initialStatus, member.followStatus, setRelationship, defaultStatus]);
 
-  const handleNetworkAction = async (method, endpoint, nextStatus) => {
-    if (isProcessing) return;
-    try {
-      setIsProcessing(true);
-      const response = await customFetch(endpoint, { method });
-      if (!response.ok) throw new Error('Network transaction rejected.');
-      
-      setStatus(nextStatus);
-      if (onStatusChange) {
-        onStatusChange(member.id, nextStatus);
-      }
-    } catch (err) {
-      alert(`Action failed: ${err.message}`);
-    } finally {
-      setIsProcessing(false);
+  const handleAction = async (method, nextStatus) => {
+    const success = await executeRelationshipAction(method, nextStatus);
+    if (success && onStatusChange) {
+      onStatusChange(member.id, nextStatus);
     }
   };
 
   const renderActionControl = () => {
-    switch (status) {
+    switch (relationship) {
       case 'NOT_FOLLOWING':
         return (
-          <button 
-            onClick={() => handleNetworkAction('POST', `/api/users/${member.id}/follow`, 'REQUEST_SENT')} 
+          <button
+            onClick={() => handleAction('POST', 'REQUEST_SENT')}
             disabled={isProcessing}
             className={`${styles.actionBtn} ${styles.connectBtn}`}
             data-testid="follow-btn"
@@ -50,8 +41,8 @@ export default function FollowCard({ member, initialStatus, onStatusChange }) {
         );
       case 'REQUEST_SENT':
         return (
-          <button 
-            onClick={() => handleNetworkAction('DELETE', `/api/users/${member.id}/cancel`, 'NOT_FOLLOWING')} 
+          <button
+            onClick={() => handleAction('DELETE', 'NOT_FOLLOWING')}
             disabled={isProcessing}
             className={`${styles.actionBtn} ${styles.cancelBtn}`}
             data-testid="cancel-request-btn"
@@ -63,8 +54,8 @@ export default function FollowCard({ member, initialStatus, onStatusChange }) {
       case 'REQUEST_RECEIVED':
         return (
           <div className={styles.btnGroup}>
-            <button 
-              onClick={() => handleNetworkAction('PATCH', `/api/users/${member.id}/accept`, 'FOLLOWING')} 
+            <button
+              onClick={() => handleAction('PATCH', 'FOLLOWING')}
               disabled={isProcessing}
               className={`${styles.actionBtn} ${styles.acceptBtn}`}
               data-testid="accept-btn"
@@ -72,8 +63,8 @@ export default function FollowCard({ member, initialStatus, onStatusChange }) {
               <UserCheck className={styles.btnIcon} aria-hidden="true" size={16} />
               <span className={styles.btnText}>Accept</span>
             </button>
-            <button 
-              onClick={() => handleNetworkAction('DELETE', `/api/users/${member.id}/cancel`, 'NOT_FOLLOWING')} 
+            <button
+              onClick={() => handleAction('DELETE', 'NOT_FOLLOWING')}
               disabled={isProcessing}
               className={`${styles.actionBtn} ${styles.rejectBtn}`}
               data-testid="reject-btn"
@@ -85,8 +76,8 @@ export default function FollowCard({ member, initialStatus, onStatusChange }) {
         );
       case 'FOLLOWING':
         return (
-          <button 
-            onClick={() => handleNetworkAction('DELETE', `/api/users/${member.id}/cancel`, 'NOT_FOLLOWING')} 
+          <button
+            onClick={() => handleAction('DELETE', 'NOT_FOLLOWING')}
             disabled={isProcessing}
             className={`${styles.actionBtn} ${styles.disconnectBtn}`}
             data-testid="unfollow-btn"
@@ -102,21 +93,27 @@ export default function FollowCard({ member, initialStatus, onStatusChange }) {
 
   return (
     <div className={styles.card} data-testid={`follow-card-${member.id}`}>
-      <Link to={`/users/${member.id}`} className={styles.avatarLink}>
-        <img 
-          src={member.avatarUrl} 
-          alt={`${member.displayName || member.username}'s avatar`} 
+      
+      <Link 
+        to={`/users/${member.id}`} 
+        className={styles.profileLinkBlock}
+        aria-label={`View ${member.displayName || member.username}'s profile configuration`}
+      >
+        <img
+          src={member.avatarUrl}
+          alt="" 
           className={styles.avatar}
-          referrerPolicy="no-referrer" 
+          referrerPolicy="no-referrer"
         />
+        <div className={styles.info}>
+          <h3 className={styles.displayName}>
+            {member.displayName || member.username}
+          </h3>
+          <p className={styles.username}>@{member.username}</p>
+          {member.bio && <p className={styles.bio}>{member.bio}</p>}
+        </div>
       </Link>
-      <div className={styles.info}>
-        <Link to={`/users/${member.id}`} className={styles.profileLink}>
-          <h3 className={styles.displayName}>{member.displayName || member.username}</h3>
-        </Link>
-        <p className={styles.username}>@{member.username}</p>
-        {member.bio && <p className={styles.bio}>{member.bio}</p>}
-      </div>
+
       <div className={styles.actions}>
         {renderActionControl()}
       </div>

@@ -12,15 +12,28 @@
   box-shadow: 0 4px 12px var(--shadow-color);
 }
 
-.avatarLink {
-  display: block;
-  cursor: pointer;
-  border-radius: var(--radius-full);
+.profileLinkBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--spacing-xs);
+  text-decoration: none;
+  color: inherit;
+  width: 100%;
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: outline 0.15s ease;
 }
 
-.avatarLink:focus-visible {
+.profileLinkBlock:focus-visible {
   outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  outline-offset: 4px;
+}
+
+.profileLinkBlock:hover .displayName {
+  color: var(--color-primary);
+  text-decoration: underline;
 }
 
 .avatar {
@@ -29,6 +42,12 @@
   border-radius: var(--radius-full);
   object-fit: cover;
   background-color: var(--bg-app);
+  margin-bottom: var(--spacing-xs);
+  transition: transform 0.2s ease;
+}
+
+.profileLinkBlock:hover .avatar {
+  transform: scale(1.02);
 }
 
 .info {
@@ -36,22 +55,6 @@
   flex-direction: column;
   gap: 4px;
   width: 100%;
-}
-
-.profileLink {
-  text-decoration: none;
-  color: inherit;
-  border-radius: var(--radius-sm);
-  display: inline-block;
-}
-
-.profileLink:focus-visible {
-  outline: 2px solid var(--color-primary);
-}
-
-.profileLink:hover .displayName {
-  color: var(--color-primary);
-  text-decoration: underline;
 }
 
 .displayName {
@@ -90,7 +93,6 @@
   width: 100%;
 }
 
-/* Aligned: Flex grid controls centering internal text blocks and SVG tracks perfectly */
 .actionBtn {
   width: 100%;
   padding: var(--spacing-xs);
@@ -116,7 +118,6 @@
   outline-offset: 2px;
 }
 
-/* Aligned: Fluid scaling constraints applied explicitly for modern layout engines */
 .btnIcon {
   flex-shrink: 0;
   display: inline-block;
