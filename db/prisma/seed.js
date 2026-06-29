@@ -39,24 +39,22 @@ async function main() {
   });
   users.push(devUser);
 
-  // Create the single, official recruiter guest account
   const guestUser = await prisma.user.create({
     data: {
-      email: 'recruiter@socialsphere.com',
-      username: 'recruiter_guest',
-      displayName: 'Hiring Manager Guest',
+      email: 'visitor@socialsphere.com',
+      username: 'visitor1',
+      displayName: `Visitor`,
       passwordHash: '$2b$10$2TC9RtF/OEaleV7xnxZ75uqxwfQ3HPr.FLbS4MgT3S6Lk7YwzXybe', 
       avatarUrl: `https://gravatar.com/avatar/${faker.string.uuid()}?d=mp&s=150`,
       bio: 'Explore mode activated. Previewing system architecture and decoupled state machines.',
       colorPalette: 'default',
       colorScheme: 'light',
       isOnline: true,
-      isGuest: true, // Controlled singular guest access target node
+      isGuest: true,
     },
   });
   users.push(guestUser);
 
-  // Generate remaining platform users as standard, active contributors
   for (let i = 0; i < usersCount - 2; i++) {
     const email = faker.internet.email();
     const gravatarUrl = `https://gravatar.com/avatar/${faker.string.uuid()}?d=mp&s=150`;
@@ -75,7 +73,7 @@ async function main() {
         colorPalette: faker.helpers.arrayElement(paletteOptions),
         colorScheme: faker.helpers.arrayElement(schemeOptions),
         isOnline: faker.datatype.boolean(0.3),
-        isGuest: false, // Fixed: Forced to false to prevent unpopulated ghost accounts
+        isGuest: false,
       },
     });
     users.push(user);
