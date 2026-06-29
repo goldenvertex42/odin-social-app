@@ -12,7 +12,7 @@ export default function Header() {
       <div className={styles.brandingBlock}>
         <Link to="/feed" className={styles.logoLink}>
           <Globe className={styles.logoIcon} aria-hidden="true" size={24} />
-          <span className={styles.logoText}>SocialSphere</span>
+          <h1 className={styles.logoText}>SocialSphere</h1>
         </Link>
       </div>
       
