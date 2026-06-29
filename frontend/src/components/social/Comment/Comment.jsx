@@ -33,7 +33,7 @@ export default function Comment({ comment, currentUserId, postOwnerId, onDeleteS
 
   return (
     <div className={styles.commentContainer} data-testid="comment-node">
-      <header className={styles.commentHeader}>
+      <div className={styles.commentHeader}>
         <div className={styles.userInfoBlock}>
           <img 
             src={comment.author?.avatarUrl} 
@@ -62,7 +62,7 @@ export default function Comment({ comment, currentUserId, postOwnerId, onDeleteS
             <Trash2 className={styles.trashIcon} size={14} aria-hidden="true" />
           </button>
         )}
-      </header>
+      </div>
       
       <div className={styles.commentBody}>
         <p className={styles.contentParagraph}>{comment.content}</p>
