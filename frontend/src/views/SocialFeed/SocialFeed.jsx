@@ -76,7 +76,7 @@ export default function SocialFeed() {
     <div className={styles.feedContainer}>
       <NewPostForm onPostCreated={handlePostCreated} />
 
-      <main className={styles.feedList} data-testid="feed-list">
+      <div className={styles.feedList} data-testid="feed-list">
         {posts.length === 0 ? (
           <p className={styles.emptyMessage} data-testid="empty-message">
             No posts to display. Follow others to populate your feed!
@@ -86,7 +86,7 @@ export default function SocialFeed() {
             <PostCard key={post.id} post={post} currentUserId={currentUser?.id} onDeleteSuccess={handlePostDeleted} />
           ))
         )}
-      </main>
+      </div>
     </div>
   );
 }
