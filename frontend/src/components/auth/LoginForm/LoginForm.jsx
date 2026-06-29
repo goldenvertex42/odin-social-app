@@ -48,15 +48,15 @@ export default function LoginForm() {
   };
 
   return (
-    <div className={styles.wrapper}>
+    <main className={styles.wrapper}>
       <form className={styles.form} onSubmit={handleSubmit}>
-        <h2 className={styles.title}>Sign in to your account</h2>
+        <h1 className={styles.title}>Sign in to your account</h1>
         
         {localError && <div className={styles.errorBanner} role="alert">{localError}</div>}
 
         <div className={styles.formGroup}>
           <label htmlFor="email" className={styles.label}>Email Address</label>
-          <input id="email" type="email" name="email" required disabled={loading} value={formData.email} onChange={handleChange} className={styles.input} />
+          <input id="email" type="email" name="email" required disabled={loading} value={formData.email} onChange={handleChange} className={styles.input} autoComplete='email'/>
         </div>
 
         <div className={styles.formGroup}>
@@ -91,6 +91,6 @@ export default function LoginForm() {
           Don't have an account? <Link to="/register" className={styles.link}>Sign Up</Link>
         </p>
       </form>
-    </div>
+    </main>
   );
 }

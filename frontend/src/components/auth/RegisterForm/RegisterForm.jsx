@@ -47,9 +47,9 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className={styles.wrapper}>
+    <main className={styles.wrapper}>
       <form className={styles.form} onSubmit={handleSubmit}>
-        <h2 className={styles.title}>Create your account</h2>
+        <h1 className={styles.title}>Create your account</h1>
         
         {localError && <div className={styles.errorBanner} role="alert">{localError}</div>}
         
@@ -135,6 +135,6 @@ export default function RegisterForm() {
           Already have an account? <Link to="/login" className={styles.link}>Sign In</Link>
         </p>
       </form>
-    </div>
+    </main>
   );
 }
