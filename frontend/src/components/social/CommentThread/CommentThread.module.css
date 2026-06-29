@@ -6,7 +6,7 @@
   box-sizing: border-box;
 }
 
-.commentListGrid {
+.commentList {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
