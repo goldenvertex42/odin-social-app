@@ -195,6 +195,26 @@
   color: var(--color-error);
 }
 
+.imageWrapper {
+  cursor: pointer;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: fit-content;
+  height: fit-content;
+}
+
+.imageWrapper:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.imageWrapper:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
+}
+
+
 /* ==========================================================================
    3. DESKTOP ADAPTIVE VIEWPORT OVERRIDES
    ========================================================================== */

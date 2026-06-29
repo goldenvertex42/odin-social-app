@@ -1,22 +1,28 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router';
+import { useParams } from 'react-router';
 import { useAuth } from '../../context/AuthContext/AuthContext';
 import { useTheme } from '../../context/ThemeContext/ThemeContext';
+import { useRelationship } from '../../hooks/useRelationship/useRelationship';
 import { customFetch } from '../../utils/api/api';
 import PostCard from '../../components/social/PostCard/PostCard';
+import ProfileHeader from './ProfileHeader';
 import styles from './ProfileView.module.css';
-import { Settings, UserPlus, UserCheck, UserX, UserMinus } from 'lucide-react';
 
 export default function ProfileView() {
   const { id: profileId } = useParams();
   const { user: currentUser } = useAuth();
   const { setProfileOverridePalette } = useTheme();
 
+  const {
+    relationship,
+    setRelationship,
+    isProcessing,
+    executeRelationshipAction
+  } = useRelationship(profileId, 'NOT_FOLLOWING');
+
   const [profileData, setProfileData] = useState(null);
   const [posts, setPosts] = useState([]);
-  const [relationship, setRelationship] = useState('NOT_FOLLOWING');
   const [loading, setLoading] = useState(true);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
 
   const isSelf = currentUser?.id === profileId;
@@ -36,10 +42,12 @@ export default function ProfileView() {
   const fetchProfileAndPosts = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
       const userRes = await customFetch(`/api/users/${profileId}`);
       if (!userRes.ok) throw new Error('Could not resolve profile information.');
-      
       const userData = await userRes.json();
+      
       setProfileData(userData);
       setRelationship(userData.relationshipStatus || 'NOT_FOLLOWING');
 
@@ -58,99 +66,12 @@ export default function ProfileView() {
     }
   };
 
-  const handleNetworkAction = async (method, endpoint, nextStatus) => {
-    if (isProcessing) return;
-    try {
-      setIsProcessing(true);
-      const response = await customFetch(endpoint, { method });
-      if (!response.ok) throw new Error('Transaction rejected.');
-      setRelationship(nextStatus);
-    } catch (err) {
-      alert(`Action failed: ${err.message}`);
-    } finally {
-      setIsProcessing(false);
-    }
+  const handleAction = (method, nextStatus) => {
+    executeRelationshipAction(method, nextStatus);
   };
 
   const handlePostDeleted = (deletedPostId) => {
     setPosts(prevPosts => prevPosts.filter(post => post.id !== deletedPostId));
-  };
-
-  const renderConnectionButton = () => {
-    if (isSelf) {
-      return (
-        <Link 
-          to="/settings" 
-          className={`${styles.actionBtn} ${styles.editProfileBtn}`} 
-          data-testid="edit-profile-navigation-btn"
-        >
-          <Settings className={styles.btnIcon} aria-hidden="true" size={16} />
-          <span className={styles.btnText}>Edit Profile</span>
-        </Link>
-      );
-    }
-
-    switch (relationship) {
-      case 'NOT_FOLLOWING':
-        return (
-          <button 
-            onClick={() => handleNetworkAction('POST', `/api/users/${profileId}/follow`, 'REQUEST_SENT')} 
-            disabled={isProcessing} 
-            className={`${styles.actionBtn} ${styles.connectBtn}`} 
-            data-testid="profile-connect-btn"
-          >
-            <UserPlus className={styles.btnIcon} aria-hidden="true" size={16} />
-            <span className={styles.btnText}>{isProcessing ? 'Connecting...' : 'Connect'}</span>
-          </button>
-        );
-      case 'REQUEST_SENT':
-        return (
-          <button 
-            onClick={() => handleNetworkAction('DELETE', `/api/users/${profileId}/cancel`, 'NOT_FOLLOWING')} 
-            disabled={isProcessing} 
-            className={`${styles.actionBtn} ${styles.cancelBtn}`} 
-            data-testid="profile-cancel-btn"
-          >
-            <UserX className={styles.btnIcon} aria-hidden="true" size={16} />
-            <span className={styles.btnText}>{isProcessing ? 'Canceling...' : 'Cancel Request'}</span>
-          </button>
-        );
-      case 'REQUEST_RECEIVED':
-        return (
-          <div className={styles.btnGroup}>
-            <button 
-              onClick={() => handleNetworkAction('PATCH', `/api/users/${profileId}/accept`, 'FOLLOWING')} 
-              disabled={isProcessing} 
-              className={`${styles.actionBtn} ${styles.acceptBtn}`} 
-              data-testid="profile-accept-btn"
-            >
-              <UserCheck className={styles.btnIcon} aria-hidden="true" size={16} />
-              <span className={styles.btnText}>Accept</span>
-            </button>
-            <button 
-              onClick={() => handleNetworkAction('DELETE', `/api/users/${profileId}/cancel`, 'NOT_FOLLOWING')} 
-              disabled={isProcessing} 
-              className={`${styles.actionBtn} ${styles.rejectBtn}`}
-            >
-              Ignore
-            </button>
-          </div>
-        );
-      case 'FOLLOWING':
-        return (
-          <button 
-            onClick={() => handleNetworkAction('DELETE', `/api/users/${profileId}/cancel`, 'NOT_FOLLOWING')} 
-            disabled={isProcessing} 
-            className={`${styles.actionBtn} ${styles.disconnectBtn}`} 
-            data-testid="profile-unfollow-btn"
-          >
-            <UserMinus className={styles.btnIcon} aria-hidden="true" size={16} />
-            <span className={styles.btnText}>{isProcessing ? 'Disconnecting...' : 'Disconnect'}</span>
-          </button>
-        );
-      default:
-        return null;
-    }
   };
 
   if (loading) return <div className={styles.centeredState}>Loading member timeline...</div>;
@@ -158,18 +79,15 @@ export default function ProfileView() {
 
   return (
     <div className={styles.profileContainer} data-testid="profile-view-canvas">
-      <header className={styles.profileHeader} data-testid="profile-header">
-        <img src={profileData?.avatarUrl} alt="" className={styles.avatarBig} referrerPolicy="no-referrer" />
-        <div className={styles.headerDetails}>
-          <h1 className={styles.displayName}>{profileData?.displayName || profileData?.username}</h1>
-          <p className={styles.username}>@{profileData?.username}</p>
-          {profileData?.bio && <p className={styles.bioText}>{profileData.bio}</p>}
-        </div>
-        <div className={styles.headerActions}>
-          {renderConnectionButton()}
-        </div>
-      </header>
-      <main className={styles.timelineSection}>
+      <ProfileHeader 
+        profileData={profileData}
+        isSelf={isSelf}
+        relationship={relationship}
+        isProcessing={isProcessing}
+        onAction={handleAction}
+      />
+
+      <div className={styles.timelineSection}>
         <h2 className={styles.timelineHeading}>Recent Activity</h2>
         {posts.length === 0 ? (
           <p className={styles.emptyTimeline}>No posts published yet by this user.</p>
@@ -181,11 +99,12 @@ export default function ProfileView() {
                 post={post} 
                 currentUserId={currentUser?.id} 
                 onDeleteSuccess={handlePostDeleted}
+                headingLevel='h3' 
               />
             ))}
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }
