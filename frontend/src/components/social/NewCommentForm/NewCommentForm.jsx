@@ -36,24 +36,27 @@ export default function NewCommentForm({ postId, onCommentCreated }) {
 
   return (
     <form onSubmit={handleSubmit} className={styles.formContainer} data-testid="new-comment-form">
-      <input
-        type="text"
+      <label htmlFor={`comment-input-${postId}`} className={styles.visuallyHidden}>
+        Write a response to this post
+      </label>
+
+      <textarea
+        id={`comment-input-${postId}`}
         value={content}
         onChange={(e) => setContent(e.target.value)}
         placeholder="Write a comment..."
         className={styles.commentInput}
-        maxLength={140}
+        data-testid="new-comment-input"
         required
-        disabled={isSubmitting}
-        data-testid="comment-input"
       />
-      <button
-        type="submit"
+
+      <button 
+        type="submit" 
+        disabled={isSubmitting || !content.trim()} 
         className={styles.submitBtn}
-        disabled={isSubmitting || !content.trim()}
-        data-testid="comment-submit"
+        data-testid="comment-submit-btn"
       >
-        {isSubmitting ? 'Posting...' : 'Reply'}
+        {isSubmitting ? 'Replying...' : 'Reply'}
       </button>
     </form>
   );
