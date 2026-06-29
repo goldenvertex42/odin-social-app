@@ -46,20 +46,20 @@ export default function PostView() {
 
   return (
     <div className={styles.pageContainer} data-testid="post-view-canvas">
-      <header className={styles.pageHeader}>
+      <div className={styles.pageHeader}>
         <Link to="/feed" className={styles.backLink}>
           <span className={styles.backIcon}>←</span> Back to Home Feed
         </Link>
-      </header>
+      </div>
 
-      <main className={styles.mainContent}>
+      <div className={styles.mainContent}>
         {post && (
           <PostCard 
             post={post} 
             currentUserId={currentUser?.id} 
           />
         )}
-      </main>
+      </div>
     </div>
   );
 }
