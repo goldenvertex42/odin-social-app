@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import { customFetch } from '../../utils/api/api';
 import { useAuth } from '../../context/AuthContext/AuthContext';
 import { useTheme } from '../../context/ThemeContext/ThemeContext';
 
@@ -7,6 +8,7 @@ import { useTheme } from '../../context/ThemeContext/ThemeContext';
 import AvatarUpload from '../../components/profile/AvatarUpload/AvatarUpload';
 import ThemePreview from '../../components/profile/ThemePreview/ThemePreview';
 import PasswordUpdate from '../../components/profile/PasswordUpdate/PasswordUpdate';
+import DeleteAccountSection from './DeleteAccountSection';
 import styles from './ProfileEditView.module.css';
 
 export default function ProfileEdit() {
@@ -90,9 +92,8 @@ export default function ProfileEdit() {
         formData.append('newPassword', passwordState.newPassword);
       }
 
-      const response = await fetch('/api/users/profile', {
+      const response = await customFetch('/api/users/profile', {
         method: 'PUT',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: formData
       });
 
@@ -119,8 +120,8 @@ export default function ProfileEdit() {
 
   return (
     <div className={styles.editPageContainer} data-testid="profile-edit-canvas">
-      <h1 className={styles.pageTitle}>Account Settings</h1>
-
+      <h2 className={styles.pageTitle}>Account Settings</h2>
+      
       {statusMessage.text && (
         <div className={`${styles.statusAlert} ${statusMessage.type === 'error' ? styles.errorAlert : styles.successAlert}`}>
           {statusMessage.text}
@@ -128,47 +129,23 @@ export default function ProfileEdit() {
       )}
 
       <form onSubmit={handleFormSubmit}>
-        <AvatarUpload 
-          initialAvatar={user?.avatarUrl} 
-          onFileSelected={setAvatarFile} 
-        />
+        <AvatarUpload initialAvatar={user?.avatarUrl} onFileSelected={setAvatarFile} />
 
         <section className={styles.formSection}>
           <h2 className={styles.sectionHeading}>Basic Information</h2>
           <div className={styles.inputGroup}>
             <label htmlFor="displayName" className={styles.fieldLabel}>Display Name</label>
-            <input
-              id="displayName"
-              type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              className={styles.textField}
-              required
-            />
+            <input id="displayName" type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className={styles.textField} required />
           </div>
           <div className={styles.inputGroup}>
             <label htmlFor="bio" className={styles.fieldLabel}>Bio</label>
-            <textarea
-              id="bio"
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              className={styles.textareaField}
-              maxLength={160}
-            />
+            <textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} className={styles.textareaField} maxLength={160} />
           </div>
         </section>
 
-        <ThemePreview 
-          scheme={selectedScheme}
-          palette={selectedPalette}
-          onSchemeChange={setSelectedScheme}
-          onPaletteChange={setSelectedPalette}
-        />
-
-        <PasswordUpdate 
-          values={passwordState}
-          onChange={handlePasswordChange}
-        />
+        <ThemePreview scheme={selectedScheme} palette={selectedPalette} onSchemeChange={setSelectedScheme} onPaletteChange={setSelectedPalette} />
+        
+        <PasswordUpdate values={passwordState} onChange={handlePasswordChange} />
 
         <footer className={styles.formActionFooter}>
           <button type="button" onClick={handleCancel} disabled={isSubmitting} className={styles.cancelBtn}>Cancel</button>
@@ -177,6 +154,8 @@ export default function ProfileEdit() {
           </button>
         </footer>
       </form>
+
+      <DeleteAccountSection isGuest={user?.isGuest}/>
     </div>
   );
 }
