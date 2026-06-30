@@ -11,7 +11,6 @@ export const createComment = async (req, res, next) => {
       return res.status(400).json({ message: 'Comment content cannot be empty.' });
     }
 
-    // Verify the target post exists before attempting insertion
     const targetPost = await prisma.post.findUnique({
       where: { id: postId }
     });
@@ -52,7 +51,7 @@ export const getPostComments = async (req, res, next) => {
     const comments = await prisma.comment.findMany({
       where: { postId: postId },
       orderBy: { 
-        createdAt: 'asc' // Threaded discussions read chronologically forward 
+        createdAt: 'asc'
       },
       include: {
         author: {
@@ -86,7 +85,6 @@ export const updateComment = async (req, res, next) => {
       return res.status(400).json({ message: 'Comment content cannot be empty.' });
     }
 
-    // Find the comment and check ownership
     const comment = await prisma.comment.findUnique({
       where: { id: commentId }
     });

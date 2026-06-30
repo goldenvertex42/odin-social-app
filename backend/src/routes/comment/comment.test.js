@@ -9,7 +9,6 @@ describe('Comment Threading Integration Tests', () => {
   beforeEach(async () => {
     await clearDatabase();
     
-    // 1. Seed active viewer record
     activeUser = await prisma.user.create({
       data: { 
         email: 'commenter@odin.local', 
@@ -22,7 +21,6 @@ describe('Comment Threading Integration Tests', () => {
     });
     userToken = generateTestToken(activeUser.id);
 
-    // 2. Seed a post to attach comment vectors against
     targetPost = await prisma.post.create({
       data: { 
         content: 'Original thread anchor post.', 
@@ -38,7 +36,6 @@ describe('Comment Threading Integration Tests', () => {
 
   describe('POST /api/comments/post/:postId - Creation Pipeline', () => {
     it('should cleanly insert a comment when string payloads are valid', async () => {
-      // FIXED: Adjusted to target your exact backend route registry path
       const res = await request(app)
         .post(`/api/comments/post/${targetPost.id}`)
         .set('Authorization', `Bearer ${userToken}`)
@@ -50,7 +47,6 @@ describe('Comment Threading Integration Tests', () => {
     });
 
     it('should block execution with a 400 error if content is empty space strings', async () => {
-      // FIXED: Adjusted to target your exact backend route registry path
       const res = await request(app)
         .post(`/api/comments/post/${targetPost.id}`)
         .set('Authorization', `Bearer ${userToken}`)
@@ -61,7 +57,6 @@ describe('Comment Threading Integration Tests', () => {
     });
 
     it('should return a 404 if the containing post does not exist', async () => {
-      // FIXED: Adjusted to target your exact backend route registry path
       const res = await request(app)
         .post('/api/comments/post/non-existent-uuid-string')
         .set('Authorization', `Bearer ${userToken}`)
@@ -73,17 +68,14 @@ describe('Comment Threading Integration Tests', () => {
 
   describe('GET /api/comments/post/:postId - Chronological Thread Reader', () => {
     it('should fetch comments for a post in ascending forward-chronological order', async () => {
-      // Seed first comment entry
       await prisma.comment.create({
         data: { content: 'First reply.', postId: targetPost.id, authorId: activeUser.id, createdAt: new Date(Date.now() - 10000) }
       });
 
-      // Seed second comment entry
       await prisma.comment.create({
         data: { content: 'Second follow-up response.', postId: targetPost.id, authorId: activeUser.id, createdAt: new Date() }
       });
 
-      // FIXED: Adjusted to target your exact backend route registry path
       const res = await request(app)
         .get(`/api/comments/post/${targetPost.id}`)
         .set('Authorization', `Bearer ${userToken}`);
@@ -92,12 +84,10 @@ describe('Comment Threading Integration Tests', () => {
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(2);
 
-      // Assure forward-reading order for threaded chats (oldest first)
       expect(res.body[0].content).toBe('First reply.');
       expect(res.body[1].content).toBe('Second follow-up response.');
       expect(res.body[0]).toHaveProperty('author');
       
-      // FIXED: Replaced legacy _count lookup with your optimized pre-loaded likes array verification
       expect(res.body[0]).toHaveProperty('likes');
     });
   });

@@ -9,7 +9,6 @@ import {
 const router = Router();
 const requireAuth = passport.authenticate('jwt', { session: false });
 
-// Match standard REST syntax patterns
 router.get('/post/:postId', requireAuth, getPostComments);
 router.post('/post/:postId', requireAuth, createComment);
 

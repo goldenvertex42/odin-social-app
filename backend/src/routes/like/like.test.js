@@ -49,7 +49,6 @@ describe('Engagement Toggle Integration Tests', () => {
         .post(`/api/likes/post/${testPost.id}`)
         .set('Authorization', `Bearer ${userToken}`);
 
-      // Handle both 201 status envelopes or direct 200 array footprint returns safely
       expect([200, 201]).toContain(res.statusCode);
       
       const dbCheck = await prisma.postLike.findUnique({
@@ -59,7 +58,6 @@ describe('Engagement Toggle Integration Tests', () => {
     });
 
     it('should destroy an existing PostLike record if toggled twice (Unlike)', async () => {
-      // Establish an existing like row beforehand
       await prisma.postLike.create({
         data: { postId: testPost.id, userId: activeUser.id }
       });
@@ -79,14 +77,12 @@ describe('Engagement Toggle Integration Tests', () => {
 
   describe('POST /api/likes/comment/:commentId', () => {
     it('should successfully cycle a CommentLike lifecycle when clicked', async () => {
-      // First click: Like comment
       const likeRes = await request(app)
         .post(`/api/likes/comment/${testComment.id}`)
         .set('Authorization', `Bearer ${userToken}`);
 
       expect([200, 201]).toContain(likeRes.statusCode);
 
-      // Second click: Unlike comment
       const unlikeRes = await request(app)
         .post(`/api/likes/comment/${testComment.id}`)
         .set('Authorization', `Bearer ${userToken}`);

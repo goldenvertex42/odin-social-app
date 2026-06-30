@@ -18,7 +18,6 @@ const streamPostImageToCloudinary = (fileBuffer) => {
   });
 };
 
-// Extract Cloudinary Public ID utility for safe asset clearing
 const getCloudinaryPublicId = (url) => {
   if (!url) return null;
   
@@ -27,12 +26,10 @@ const getCloudinaryPublicId = (url) => {
     const filePart = parts[parts.length - 1].split('.')[0];
     const folderPart = parts[parts.length - 2];
 
-    // If the image is housed in one of your two active folder namespaces, prepend it
     if (folderPart === 'odin_social_avatars' || folderPart === 'odin_social_post_images') {
       return `${folderPart}/${filePart}`;
     }
 
-    // Standard fallback loop for root-level assets
     return filePart;
   } catch (error) {
     console.error('Failed to parse Cloudinary public_id out of resource URL payload:', error);
@@ -46,11 +43,10 @@ export const getSocialFeed = async (req, res, next) => {
   try {
     const currentUserId = req.user.id;
 
-    // Discover who the current session user is actively tracking using the new alignment enums
     const followedRelations = await prisma.follow.findMany({
       where: { 
         followerId: currentUserId, 
-        status: 'FOLLOWING' // Aligned with the four-part state configuration
+        status: 'FOLLOWING'
       },
       select: { followingId: true },
     });
@@ -151,7 +147,6 @@ export const updatePost = async (req, res, next) => {
     let targetImageUrl = post.imageUrl;
     if (req.file) {
       try {
-        // Purge old asset from Cloudinary nodes if replacing it with a fresh file upload
         if (post.imageUrl) {
           const publicId = getCloudinaryPublicId(post.imageUrl);
           if (publicId) await cloudinary.v2.uploader.destroy(publicId);
@@ -180,7 +175,7 @@ export const updatePost = async (req, res, next) => {
   }
 };
 
-// 4. DELETE A POST NATIVELY (With Complete Phase 2 Binary Clearing)
+// 4. DELETE A POST NATIVELY
 export const deletePost = async (req, res, next) => {
   try {
     const currentUserId = req.user.id;
@@ -196,7 +191,6 @@ export const deletePost = async (req, res, next) => {
       return res.status(403).json({ message: 'Unauthorized to delete this post.' });
     }
 
-    // Phase 2 Cleanup: Purge binary files from Cloudinary storage nodes instantly
     if (post.imageUrl) {
       const publicId = getCloudinaryPublicId(post.imageUrl);
       if (publicId) {
@@ -205,7 +199,7 @@ export const deletePost = async (req, res, next) => {
     }
 
     await prisma.post.delete({ where: { id: postId } });
-    return res.status(204).send(); // Standard non-content transaction finish
+    return res.status(204).send();
   } catch (error) {
     next(error);
   }

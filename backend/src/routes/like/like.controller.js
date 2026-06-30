@@ -50,7 +50,6 @@ export const toggleCommentLike = async (req, res, next) => {
       return res.status(404).json({ message: 'Target comment not found.' });
     }
 
-    // MATCHES REVERSED SCHEMA: commentId first, then userId
     const existingLike = await prisma.commentLike.findUnique({
       where: {
         commentId_userId: {

@@ -25,12 +25,10 @@ const getCloudinaryPublicId = (url) => {
     const filePart = parts[parts.length - 1].split('.')[0];
     const folderPart = parts[parts.length - 2];
 
-    // If the image is housed in one of your two active folder namespaces, prepend it
     if (folderPart === 'odin_social_avatars' || folderPart === 'odin_social_post_images') {
       return `${folderPart}/${filePart}`;
     }
 
-    // Standard fallback loop for root-level assets
     return filePart;
   } catch (error) {
     console.error('Failed to parse Cloudinary public_id out of resource URL payload:', error);
@@ -157,8 +155,8 @@ export const sendFollowRequest = async (req, res, next) => {
 // 4. ACCEPT A FOLLOW REQUEST (Resilient Implementation)
 export const acceptFollowRequest = async (req, res, next) => {
   try {
-    const currentUserId = req.user.id; // User B
-    const senderUserId = req.params.id;  // User A
+    const currentUserId = req.user.id;
+    const senderUserId = req.params.id; 
 
     const followRecord = await prisma.follow.update({
       where: { 
@@ -198,7 +196,6 @@ export const removeFollowRelationship = async (req, res, next) => {
     const currentUserId = req.user.id;
     const targetUserId = req.params.id;
 
-    // Reset rows to baseline state instead of dropping to maintain robust indexing properties
     await prisma.follow.updateMany({
       where: {
         OR: [

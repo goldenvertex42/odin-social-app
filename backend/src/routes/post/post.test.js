@@ -1,6 +1,5 @@
 import { jest, beforeEach, describe, it, expect, afterAll } from '@jest/globals';
 
-// 1. Unified ESM Mock to catch post controller media uploader streams
 jest.unstable_mockModule('cloudinary', () => {
   const mockConfig = jest.fn();
   const mockUploader = {
@@ -33,7 +32,6 @@ describe('Post & Social Feed Integration Tests', () => {
     const dbModule = await import('../../../../db/src/index.js');
     prisma = dbModule.prisma;
 
-    // Create User A (The Main Viewer)
     userA = await prisma.user.create({
       data: {
         email: 'viewer_alpha@odin.local',
@@ -45,7 +43,6 @@ describe('Post & Social Feed Integration Tests', () => {
       },
     });
 
-    // Create User B (An Active Connection)
     userB = await prisma.user.create({
       data: {
         email: 'friend_beta@odin.local',
@@ -57,7 +54,6 @@ describe('Post & Social Feed Integration Tests', () => {
       },
     });
 
-    // Create User C (A Pending Request or Stranger)
     userC = await prisma.user.create({
       data: {
         email: 'stranger_gamma@odin.local',
@@ -73,12 +69,10 @@ describe('Post & Social Feed Integration Tests', () => {
     tokenB = generateTestToken(userB.id);
     tokenC = generateTestToken(userC.id);
 
-    // User A follows User B (FOLLOWING relationship)
     await prisma.follow.create({
       data: { followerId: userA.id, followingId: userB.id, status: 'FOLLOWING' },
     });
 
-    // User A follows User C (REQUEST_SENT relationship - excluded from feed)
     await prisma.follow.create({
       data: { followerId: userA.id, followingId: userC.id, status: 'REQUEST_SENT' },
     });
@@ -98,7 +92,6 @@ describe('Post & Social Feed Integration Tests', () => {
         .attach('image', Buffer.from('fake-binary-data'), 'test-photo.png');
 
       expect(res.statusCode).toBe(201);
-      // Fixed: Swapped '.body' to '.content' to match Prisma production keys
       expect(res.body.post.content).toBe('Testing form-data multi-part content pipeline.');
       expect(res.body.post.imageUrl).toBeDefined();
     });
@@ -107,7 +100,6 @@ describe('Post & Social Feed Integration Tests', () => {
       const res = await request(app)
         .post('/api/posts')
         .set('Authorization', `Bearer ${tokenA}`)
-        // Fixed: Use field layout because form-data multi-part middleware intercepts this route handler path
         .field('content', ' ');
 
       expect(res.statusCode).toBe(400);
@@ -117,7 +109,6 @@ describe('Post & Social Feed Integration Tests', () => {
 
   describe('GET /api/posts/feed - Chronological Aggregation Pipeline', () => {
     it('should aggregate self posts and accepted follow posts while filtering out pending connections', async () => {
-      // Fixed: Swapped '.body' payload attributes to '.content' column schemas
       await prisma.post.create({
         data: { content: 'Hello from User Beta!', authorId: userB.id },
       });
@@ -141,7 +132,6 @@ describe('Post & Social Feed Integration Tests', () => {
       const includesGammaContent = res.body.some(post => post.authorId === userC.id);
       expect(includesGammaContent).toBe(false);
 
-      // Fixed: Evaluated properties directly on the element index, not on the parent wrapper array
       expect(res.body[0]).toHaveProperty('author');
       expect(res.body[0]).toHaveProperty('likes');
       expect(res.body[0]).toHaveProperty('comments');

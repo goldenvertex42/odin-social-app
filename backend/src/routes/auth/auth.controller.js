@@ -62,16 +62,13 @@ export const registerUser = async (req, res, next) => {
 // 2. LOCAL LOGIN CONTROLLER
 export const loginUser = async (req, res, next) => {
   try {
-    // Passport's middleware successfully completed, so req.user is ready!
     const user = req.user;
 
-    // Mutate database state to declare active network presence
     const updatedUser = await prisma.user.update({
       where: { id: user.id },
       data: { isOnline: true }
     });
 
-    // Map structural values cleanly using the freshly updated model row
     const safeUser = {
       id: updatedUser.id,
       email: updatedUser.email,
@@ -85,7 +82,6 @@ export const loginUser = async (req, res, next) => {
       isGuest: updatedUser.isGuest
     };
 
-    // Issue the stateless web token
     const token = generateToken(updatedUser.id);
 
     return res.status(200).json({ message: 'Logged in successfully.', token, user: safeUser });
@@ -103,7 +99,6 @@ export const logoutUser = async (req, res, next) => {
       return res.status(401).json({ success: false, error: 'Unauthorized payload exception.' });
     }
 
-    // Flip presence toggle state back to offline
     await prisma.user.update({
       where: { id: currentUserId },
       data: { isOnline: false }
@@ -121,7 +116,6 @@ export const getMe = async (req, res) => {
     return res.status(401).json({ message: 'Unauthorized.' });
   }
   try {
-    // Pull live theme and profile configurations straight from the schema
     const freshUser = await prisma.user.findUnique({
       where: { id: req.user.id },
       select: {
@@ -152,7 +146,6 @@ export const googleAuthCallback = async (req, res, next) => {
       return res.redirect(`${frontendBaseUrl}/login?error=oauth_failed`);
     }
 
-    // Set network presence status to true
     await prisma.user.update({
       where: { id: req.user.id },
       data: { isOnline: true }
@@ -160,7 +153,6 @@ export const googleAuthCallback = async (req, res, next) => {
 
     const token = generateToken(req.user.id);
     
-    // Dynamic production-ready redirect link parsing
     const frontendRedirectUrl = `${frontendBaseUrl}/auth-success?token=${token}`;
     return res.redirect(frontendRedirectUrl);
   } catch (error) {
@@ -227,7 +219,6 @@ export const loginGuestUser = async (req, res, next) => {
       });
     }
 
-    // 3. Mark the seeded profile online dynamically during their active session
     if (!guestUser.isOnline) {
       await prisma.user.update({
         where: { id: guestUser.id },
@@ -236,7 +227,6 @@ export const loginGuestUser = async (req, res, next) => {
       guestUser.isOnline = true;
     }
 
-    // 4. Issue your system authentication access token
     const token = generateToken(guestUser.id);
 
     return res.status(200).json({
