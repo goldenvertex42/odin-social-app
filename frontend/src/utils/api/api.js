@@ -26,7 +26,7 @@ export async function customFetch(endpoint, options = {}) {
       localStorage.removeItem('token');
     }
     if (typeof window !== 'undefined' && window.location && !window.location.pathname.includes('/login')) {
-      window.location.href = '/login?error=session_expired';
+      window.location.replace('/login?error=session_expired');
     }
   }
 
