@@ -16,6 +16,7 @@ export default function PasswordSecurityFields({ values, onChange }) {
           className={styles.input}
           placeholder="••••••••"
           required={!!values.newPassword}
+          autoComplete='current-password'
         />
       </div>
       
@@ -30,6 +31,7 @@ export default function PasswordSecurityFields({ values, onChange }) {
             className={styles.input}
             placeholder="••••••••"
             minLength={8}
+            autoComplete='new-password'
           />
         </div>
         <div className={styles.inputGroup}>
@@ -42,6 +44,7 @@ export default function PasswordSecurityFields({ values, onChange }) {
             className={styles.input}
             placeholder="••••••••"
             required={!!values.newPassword}
+            autoComplete='new-password'
           />
         </div>
       </div>

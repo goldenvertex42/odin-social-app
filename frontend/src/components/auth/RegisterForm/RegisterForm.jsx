@@ -63,7 +63,8 @@ export default function RegisterForm() {
             disabled={loading} 
             value={formData.email} 
             onChange={handleChange} 
-            className={styles.input} 
+            className={styles.input}
+            autoComplete='email' 
           />
         </div>
 
@@ -77,7 +78,8 @@ export default function RegisterForm() {
             disabled={loading} 
             value={formData.username} 
             onChange={handleChange} 
-            className={styles.input} 
+            className={styles.input}
+            autoComplete='username' 
           />
         </div>
 
