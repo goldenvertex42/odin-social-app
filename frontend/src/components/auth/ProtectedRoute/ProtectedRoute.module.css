@@ -43,7 +43,7 @@
     "header" 
     "main" 
     "sidebar";
-  min-height: 100vh;
+  min-height: 100dvh;
   box-sizing: border-box;
 }
 
@@ -63,7 +63,8 @@
   height: var(--nav-height, 60px);
   z-index: 90;
   border-top: 1px solid var(--border-main);
-  background-color: var(--bg-app);
+  background-color: var(--bg-sidebar);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .mainContentArea {
@@ -91,9 +92,10 @@
     top: var(--nav-height, 60px);
     left: 0;
     width: var(--sidebar-width, 240px);
-    height: calc(100vh - var(--nav-height, 60px));
+    height: calc(100dvh - var(--nav-height, 60px));
     border-top: none;
     border-right: 1px solid var(--border-main);
+    padding-bottom: 0;
   }
 
   .mainContentArea {
