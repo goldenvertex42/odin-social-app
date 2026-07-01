@@ -81,7 +81,7 @@
 
 .submitBtn {
   background-color: var(--color-primary);
-  color: var(--btn-action-text, #ffffff);
+  color: var(--btn-action-text);
 }
 
 .submitBtn:hover {
