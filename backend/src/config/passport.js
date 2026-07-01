@@ -6,10 +6,7 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '../../../db/src/index.js';
 import { getGravatarUrl } from '../utils/gravatar.js';
 
-const productionApiUrl = process.env.RAILWAY_PUBLIC_DOMAIN; // Target the active Railway app backend variable
-const cleanBackendBaseUrl = productionApiUrl && productionApiUrl.endsWith('/') 
-  ? productionApiUrl.slice(0, -1) 
-  : (productionApiUrl);
+const cleanBackendBaseUrl = process.env.PUBLIC_URL || `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`;
 
 // 1. PASSPORT-LOCAL STRATEGY (Used strictly during POST /api/auth/login)
 passport.use(

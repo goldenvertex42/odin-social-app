@@ -140,7 +140,7 @@ export const getMe = async (req, res) => {
 // 5. GOOGLE OAUTH CALLBACK CONTROLLER
 export const googleAuthCallback = async (req, res, next) => {
   try {
-    const frontendBaseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const frontendBaseUrl = process.env.PRODUCTION_FRONTEND_URL || process.env.FRONTEND_URL;
 
     if (!req.user) {
       return res.redirect(`${frontendBaseUrl}/login?error=oauth_failed`);
