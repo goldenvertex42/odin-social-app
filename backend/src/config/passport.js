@@ -9,7 +9,7 @@ import { getGravatarUrl } from '../utils/gravatar.js';
 const productionApiUrl = process.env.VITE_API_URL; // Target the active Railway app backend variable
 const cleanBackendBaseUrl = productionApiUrl && productionApiUrl.endsWith('/') 
   ? productionApiUrl.slice(0, -1) 
-  : (productionApiUrl || 'http://localhost:3000');
+  : (productionApiUrl);
 
 // 1. PASSPORT-LOCAL STRATEGY (Used strictly during POST /api/auth/login)
 passport.use(
