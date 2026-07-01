@@ -165,7 +165,7 @@ export const loginGuestUser = async (req, res, next) => {
   try {
     const guestUser = await prisma.user.findUnique({
       where: { 
-        email: 'recruiter@socialsphere.com' 
+        email: 'visitor@socialsphere.com' 
       },
       select: {
         id: true,
