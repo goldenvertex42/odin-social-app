@@ -13,7 +13,7 @@ export default function LoginForm() {
   const [localLoading, setLocalLoading] = useState(false);
   const loading = authLoading || localLoading;
 
-  const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+  const apiBaseUrl = import.meta.env.VITE_API_URL;
   const googleOAuthUrl = `${apiBaseUrl}/api/auth/google`;
 
   const handleChange = (e) => {
