@@ -86,13 +86,14 @@
   font-size: var(--font-xs);
   font-weight: var(--weight-medium);
   cursor: pointer;
-  white-space: nowrap; /* Forces text to stay in a single line */
+  white-space: nowrap;
   transition: background-color 0.2s ease, border-color 0.2s ease, outline 0.2s ease;
 }
 
 .logoutButton:hover {
   background-color: var(--bg-hover);
-  border-color: var(--text-muted);
+  border-color: var(--color-primary);
+  color: var(--text-main);
 }
 
 .logoutButton:focus-visible {
