@@ -31,7 +31,9 @@ const corsOptions = {
     if (origin === 'http://localhost:5173' || origin === cleanProductionFrontendUrl) {
       return callback(null, true);
     }
-    if (origin.endsWith('.vercel.app') && origin.includes('-denver-clarks-projects')) {
+    const isVercelDomain = origin.endsWith('.vercel.app');
+    const isOdinProject = origin.includes('odin-social-');
+    if (isVercelDomain && isOdinProject) {
       return callback(null, true);
     }
     return callback(new Error(`CORS policy blocked request from unauthorized origin: ${origin}`));
