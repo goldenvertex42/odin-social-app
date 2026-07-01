@@ -28,12 +28,12 @@ export default function ProtectedRoute() {
       <div className={styles.headerArea}>
         <Header />
       </div>
-      <aside className={styles.sidebarArea}>
-        <Sidebar />
-      </aside>
       <main className={styles.mainContentArea}>
         <Outlet />
       </main>
+      <aside className={styles.sidebarArea}>
+        <Sidebar />
+      </aside>
     </div>
   );
 }
