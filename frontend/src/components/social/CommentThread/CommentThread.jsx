@@ -31,7 +31,7 @@ export default function CommentThread({ comments: initialComments, postId, curre
   const visibleComments = isExpanded ? comments : comments.slice(0, 1);
 
   return (
-    <div className={styles.threadWrapper} data-testid="comment-thread">
+    <div className={styles.threadContainer} data-testid="comment-thread">
       <NewCommentForm postId={postId} onCommentCreated={handleCommentCreated} />
       
       {comments.length === 0 ? (
