@@ -84,6 +84,22 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const loginWithToken = async (token) => {
+    setLoading(true);
+    try {
+      const response = await customFetch('/api/users/me');
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData);
+      }
+    } catch (err) {
+      console.error("Failed to restore OAuth user states:", err);
+      logout();
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async () => {
     setLoading(true);
     try {
