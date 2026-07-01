@@ -62,8 +62,8 @@
   --bg-sidebar: #0f172a;
   --border-main: #334155;
   --text-main: #f8fafc;
-  --text-muted: #cbd5e1;
-  --bg-hover: #2d3748;
+  --text-muted: #f1f5f9;
+  --bg-hover: #151e2e;
   --bg-sidebar-hover: #1e293b;
   --color-primary: #60a5fa;
   --color-primary-hover: #93c5fd;
@@ -71,7 +71,7 @@
   --shadow-color: rgba(0, 0, 0, 0.3);
 }
 
-/* 🟢 THE NORD THEME: High-Vibrancy Arctic Frost */
+/* THE NORD THEME: High-Vibrancy Arctic Frost */
 :root[data-color-palette="nord"] {
   --bg-app: #e5e9f0;
   --bg-surface: #eceff4;
@@ -87,12 +87,12 @@
   --shadow-color: rgba(46, 52, 64, 0.05);
 }
 :root[data-color-scheme="dark"][data-color-palette="nord"] {
-  --bg-app: #2e3440;
+  --bg-app: #e5e9f0;
   --bg-surface: #3b4252;
   --bg-sidebar: #2e3440;
   --border-main: #4c566a;
   --text-main: #f3f4f6;
-  --text-muted: #e5e9f0;
+  --text-muted: #d8dee9; 
   --bg-hover: #434c5e;
   --bg-sidebar-hover: #4c566a;
   --color-primary: #88c0d0;
@@ -156,7 +156,7 @@
   --text-muted: #00f0ff;
   --bg-hover: #16162e;
   --bg-sidebar-hover: #1b002c;
-  --color-primary: #ff0055;
+  --color-primary: #ff3377; 
   --color-primary-hover: #00f0ff;
   --color-accent: #260033;
   --btn-action-text: #000000;
@@ -185,14 +185,18 @@
   --bg-sidebar: #030712;
   --border-main: #1f2937;
   --text-main: #f9fafb;
-  --text-muted: #e5e7eb;         
-  --bg-hover: #161f30;
-  --bg-sidebar-hover: #222f47;
-  --color-primary: #93c5fd;      
-  --color-primary-hover: #60a5fa;
-  --color-accent: #1e3a8a;
+  --text-muted: #cbd5e1;        
+  --bg-hover: #161f30;           
+  --bg-sidebar-hover: #1e293b;   
+  --color-primary: #a5b4fc;    
+  --color-primary-hover: #c7d2fe;
+  --color-accent: #312e81;
+  --btn-action-text: #030712;
   --shadow-color: rgba(0, 0, 0, 0.6);
+  --color-success: #10b981;
+  --color-error: #ef4444;
 }
+
 
 
 /* 🟢 THE NEON MINT THEME: Crisp Technical Emerald */
@@ -216,9 +220,9 @@
   --bg-sidebar: #022c22;
   --border-main: #059669;
   --text-main: #f0fdf4;
-  --text-muted: #6ee7b7;
-  --bg-hover: #065f46;
-  --bg-sidebar-hover: #047857;
+  --text-muted: #a7f3d0;
+  --bg-hover: #032b20;
+  --bg-sidebar-hover: #044232;
   --color-primary: #10b981;
   --color-primary-hover: #34d399;
   --color-accent: #022c22;

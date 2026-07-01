@@ -25,6 +25,11 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
 .textarea:focus {
   border-color: var(--color-primary);
 }
@@ -101,18 +106,20 @@
   cursor: pointer;
   font-size: var(--font-sm);
   font-weight: var(--weight-medium);
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   border: 1px solid var(--border-main);
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-xs);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .uploadLabel:hover {
   background-color: var(--bg-hover);
-  color: var(--color-primary);
+  color: var(--text-main);
+  border-color: var(--color-primary);
 }
 
+.fileInput:focus-visible + .uploadLabel,
 .uploadLabel:focus-within {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
@@ -149,7 +156,7 @@
   font-weight: var(--weight-semibold);
   cursor: pointer;
   outline: none;
-  transition: background-color 0.2s ease, opacity 0.2s ease, outline 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, outline 0.2s ease;
 }
 
 .submitBtn:hover:not(:disabled) {
@@ -162,7 +169,9 @@
 }
 
 .submitBtn:disabled {
-  opacity: 0.5;
+  background-color: var(--bg-app);
+  color: var(--text-muted);
+  border: 1px solid var(--border-main);
   cursor: not-allowed;
 }
 

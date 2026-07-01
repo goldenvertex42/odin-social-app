@@ -50,12 +50,13 @@
   font-weight: var(--weight-semibold);
   display: inline-block;
   text-align: center;
-  transition: background-color 0.2s ease, border-color 0.2s ease, outline 0.2s ease;
   border: 1px solid var(--border-main);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, outline 0.2s ease;
 }
 
 .uploadLabel:hover {
   background-color: var(--bg-hover);
+  color: var(--text-main);
 }
 
 .uploadLabel:focus-within {
@@ -71,4 +72,10 @@
   font-size: var(--font-xs);
   color: var(--text-muted);
   margin: 0;
+}
+
+.hiddenInput:focus-visible + .uploadLabel,
+.uploadLabel:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }

@@ -22,7 +22,7 @@
 .text {
   margin-top: var(--spacing-md);
   font-size: var(--font-sm);
-  color: var(--text-muted);
+  color: var(--text-main); 
   font-weight: var(--weight-medium);
 }
 

@@ -88,18 +88,20 @@
   cursor: pointer;
   border: none;
   outline: none;
-  transition: opacity 0.2s ease, background-color 0.2s ease, outline 0.2s ease;
+  transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, outline 0.2s ease;
 }
 
 .cancelBtn {
-  background-color: transparent;
-  color: var(--text-muted);
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  opacity: 0.85;
   border: 1px solid var(--border-main);
 }
 
 .cancelBtn:hover {
   background-color: var(--bg-hover);
   color: var(--text-main);
+  opacity: 1;
 }
 
 .saveBtn {
@@ -117,7 +119,7 @@
 }
 
 .cancelBtn:disabled, .saveBtn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
@@ -158,7 +160,8 @@
 
 .dangerDescription {
   font-size: var(--font-sm);
-  color: var(--text-muted);
+  color: var(--text-main);
+  opacity: 0.85;
   line-height: 1.5;
   margin: 0 0 var(--spacing-md) 0;
 }
@@ -167,15 +170,15 @@
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-xs);
-  background-color: transparent;
-  color: var(--color-error);
+  background-color: var(--bg-app);
+  color: var(--text-main);
   border: 1px solid var(--color-error);
   padding: var(--spacing-sm) var(--spacing-lg);
   border-radius: var(--radius-md);
   font-weight: var(--weight-semibold);
   font-size: var(--font-sm);
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .triggerDeleteBtn:hover {
@@ -188,14 +191,13 @@
   outline-offset: 2px;
 }
 
-/* MODAL OVERLAY STYLING SYSTEM */
 .modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.65);
+  background-color: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -227,7 +229,7 @@
   color: var(--color-error);
 }
 
-.modalHeading {
+.modalContent .modalHeading {
   font-size: var(--font-lg);
   font-weight: var(--weight-bold);
   color: var(--text-main);
@@ -249,7 +251,8 @@
 
 .modalLabel {
   font-size: var(--font-sm);
-  color: var(--text-muted);
+  color: var(--text-main);
+  opacity: 0.9;
 }
 
 .modalInputField {
@@ -260,6 +263,12 @@
   color: var(--text-main);
   font-size: var(--font-base);
   outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modalInputField::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
 }
 
 .modalInputField:focus {
@@ -287,6 +296,7 @@
   font-weight: var(--weight-semibold);
   cursor: pointer;
   border: none;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
 }
 
 .modalCancelBtn {
@@ -300,7 +310,9 @@
 }
 
 .modalConfirmDeleteBtn:disabled {
-  opacity: 0.4;
+  background-color: var(--bg-app);
+  color: var(--text-muted);
+  border: 1px solid var(--border-main);
   cursor: not-allowed;
 }
 

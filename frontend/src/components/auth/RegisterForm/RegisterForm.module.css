@@ -117,10 +117,12 @@
   border: 1px solid var(--border-main);
   text-decoration: none;
   gap: var(--spacing-xs);
+  transition: background-color 0.2s ease, color 0.2s ease, outline 0.2s ease;
 }
 
 .oauthBtn:hover {
   background-color: var(--bg-hover);
+  color: var(--text-main);
 }
 
 .googleIcon {

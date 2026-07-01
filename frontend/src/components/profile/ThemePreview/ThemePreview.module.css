@@ -55,9 +55,10 @@
 .fieldIcon {
   position: absolute;
   left: var(--spacing-sm);
-  color: var(--text-muted);
+  color: var(--text-main);
   pointer-events: none;
   z-index: 10;
+  transition: color 0.2s ease;
 }
 
 .select {
@@ -73,7 +74,12 @@
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.select option {
+  background-color: var(--bg-surface);
+  color: var(--text-main);
 }
 
 .select:focus {

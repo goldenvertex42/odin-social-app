@@ -104,6 +104,7 @@
 
 .editProfileBtn:hover {
   background-color: var(--bg-hover);
+  color: var(--text-main);
 }
 
 .editProfileBtn:hover .btnIcon {
@@ -127,6 +128,7 @@
 
 .cancelBtn:hover {
   background-color: var(--bg-hover);
+  color: var(--text-main);
 }
 
 .acceptBtn {
@@ -140,12 +142,15 @@
 
 .rejectBtn {
   background-color: var(--bg-app);
-  color: var(--text-muted);
+  color: var(--text-main);
+  opacity: 0.85;
   border: 1px solid var(--border-main);
 }
 
 .rejectBtn:hover {
   background-color: var(--bg-hover);
+  color: var(--text-main);
+  opacity: 1;
 }
 
 .disconnectBtn {
@@ -187,12 +192,15 @@
 .centeredState, .emptyTimeline {
   text-align: center;
   padding: var(--spacing-xl);
-  color: var(--text-muted);
+  color: var(--text-main);
+  opacity: 0.85;
   font-size: var(--font-base);
+  font-weight: var(--weight-medium);
 }
 
 .error {
   color: var(--color-error);
+  opacity: 1;
 }
 
 .imageWrapper {
@@ -214,9 +222,8 @@
   outline-offset: 4px;
 }
 
-
 /* ==========================================================================
-   3. DESKTOP ADAPTIVE VIEWPORT OVERRIDES
+   DESKTOP ADAPTIVE VIEWPORT OVERRIDES
    ========================================================================== */
 @media (min-width: 520px) {
   .profileContainer {
@@ -241,7 +248,6 @@
     width: auto;
   }
 
-  /* Fixed: Kept horizontal layout flow to keep Accept/Ignore buttons inline on desktop */
   .btnGroup {
     flex-direction: row;
     width: auto;

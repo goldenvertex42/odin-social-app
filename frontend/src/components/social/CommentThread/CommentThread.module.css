@@ -31,6 +31,7 @@
 
 .threadToggleAction:hover {
   background-color: var(--bg-hover);
+  color: var(--text-main);
   text-decoration: underline;
 }
 
@@ -43,9 +44,10 @@
   font-size: var(--font-xs);
 }
 
-.emptyText {
+.emptyMessage {
   font-size: var(--font-sm);
-  color: var(--text-muted);
+  color: var(--text-main);
+  opacity: 0.8;
   font-style: italic;
   margin: 0;
   padding: var(--spacing-xs) 0;
