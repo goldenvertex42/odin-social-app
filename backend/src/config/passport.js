@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '../../../db/src/index.js';
 import { getGravatarUrl } from '../utils/gravatar.js';
 
-const productionApiUrl = process.env.VITE_API_URL; // Target the active Railway app backend variable
+const productionApiUrl = process.env.RAILWAY_PUBLIC_DOMAIN; // Target the active Railway app backend variable
 const cleanBackendBaseUrl = productionApiUrl && productionApiUrl.endsWith('/') 
   ? productionApiUrl.slice(0, -1) 
   : (productionApiUrl);
