@@ -90,7 +90,13 @@
 
 .activeLikedState {
   color: var(--color-error);
+  font-weight: var(--weight-bold);
   opacity: 1;
+}
+
+.activeLikedState .heartIcon {
+  color: var(--color-error);
+  fill: currentColor;
 }
 
 .deleteButton {
