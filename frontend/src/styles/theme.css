@@ -69,7 +69,8 @@
   --color-primary-hover: #93c5fd;
   --color-accent: #1e3a8a;
   --shadow-color: rgba(0, 0, 0, 0.3);
-  --btn-action-text: #0f172a; 
+  --btn-action-text: #0f172a;
+  --color-error: #f87171;  
 }
 
 /* THE NORD THEME: High-Vibrancy Arctic Frost */
@@ -101,6 +102,7 @@
   --color-accent: #434c5e;
   --shadow-color: rgba(0, 0, 0, 0.4);
   --btn-action-text: #2e3440;
+  --color-error: #f87171; 
 }
 
 /* 🟡 THE SUNSET THEME: Rich Warm Dusk Cream */
@@ -131,6 +133,7 @@
   --color-primary-hover: #fecdd3;
   --color-accent: #69243f;
   --shadow-color: rgba(0, 0, 0, 0.45);
+  --color-error: #f87171; 
 }
 
 /* 🟣 THE CYBERPUNK THEME: Electric Synth Overdrive */
@@ -163,6 +166,7 @@
   --color-accent: #260033;
   --btn-action-text: #000000;
   --shadow-color: rgba(255, 0, 85, 0.15);
+  --color-error: #f87171; 
 }
 
 /* ⚫ THE MIDNIGHT OBSIDIAN THEME: Sleek Stealth Charcoal */
@@ -197,6 +201,7 @@
   --shadow-color: rgba(0, 0, 0, 0.6);
   --color-success: #10b981;
   --color-error: #ef4444;
+  --color-error: #f87171; 
 }
 
 
@@ -229,6 +234,7 @@
   --color-primary-hover: #34d399;
   --color-accent: #022c22;
   --shadow-color: rgba(0, 0, 0, 0.4);
+  --color-error: #f87171; 
 }
 
 /* ==========================================================================
