@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext/AuthContext';
+import { customFetch } from '../../utils/api/api';
 import NewPostForm from '../../components/social/NewPostForm/NewPostForm';
 import PostCard from '../../components/social/PostCard/PostCard';
 import styles from './SocialFeed.module.css';
 
 export default function SocialFeed() {
-  const { user: currentUser } = useAuth(); // Access global active user state
+  const { user: currentUser } = useAuth();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,12 +19,7 @@ export default function SocialFeed() {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/posts/feed', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await customFetch('/api/posts/feed');
       if (!response.ok) throw new Error('Failed to fetch feed posts.');
       const data = await response.json();
       setPosts(data);
