@@ -178,20 +178,22 @@
   --color-accent: #e0e7ff;
   --shadow-color: rgba(15, 23, 42, 0.04);
 }
+
 :root[data-color-scheme="dark"][data-color-palette="obsidian"] {
   --bg-app: #030712;
-  --bg-surface: #111827;
+  --bg-surface: #0b0f19;
   --bg-sidebar: #030712;
-  --border-main: #374151;
+  --border-main: #1f2937;
   --text-main: #f9fafb;
-  --text-muted: #d1d5db;
-  --bg-hover: #1f2937;
-  --bg-sidebar-hover: #374151;
-  --color-primary: #818cf8;
-  --color-primary-hover: #a5b4fc;
-  --color-accent: #312e81;
-  --shadow-color: rgba(0, 0, 0, 0.5);
+  --text-muted: #e5e7eb;         
+  --bg-hover: #161f30;
+  --bg-sidebar-hover: #222f47;
+  --color-primary: #93c5fd;      
+  --color-primary-hover: #60a5fa;
+  --color-accent: #1e3a8a;
+  --shadow-color: rgba(0, 0, 0, 0.6);
 }
+
 
 /* 🟢 THE NEON MINT THEME: Crisp Technical Emerald */
 :root[data-color-palette="neonmint"] {
