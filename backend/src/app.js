@@ -22,13 +22,21 @@ const PORT = process.env.PORT || 3000;
 
 app.set('trust proxy', true);
 
-const allowedOrigin = process.env.VITE_API_URL 
-  ? process.env.VITE_API_URL.replace(':3000', ':5173') 
-  : 'http://localhost:5173';
+const rawFrontendUrl = process.env.PRODUCTION_FRONTEND_URL || '';
+const cleanProductionFrontendUrl = rawFrontendUrl.endsWith('/') ? rawFrontendUrl.slice(0, -1) : rawFrontendUrl;
 
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' ? process.env.PRODUCTION_FRONTEND_URL : allowedOrigin,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (origin === 'http://localhost:5173' || origin === cleanProductionFrontendUrl) {
+      return callback(null, true);
+    }
+    if (origin.endsWith('.vercel.app') && origin.includes('-denver-clarks-projects')) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS policy blocked request from unauthorized origin: ${origin}`));
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
   optionsSuccessStatus: 200
