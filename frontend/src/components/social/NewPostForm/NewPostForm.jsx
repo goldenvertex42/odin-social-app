@@ -43,7 +43,6 @@ export default function NewPostForm({ onPostCreated }) {
         formData.append('image', imageFile);
       }
 
-      // Aligned: Swapped manual fetch loop for your unified customFetch interceptor token layer
       const response = await customFetch('/api/posts', {
         method: 'POST',
         body: formData
@@ -52,7 +51,6 @@ export default function NewPostForm({ onPostCreated }) {
       if (!response.ok) throw new Error('Failed to publish your post.');
       const data = await response.json();
       
-      // 🎯 FIXED: Extract the nested post record node explicitly from the server object envelope
       onPostCreated(data.post); 
       
       setContent('');
