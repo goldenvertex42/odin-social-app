@@ -20,18 +20,23 @@ export default function AvatarUploadField({ initialAvatar, onFileSelected }) {
       <h2 className={styles.heading}>Profile Picture</h2>
       <div className={styles.flexWrapper}>
         <img src={preview} alt="Avatar preview" className={styles.avatarImage} referrerPolicy="no-referrer" />
+        
         <div className={styles.controls}>
-          <label className={styles.uploadLabel}>
+          <label htmlFor="avatar-file-upload-node" className={styles.uploadLabel}>
             Change Picture
-            <input 
-              type="file" 
-              ref={fileInputRef}
-              onChange={handleFileChange} 
-              accept="image/*" 
-              className={styles.hiddenInput}
-              data-testid="edit-avatar-input"
-            />
           </label>
+          
+          <input 
+            type="file" 
+            id="avatar-file-upload-node"
+            ref={fileInputRef} 
+            onChange={handleFileChange} 
+            accept="image/*" 
+            className={styles.hiddenInput} 
+            data-testid="edit-avatar-input" 
+            aria-label="Upload a new profile avatar image"
+          />
+          
           <p className={styles.hint}>JPG or PNG. Max size 5MB.</p>
         </div>
       </div>
