@@ -69,6 +69,7 @@
   --color-primary-hover: #93c5fd;
   --color-accent: #1e3a8a;
   --shadow-color: rgba(0, 0, 0, 0.3);
+  --btn-action-text: #0f172a; 
 }
 
 /* THE NORD THEME: High-Vibrancy Arctic Frost */
@@ -87,18 +88,19 @@
   --shadow-color: rgba(46, 52, 64, 0.05);
 }
 :root[data-color-scheme="dark"][data-color-palette="nord"] {
-  --bg-app: #e5e9f0;
+  --bg-app: #2e3440;
   --bg-surface: #3b4252;
   --bg-sidebar: #2e3440;
   --border-main: #4c566a;
   --text-main: #f3f4f6;
-  --text-muted: #d8dee9; 
+  --text-muted: #d8dee9;
   --bg-hover: #434c5e;
   --bg-sidebar-hover: #4c566a;
   --color-primary: #88c0d0;
   --color-primary-hover: #8fbcbb;
   --color-accent: #434c5e;
   --shadow-color: rgba(0, 0, 0, 0.4);
+  --btn-action-text: #2e3440;
 }
 
 /* 🟡 THE SUNSET THEME: Rich Warm Dusk Cream */
