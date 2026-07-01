@@ -31,10 +31,7 @@
   --app-max-width: 1240px;
   --nav-height: 60px;
   
-  /* Constant action utility indicator colors */
-  --color-success: #22c55e;
-  --color-error: #ef4444;
-  --btn-action-text: #ffffff;
+  --shadow-color: rgba(0, 0, 0, 0.05);
 }
 
 /* ==========================================================================
@@ -55,6 +52,10 @@
   --color-primary-hover: #1e40af;
   --color-accent: #dbeafe;
   --shadow-color: rgba(15, 23, 42, 0.04);
+  --color-success: #15803d; 
+  --color-success-text: #064e3b;
+  --btn-action-text: #ffffff;
+  --color-error: #ef4444; 
 }
 :root[data-color-scheme="dark"][data-color-palette="default"] {
   --bg-app: #0f172a;
@@ -71,6 +72,8 @@
   --shadow-color: rgba(0, 0, 0, 0.3);
   --btn-action-text: #0f172a;
   --color-error: #f87171;  
+  --color-success: #065f46; 
+  --color-success-text: #ecfdf5; 
 }
 
 /* THE NORD THEME: High-Vibrancy Arctic Frost */
@@ -87,6 +90,10 @@
   --color-primary-hover: #205c6d;
   --color-accent: #d8dee9;
   --shadow-color: rgba(46, 52, 64, 0.05);
+  ---color-success: #15803d; 
+  --color-success-text: #064e3b;
+  --btn-action-text: #ffffff;
+  --color-error: #ef4444;
 }
 :root[data-color-scheme="dark"][data-color-palette="nord"] {
   --bg-app: #2e3440;
@@ -103,6 +110,8 @@
   --shadow-color: rgba(0, 0, 0, 0.4);
   --btn-action-text: #2e3440;
   --color-error: #f87171; 
+  --color-success: #065f46; 
+  --color-success-text: #ecfdf5; 
 }
 
 /* 🟡 THE SUNSET THEME: Rich Warm Dusk Cream */
@@ -119,6 +128,10 @@
   --color-primary-hover: #9f1239;
   --color-accent: #ffe4e6;
   --shadow-color: rgba(76, 5, 25, 0.04);
+  --color-success: #15803d; 
+  --color-success-text: #064e3b;
+  --btn-action-text: #ffffff;
+  --color-error: #ef4444;
 }
 :root[data-color-scheme="dark"][data-color-palette="sunset"] {
   --bg-app: #1c1216;
@@ -134,6 +147,9 @@
   --color-accent: #69243f;
   --shadow-color: rgba(0, 0, 0, 0.45);
   --color-error: #f87171; 
+  --color-success: #065f46; 
+  --color-success-text: #ecfdf5; 
+  --btn-action-text: #f9fafb;  
 }
 
 /* 🟣 THE CYBERPUNK THEME: Electric Synth Overdrive */
@@ -151,6 +167,10 @@
   --color-accent: #e6e200;
   --btn-action-text: #ffffff;
   --shadow-color: rgba(0, 0, 0, 0.1);
+  --color-success: #10b981;
+  --color-success-text: #000000;
+  --btn-action-text: #000000;
+  --color-error: #bc003f;
 }
 :root[data-color-scheme="dark"][data-color-palette="cyberpunk"] {
   --bg-app: #030307;
@@ -166,7 +186,10 @@
   --color-accent: #260033;
   --btn-action-text: #000000;
   --shadow-color: rgba(255, 0, 85, 0.15);
-  --color-error: #f87171; 
+  --color-success: #00ff66;
+  --color-success-text: #00ff66;
+  --btn-action-text: #030307;
+  --color-error: #ff0055;
 }
 
 /* ⚫ THE MIDNIGHT OBSIDIAN THEME: Sleek Stealth Charcoal */
@@ -183,6 +206,10 @@
   --color-primary-hover: #3730a3;
   --color-accent: #e0e7ff;
   --shadow-color: rgba(15, 23, 42, 0.04);
+  --color-success: #15803d; 
+  --color-success-text: #064e3b;
+  --btn-action-text: #ffffff;
+  --color-error: #ef4444;
 }
 
 :root[data-color-scheme="dark"][data-color-palette="obsidian"] {
@@ -200,8 +227,10 @@
   --btn-action-text: #030712;
   --shadow-color: rgba(0, 0, 0, 0.6);
   --color-success: #10b981;
-  --color-error: #ef4444;
-  --color-error: #f87171; 
+  --color-error: #f87171;
+  --color-success: #065f46; 
+  --color-success-text: #ecfdf5;
+  --btn-action-text: #f9fafb;  
 }
 
 
@@ -220,6 +249,10 @@
   --color-primary-hover: #065f46;
   --color-accent: #d1fae5;
   --shadow-color: rgba(6, 78, 59, 0.03);
+  --color-success: #15803d; 
+  --color-success-text: #064e3b;
+  --btn-action-text: #ffffff;
+  --color-error: #ef4444; 
 }
 :root[data-color-scheme="dark"][data-color-palette="neonmint"] {
   --bg-app: #022c22;
@@ -230,11 +263,14 @@
   --text-muted: #a7f3d0;
   --bg-hover: #032b20;
   --bg-sidebar-hover: #044232;
-  --color-primary: #10b981;
-  --color-primary-hover: #34d399;
+  --color-primary: #52fda4; 
+  --color-primary-hover: #a7f3d0;
   --color-accent: #022c22;
   --shadow-color: rgba(0, 0, 0, 0.4);
   --color-error: #f87171; 
+  --color-success: #065f46; 
+  --color-success-text: #ecfdf5;  
+  --btn-action-text: #022c22;; 
 }
 
 /* ==========================================================================

@@ -149,12 +149,20 @@
 }
 
 .acceptBtn {
-  background-color: var(--color-success);
-  color: var(--btn-action-text, #ffffff);
+  background-color: var(--bg-app);
+  color: var(--color-success-text);
+  border: 1px solid var(--color-success);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .acceptBtn:hover {
   opacity: 0.9;
+}
+
+.acceptBtn:hover:not(:disabled) {
+  background-color: var(--color-success);
+  color: var(--text-main);
+  border-color: var(--color-success);
 }
 
 .rejectBtn {
