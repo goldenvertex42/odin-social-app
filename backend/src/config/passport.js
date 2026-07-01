@@ -4,6 +4,12 @@ import { Strategy as JWTStrategy, ExtractJwt } from 'passport-jwt';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../../../db/src/index.js';
+import { getGravatarUrl } from '../utils/gravatar.js';
+
+const productionApiUrl = process.env.VITE_API_URL; // Target the active Railway app backend variable
+const cleanBackendBaseUrl = productionApiUrl && productionApiUrl.endsWith('/') 
+  ? productionApiUrl.slice(0, -1) 
+  : (productionApiUrl || 'http://localhost:3000');
 
 // 1. PASSPORT-LOCAL STRATEGY (Used strictly during POST /api/auth/login)
 passport.use(
@@ -80,20 +86,20 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: 'http://localhost:3000/api/auth/google/callback',
-      proxy: true // Ensures HTTPS resolution tracks safely inside cloud configurations
+      // 🎯 FIXED: Dynamic cross-origin URL routing string interpolation
+      callbackURL: `${cleanBackendBaseUrl}/api/auth/google/callback`,
+      proxy: true // Ensures HTTPS headers pass through cloud load balancers safely
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
         const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
         if (!email) {
-          return done(new Error('No email returned from Google'), null);
+          return done(new Error('No email returned from Google authentication context'), null);
         }
 
         // 1. Defensively extract the Google photo URL supporting multiple library variants
         let googleAvatarUrl = null;
         if (profile.photos && profile.photos[0]) {
-          // Extracts the standard value key path property cleanly
           googleAvatarUrl = profile.photos[0].value || profile.photos[0].url || null;
         }
 
@@ -105,6 +111,7 @@ passport.use(
         // 2. Select final fallback avatar URL
         const finalAvatarUrl = googleAvatarUrl || getGravatarUrl(email);
 
+        // Scan database registry for existing record rows
         let user = await prisma.user.findFirst({
           where: {
             OR: [
