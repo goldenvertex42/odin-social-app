@@ -18,7 +18,6 @@ export default function SocialFeed() {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
       const response = await customFetch('/api/posts/feed');
       if (!response.ok) throw new Error('Failed to fetch feed posts.');
       const data = await response.json();
@@ -32,7 +31,6 @@ export default function SocialFeed() {
 
   const handlePostCreated = (apiPostResponse) => {
     const targetPost = apiPostResponse?.post ? apiPostResponse.post : apiPostResponse;
-
     if (!targetPost || !targetPost.id) {
       console.error('CRITICAL: handlePostCreated received an invalid post node payload matrix:', apiPostResponse);
       return;
@@ -41,7 +39,7 @@ export default function SocialFeed() {
     const unifiedAuthor = targetPost.author || {
       id: currentUser?.id,
       username: currentUser?.username || 'You',
-      displayName: currentUser?.displayName || currentUser?.displayName || 'You',
+      displayName: currentUser?.displayName || 'You',
       avatarUrl: currentUser?.avatarUrl || null
     };
 
@@ -56,21 +54,32 @@ export default function SocialFeed() {
     setPosts((prevPosts) => [fullyHydratedPost, ...prevPosts]);
   };
 
-
   const handlePostDeleted = (deletedPostId) => {
-    setPosts((prevPosts) => 
-      prevPosts.filter((post) => post.id !== deletedPostId)
-    );
+    setPosts((prevPosts) => prevPosts.filter((post) => post.id !== deletedPostId));
   };
 
+  if (loading) {
+    return (
+      <div className={styles.loading} role="status" aria-live="polite" data-testid="feed-loading">
+        Loading your feed...
+      </div>
+    );
+  }
 
-  if (loading) return <div className={styles.loading} data-testid="feed-loading">Loading your feed...</div>;
-  if (error) return <div className={styles.error} data-testid="feed-error">{error}</div>;
+  if (error) {
+    return (
+      <div className={styles.error} role="alert" data-testid="feed-error">
+        {error}
+      </div>
+    );
+  }
 
   return (
-    <div className={styles.feedContainer}>
+    <main className={styles.feedContainer} data-testid="feed-canvas">
+      <h1 className={styles.visuallyHidden}>Chronological Social Dashboard Feed</h1>
+      
       <NewPostForm onPostCreated={handlePostCreated} />
-
+      
       <div className={styles.feedList} data-testid="feed-list">
         {posts.length === 0 ? (
           <p className={styles.emptyMessage} data-testid="empty-message">
@@ -78,10 +87,16 @@ export default function SocialFeed() {
           </p>
         ) : (
           posts.map((post) => (
-            <PostCard key={post.id} post={post} currentUserId={currentUser?.id} onDeleteSuccess={handlePostDeleted} />
+            <PostCard 
+              key={post.id} 
+              post={post} 
+              currentUserId={currentUser?.id} 
+              onDeleteSuccess={handlePostDeleted} 
+              headingLevel="h2"
+            />
           ))
         )}
       </div>
-    </div>
+    </main>
   );
 }
