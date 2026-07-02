@@ -1,26 +1,31 @@
 .formContainer {
   display: flex;
-  gap: var(--spacing-xs);
+  align-items: flex-end;
+  gap: var(--spacing-sm);
   padding: var(--spacing-sm) 0;
-  border-top: 1px solid var(--border-main);
+  border-top: 2px solid var(--border-main);
   margin-top: var(--spacing-xs);
   width: 100%;
+  box-sizing: border-box;
 }
 
 .commentInput {
   flex: 1;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border: 1px solid var(--border-main);
-  border-radius: var(--radius-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid var(--border-main);
+  border-radius: var(--radius-md);
   background-color: var(--bg-app);
   color: var(--text-main);
+  font-family: inherit;
   font-size: var(--font-sm);
+  font-weight: var(--weight-medium);
   outline: none;
-  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  resize: vertical;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .commentInput::placeholder {
-  color: var(--text-muted);
+  color: var(--color-text-muted-placeholder);
   opacity: 1;
 }
 
@@ -30,25 +35,25 @@
 }
 
 .commentInput:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 3px solid var(--color-primary);
   outline-offset: 2px;
-}
-
-.commentInput:disabled {
-  opacity: 0.6;
 }
 
 .submitBtn {
   background-color: var(--color-primary);
   color: var(--btn-action-text, #ffffff);
-  border: none;
+  border: 2px solid transparent;
   padding: var(--spacing-xs) var(--spacing-md);
   border-radius: var(--radius-full);
   font-size: var(--font-xs);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   cursor: pointer;
   outline: none;
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, outline 0.2s ease;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .submitBtn:hover:not(:disabled) {
@@ -56,15 +61,17 @@
 }
 
 .submitBtn:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 3px solid var(--color-primary);
   outline-offset: 2px;
 }
 
+.commentInput:disabled,
 .submitBtn:disabled {
-  background-color: var(--bg-app);
-  color: var(--text-muted);
-  border: 1px solid var(--border-main);
+  background-color: var(--bg-disabled) !important;
+  color: var(--text-disabled) !important;
+  border-color: var(--border-main) !important;
   cursor: not-allowed;
+  opacity: 1;
 }
 
 .visuallyHidden {

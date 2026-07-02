@@ -12,7 +12,6 @@ export default function NewCommentForm({ postId, onCommentCreated }) {
 
     try {
       setIsSubmitting(true);
-      // Constructing dynamic absolute path targeting your backend architecture
       const response = await customFetch(`/api/comments/post/${postId}`, {
         method: 'POST',
         headers: {
@@ -22,24 +21,24 @@ export default function NewCommentForm({ postId, onCommentCreated }) {
       });
 
       if (!response.ok) throw new Error('Failed to publish comment.');
-      
+
       const data = await response.json();
       const cleanCommentNode = data.comment ? data.comment : data;
       onCommentCreated(cleanCommentNode);
       setContent('');
     } catch (err) {
-      alert(err.message);
+      console.error('Comment creation execution exception:', err);
+      alert(err.message || 'Failed to publish comment. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className={styles.formContainer} data-testid="new-comment-form">
+    <form onSubmit={handleSubmit} className={styles.formContainer} data-testid="new-comment-form" noValidate>
       <label htmlFor={`comment-input-${postId}`} className={styles.visuallyHidden}>
         Write a response to this post
       </label>
-
       <textarea
         id={`comment-input-${postId}`}
         value={content}
@@ -47,12 +46,13 @@ export default function NewCommentForm({ postId, onCommentCreated }) {
         placeholder="Write a comment..."
         className={styles.commentInput}
         data-testid="new-comment-input"
+        disabled={isSubmitting}
         required
+        rows={1}
       />
-
-      <button 
-        type="submit" 
-        disabled={isSubmitting || !content.trim()} 
+      <button
+        type="submit"
+        disabled={isSubmitting || !content.trim()}
         className={styles.submitBtn}
         data-testid="comment-submit-btn"
       >

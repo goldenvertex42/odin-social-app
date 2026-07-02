@@ -8,7 +8,7 @@ vi.mock('../../../utils/api/api', () => ({
 }));
 import { customFetch } from '../../../utils/api/api';
 
-describe('NewCommentForm Component Module', () => {
+describe('NewCommentForm Component Module Suite', () => {
   const mockOnCommentCreated = vi.fn();
 
   beforeEach(() => {
@@ -22,7 +22,7 @@ describe('NewCommentForm Component Module', () => {
     
     const input = screen.getByLabelText(/Write a response to this post/i);
     const submitBtn = screen.getByRole('button', { name: /Reply/i });
-
+    
     expect(input).toBeInTheDocument();
     expect(input.value).toBe('');
     expect(submitBtn).toBeDisabled();
@@ -33,7 +33,7 @@ describe('NewCommentForm Component Module', () => {
     
     const input = screen.getByLabelText(/Write a response to this post/i);
     const submitBtn = screen.getByRole('button', { name: /Reply/i });
-
+    
     fireEvent.change(input, { target: { value: 'Valid comment content text string asset' } });
     
     expect(input.value).toBe('Valid comment content text string asset');
@@ -43,25 +43,29 @@ describe('NewCommentForm Component Module', () => {
   it('submits data via customFetch absolute endpoints and unboxes the nested backend comment row object cleanly', async () => {
     const mockEnvelopePayload = {
       message: 'Comment posted successfully.',
-      comment: { 
-        id: 'comment-uuid-777', 
-        content: 'Testing database row extraction parameters', 
-        postId: 'post-123' 
-      }
+      comment: { id: 'comment-uuid-777', content: 'Testing database row extraction parameters', postId: 'post-123' }
     };
-
-    vi.mocked(customFetch).mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockEnvelopePayload
+    
+    let resolveNetworkPromise;
+    const networkPromise = new Promise((resolve) => {
+      resolveNetworkPromise = () => resolve({ ok: true, json: async () => mockEnvelopePayload });
     });
+    vi.mocked(customFetch).mockReturnValueOnce(networkPromise);
 
     render(<NewCommentForm postId="post-123" onCommentCreated={mockOnCommentCreated} />);
     
     const input = screen.getByLabelText(/Write a response to this post/i);
     const form = screen.getByTestId('new-comment-form');
+    const submitBtn = screen.getByRole('button', { name: /reply/i });
 
     fireEvent.change(input, { target: { value: 'Testing database row extraction parameters' } });
     fireEvent.submit(form);
+
+    expect(input).toBeDisabled();
+    expect(submitBtn).toBeDisabled();
+    expect(submitBtn).toHaveTextContent(/replying.../i);
+
+    resolveNetworkPromise();
 
     await waitFor(() => {
       expect(customFetch).toHaveBeenCalledTimes(1);
@@ -76,7 +80,8 @@ describe('NewCommentForm Component Module', () => {
     });
 
     expect(mockOnCommentCreated).toHaveBeenCalledWith(mockEnvelopePayload.comment);
-
+    
+    expect(input).not.toBeDisabled();
     expect(input.value).toBe('');
   });
 });
