@@ -1,6 +1,6 @@
 .commentContainer {
   background: var(--bg-surface);
-  border: 1px solid var(--border-main);
+  border: 2px solid var(--border-main);
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
   display: flex;
@@ -21,11 +21,23 @@
   gap: var(--spacing-sm);
 }
 
-.commentAvatar {
+.commentAvatar, .commentAvatarFallback {
   width: 32px;
   height: 32px;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-full, 50%);
   object-fit: cover;
+  flex-shrink: 0;
+}
+
+.commentAvatarFallback {
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+  font-weight: var(--weight-bold);
+  font-size: var(--font-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-main);
 }
 
 .metaBlock {
@@ -35,10 +47,11 @@
 
 .authorProfileLink {
   font-size: var(--font-sm);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   color: var(--text-main);
   text-decoration: none;
   border-radius: var(--radius-sm);
+  transition: color 0.15s ease;
 }
 
 .authorProfileLink:hover {
@@ -48,8 +61,8 @@
 
 .timestamp {
   font-size: var(--font-xs);
-  color: var(--text-main);
-  opacity: 0.85;
+  color: var(--color-text-muted-placeholder, var(--text-muted));
+  font-weight: var(--weight-medium);
 }
 
 .commentBody {
@@ -60,69 +73,160 @@
 
 .contentParagraph {
   margin: 0;
+  white-space: pre-wrap;
 }
 
+/* ==========================================================================
+   🚨 INLINE DELETION GUARDRAIL SYSTEM
+   ========================================================================== */
+.deleteGuardrailWrapper {
+  display: inline-flex;
+  align-items: center;
+}
+
+.deleteButton {
+  background: var(--bg-surface);
+  border: 2px solid var(--border-main);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-main);
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  height: 28px;
+  width: 28px;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.deleteButton:hover:not(:disabled) {
+  color: var(--color-error);
+  background-color: var(--bg-hover);
+  border-color: var(--color-error);
+}
+
+.deleteButton:disabled {
+  background-color: var(--bg-disabled);
+  color: var(--text-disabled);
+  border-color: var(--border-main);
+  cursor: not-allowed;
+}
+
+.inlineVerifyGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background-color: var(--bg-app);
+  border: 2px solid var(--border-main);
+  padding: 2px var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  animation: inlineFadeIn 0.15s ease-out;
+}
+
+.verifyPrompt {
+  font-size: var(--font-xs);
+  color: var(--color-error);
+  font-weight: var(--weight-bold);
+  padding-left: 2px;
+}
+
+.inlineConfirmBtn, .inlineCancelBtn {
+  font-size: var(--font-xs);
+  font-weight: var(--weight-bold);
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.inlineConfirmBtn {
+  background-color: var(--color-error);
+  color: var(--btn-action-text, #ffffff);
+}
+
+.inlineConfirmBtn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.inlineCancelBtn {
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+  border-color: var(--border-main);
+}
+
+.inlineCancelBtn:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+}
+
+.inlineConfirmBtn:disabled, .inlineCancelBtn:disabled {
+  background-color: var(--bg-disabled);
+  color: var(--text-disabled);
+  border-color: var(--border-main);
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   🌟 SANITIZED COMMENT ACTIONS & HIGHER CONTRAST BUTTONS
+   ========================================================================== */
 .commentFooter {
   display: flex;
   align-items: center;
   margin-top: var(--spacing-xs);
 }
 
-/* 🎯 1. BASE STATIC BUTTON STATES */
-.likeButton, .deleteButton {
-  background: transparent;
-  border: none;
+.likeButton {
+  background: var(--bg-surface);
+  border: 2px solid var(--border-main);
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: var(--spacing-xs);
   color: var(--text-main);
-  opacity: 0.8;
-  padding: var(--spacing-xs);
-  border-radius: var(--radius-sm);
-  transition: color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
-}
-
-.likeButton:hover {
-  background-color: var(--bg-hover);
-  color: var(--text-main);
-  opacity: 1;
-}
-
-.activeLikedState {
-  color: var(--text-main) !important;
   font-weight: var(--weight-bold);
-  opacity: 1;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-xs);
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 
-.activeLikedState .heartIcon {
-  color: var(--color-error) !important;
-  fill: var(--color-error) !important;
+.likeButton:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+  border-color: var(--color-primary);
 }
 
-.likeButton .likeCounter,
-.activeLikedState .likeCounter {
-  color: var(--text-main) !important;
-  font-weight: var(--weight-semibold);
-}
-
-
-.deleteButton {
-  justify-content: center;
-}
-
-.deleteButton:hover:not(:disabled) {
-  color: var(--color-error);
-  background-color: rgba(239, 68, 68, 0.08);
-  opacity: 1;
-}
-
-.deleteButton:disabled {
-  opacity: 0.4;
+.likeButton:disabled {
+  background-color: var(--bg-disabled);
+  color: var(--text-disabled);
+  border-color: var(--border-main);
   cursor: not-allowed;
 }
 
-.deleteButton:focus-visible, .likeButton:focus-visible, .authorProfileLink:focus-visible {
-  outline: 2px solid var(--color-primary);
+.commentFooter button.activeLikedState {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background-color: var(--bg-hover);
+}
+
+.heartIcon {
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.likeButton:hover:not(:disabled) .heartIcon {
+  transform: scale(1.15);
+}
+
+.deleteButton:focus-visible, 
+.authorProfileLink:focus-visible, 
+.inlineConfirmBtn:focus-visible, 
+.inlineCancelBtn:focus-visible, 
+.likeButton:focus-visible {
+  outline: 3px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+@keyframes inlineFadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
 }

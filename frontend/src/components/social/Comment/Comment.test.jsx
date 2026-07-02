@@ -34,10 +34,13 @@ describe('Comment Feature Component Module', () => {
         <Comment comment={mockCommentData} currentUserId="user-uuid-222" postOwnerId="post-owner-id" />
       </MemoryRouter>
     );
-
     expect(screen.getByText('Bruce Wayne')).toBeInTheDocument();
     expect(screen.getByText('This is a test comment message stream string.')).toBeInTheDocument();
     expect(screen.getByText('1')).toBeInTheDocument();
+    
+    const avatar = screen.getByTestId('comment-user-avatar');
+    expect(avatar).toBeInTheDocument();
+    expect(avatar).toHaveAttribute('src', 'https://cloudinary.com');
   });
 
   it('highlights the active like style state when currentUserId matches a like item within actions', () => {
@@ -46,7 +49,6 @@ describe('Comment Feature Component Module', () => {
         <Comment comment={mockCommentData} currentUserId="user-uuid-111" postOwnerId="post-owner-id" />
       </MemoryRouter>
     );
-
     const likeBtn = screen.getByRole('button', { name: /unlike comment/i });
     expect(likeBtn.className).toContain('activeLikedState');
   });
@@ -56,11 +58,7 @@ describe('Comment Feature Component Module', () => {
       { id: 'like-1', commentId: 'comment-uuid-456', userId: 'user-uuid-111' },
       { id: 'like-2', commentId: 'comment-uuid-456', userId: 'user-uuid-222' }
     ];
-
-    vi.mocked(customFetch).mockResolvedValueOnce({ 
-      ok: true, 
-      json: async () => updatedLikesPayload 
-    });
+    vi.mocked(customFetch).mockResolvedValueOnce({ ok: true, json: async () => updatedLikesPayload });
 
     render(
       <MemoryRouter>
@@ -74,37 +72,37 @@ describe('Comment Feature Component Module', () => {
     await waitFor(() => {
       expect(customFetch).toHaveBeenCalledTimes(1);
     });
-
     expect(customFetch).toHaveBeenCalledWith('/api/likes/comment/comment-uuid-456', { method: 'POST' });
 
     const updatedCounter = await screen.findByText('2');
     expect(updatedCounter).toBeInTheDocument();
   });
 
-  it('renders a delete button and handles network actions when currentUserId matches comment authorId', async () => {
-    vi.mocked(customFetch).mockResolvedValueOnce({
-      ok: true,
-      status: 204,
-      text: async () => ''
-    });
-
+  it('renders a delete button and handles network actions after stepping through the inline confirmation guardrail', async () => {
+    vi.mocked(customFetch).mockResolvedValueOnce({ ok: true, status: 204, text: async () => '' });
     const deleteMockCallback = vi.fn();
 
     render(
       <MemoryRouter>
         <Comment 
           comment={mockCommentData} 
-          currentUserId="user-uuid-999"
+          currentUserId="user-uuid-999" 
           postOwnerId="post-owner-id" 
-          onDeleteSuccess={deleteMockCallback}
+          onDeleteSuccess={deleteMockCallback} 
         />
       </MemoryRouter>
     );
 
     const deleteBtn = screen.getByTestId('delete-comment-btn');
     expect(deleteBtn).toBeInTheDocument();
-
+    
     fireEvent.click(deleteBtn);
+    
+    const inlineGroup = screen.getByRole('group', { name: /confirm comment deletion/i });
+    expect(inlineGroup).toBeInTheDocument();
+
+    const confirmActionBtn = screen.getByRole('button', { name: /^yes$/i });
+    fireEvent.click(confirmActionBtn);
 
     await waitFor(() => {
       expect(customFetch).toHaveBeenCalledWith('/api/comments/comment-uuid-456', { method: 'DELETE' });
@@ -112,30 +110,28 @@ describe('Comment Feature Component Module', () => {
     });
   });
 
-  it('renders a delete button and handles moderation paths when currentUserId matches parent postOwnerId', async () => {
-    vi.mocked(customFetch).mockResolvedValueOnce({
-      ok: true,
-      status: 204,
-      text: async () => ''
-    });
-
+  it('renders a delete button and handles moderation paths after stepping through the inline confirmation guardrail', async () => {
+    vi.mocked(customFetch).mockResolvedValueOnce({ ok: true, status: 204, text: async () => '' });
     const deleteMockCallback = vi.fn();
 
     render(
       <MemoryRouter>
         <Comment 
           comment={mockCommentData} 
-          currentUserId="post-owner-id"
+          currentUserId="post-owner-id" 
           postOwnerId="post-owner-id" 
-          onDeleteSuccess={deleteMockCallback}
+          onDeleteSuccess={deleteMockCallback} 
         />
       </MemoryRouter>
     );
 
     const deleteBtn = screen.getByTestId('delete-comment-btn');
     expect(deleteBtn).toBeInTheDocument();
-
+    
     fireEvent.click(deleteBtn);
+
+    const confirmActionBtn = screen.getByRole('button', { name: /^yes$/i });
+    fireEvent.click(confirmActionBtn);
 
     await waitFor(() => {
       expect(customFetch).toHaveBeenCalledWith('/api/comments/comment-uuid-456', { method: 'DELETE' });
@@ -146,14 +142,9 @@ describe('Comment Feature Component Module', () => {
   it('hides the delete button when currentUserId matches neither comment author nor post owner', () => {
     render(
       <MemoryRouter>
-        <Comment 
-          comment={mockCommentData} 
-          currentUserId="user-uuid-stranger"
-          postOwnerId="post-owner-id" 
-        />
+        <Comment comment={mockCommentData} currentUserId="user-uuid-stranger" postOwnerId="post-owner-id" />
       </MemoryRouter>
     );
-
     expect(screen.queryByTestId('delete-comment-btn')).not.toBeInTheDocument();
   });
 });
