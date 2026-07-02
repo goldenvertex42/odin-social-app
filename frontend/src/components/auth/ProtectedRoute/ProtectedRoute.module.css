@@ -8,28 +8,31 @@
   align-items: center;
   height: 100vh;
   background-color: var(--bg-app);
+  padding: var(--spacing-md);
+  box-sizing: border-box;
 }
 
 .spinner {
   width: 44px;
   height: 44px;
-  border: 4px solid var(--border-main);
+  border: 4px solid var(--text-muted);
   border-top-color: var(--color-primary);
   border-radius: var(--radius-full);
   animation: spin 1s linear infinite;
+  flex-shrink: 0;
 }
 
 .text {
   margin-top: var(--spacing-md);
   font-size: var(--font-sm);
-  color: var(--text-main); 
-  font-weight: var(--weight-medium);
+  color: var(--text-main);
+  font-weight: var(--weight-bold);
+  text-align: center;
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* ==========================================================================
@@ -38,7 +41,7 @@
 .appContainer {
   display: flex;
   flex-direction: column;
-  height: 100dvh; 
+  height: 100dvh;
   width: 100%;
   box-sizing: border-box;
   overflow: hidden;
@@ -57,9 +60,8 @@
   flex: 1;
   width: 100%;
   padding: var(--spacing-md);
-  overflow-y: auto; 
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  
   background-color: var(--bg-app);
 }
 
@@ -67,10 +69,9 @@
   width: 100%;
   height: var(--nav-height, 60px);
   flex-shrink: 0;
-  background-color: var(--bg-sidebar);
-  border-top: 1px solid var(--border-main);
+  background-color: var(--bg-sidebar, var(--bg-surface));
+  border-top: 2px solid var(--border-main);
   z-index: 90;
-  
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
@@ -82,8 +83,8 @@
     display: grid;
     grid-template-rows: var(--nav-height, 60px) 1fr;
     grid-template-columns: var(--sidebar-width, 240px) 1fr;
-    grid-template-areas:
-      "header header"
+    grid-template-areas: 
+      "header header" 
       "sidebar main";
     height: 100vh;
     overflow: hidden;
@@ -98,7 +99,7 @@
     grid-area: main;
     overflow-y: auto;
     padding: var(--spacing-lg);
-    height: calc(100vh - var(--nav-height, 60px))
+    height: calc(100vh - var(--nav-height, 60px));
   }
 
   .sidebarArea {
@@ -109,8 +110,8 @@
     width: var(--sidebar-width, 240px);
     height: 100%;
     border-top: none;
-    border-right: 1px solid var(--border-main);
+    /* Hardened: Consistent border parameters across dynamic layout modifications */
+    border-right: 2px solid var(--border-main);
     padding-bottom: 0;
   }
 }
-

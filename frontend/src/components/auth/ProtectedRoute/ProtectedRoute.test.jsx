@@ -3,7 +3,6 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router';
 import ProtectedRoute from './ProtectedRoute';
 
-// Construct dynamic context mock state hooks
 let mockUser = null;
 let mockLoading = true;
 
@@ -11,7 +10,6 @@ vi.mock('../../../context/AuthContext/AuthContext', () => ({
   useAuth: () => ({ user: mockUser, loading: mockLoading })
 }));
 
-// Mock new structural layout child components to prevent sub-route leaks
 vi.mock('../../layout/Header/Header', () => ({
   default: () => <div data-testid="mock-header">Application Header</div>
 }));
@@ -39,12 +37,16 @@ describe('ProtectedRoute Security Perimeter Suite', () => {
     );
 
     expect(screen.getByTestId('route-loader')).toBeInTheDocument();
-    expect(screen.getByText(/synchronizing/i)).toBeInTheDocument();
+    
+    const liveAnnouncement = screen.getByRole('status');
+    expect(liveAnnouncement).toBeInTheDocument();
+    expect(liveAnnouncement).toHaveTextContent(/synchronizing social session graph/i);
+    
     expect(screen.queryByText('Dashboard')).not.toBeInTheDocument();
   });
 
   it('should redirect unauthenticated users to the login route when token is missing', () => {
-    mockLoading = false; // Sync finished, user is missing
+    mockLoading = false;
     mockUser = null;
 
     render(
@@ -76,12 +78,13 @@ describe('ProtectedRoute Security Perimeter Suite', () => {
       </MemoryRouter>
     );
 
-    // Verify security perimeter is bypassed
     expect(screen.getByText('Dashboard Protected Feed Content')).toBeInTheDocument();
     expect(screen.queryByTestId('route-loader')).not.toBeInTheDocument();
 
-    // Verify layout orchestration frame components render cleanly alongside the feed content
     expect(screen.getByTestId('mock-header')).toBeInTheDocument();
+    
+    const sidebarComplementaryRail = screen.getByRole('complementary', { name: /application navigation rail/i });
+    expect(sidebarComplementaryRail).toBeInTheDocument();
     expect(screen.getByTestId('mock-sidebar')).toBeInTheDocument();
   });
 });
