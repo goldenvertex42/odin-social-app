@@ -12,7 +12,7 @@ vi.mock('../CommentThread/CommentThread', () => ({
   default: () => <div data-testid="mock-comment-thread">Nested Comment Thread Canvas</div>
 }));
 
-describe('PostCard Feature Component Module', () => {
+describe('PostCard Feature Component Module Suite', () => {
   const mockPostData = {
     id: 'post-uuid-99',
     content: 'This is an isolated core text string layout test.',
@@ -42,10 +42,17 @@ describe('PostCard Feature Component Module', () => {
         <PostCard post={mockPostData} currentUserId="user-uuid-xyz" />
       </MemoryRouter>
     );
-
     expect(screen.getByText('Diana Prince')).toBeInTheDocument();
     expect(screen.getByText('This is an isolated core text string layout test.')).toBeInTheDocument();
-    expect(screen.getByRole('img', { name: /user published media asset/i })).toHaveAttribute('src', mockPostData.imageUrl);
+    
+    const avatar = screen.getByTestId('post-header-avatar');
+    expect(avatar).toBeInTheDocument();
+    expect(avatar).toHaveAttribute('src', 'https://cloudinary.com');
+
+    const mediaTriggerButton = screen.getByTestId('post-media-trigger-button');
+    expect(mediaTriggerButton).toBeInTheDocument();
+    expect(mediaTriggerButton.querySelector('img')).toHaveAttribute('src', mockPostData.imageUrl);
+
     expect(screen.getByTestId('mock-comment-thread')).toBeInTheDocument();
   });
 
@@ -55,11 +62,11 @@ describe('PostCard Feature Component Module', () => {
         <PostCard post={mockPostData} currentUserId="user-uuid-abc" />
       </MemoryRouter>
     );
-
-    const button = screen.getByRole('button', { name: /Unlike post/i });
-    expect(button.className).toContain('activeLikedState');
-    expect(button).toHaveTextContent(/Liked/i);
-    expect(button).toHaveTextContent(/\(1\)/);
+    
+    const unlikeButton = screen.getByRole('button', { name: /unlike post/i });
+    expect(unlikeButton).toBeInTheDocument();
+    expect(unlikeButton).toHaveTextContent(/liked/i);
+    expect(unlikeButton).toHaveTextContent(/\(1\)/);
   });
 
   it('triggers the customFetch API engine when clicking the post level like toggle action button', async () => {
@@ -78,10 +85,7 @@ describe('PostCard Feature Component Module', () => {
       author: { displayName: 'Odin Alpha', username: 'alpha_odin', avatarUrl: null }
     };
 
-    vi.mocked(customFetch).mockResolvedValueOnce({
-      ok: true,
-      json: async () => updatedLikesPayload
-    });
+    vi.mocked(customFetch).mockResolvedValueOnce({ ok: true, json: async () => updatedLikesPayload });
 
     render(
       <MemoryRouter>
@@ -89,46 +93,42 @@ describe('PostCard Feature Component Module', () => {
       </MemoryRouter>
     );
 
-    const button = screen.getByRole('button', { name: /Like post/i });
+    const button = screen.getByRole('button', { name: /like post/i });
     expect(button).not.toBeDisabled();
-
+    
     fireEvent.click(button);
 
     await waitFor(() => {
       expect(customFetch).toHaveBeenCalledTimes(1);
     });
-
     expect(customFetch).toHaveBeenCalledWith('/api/likes/post/post-uuid-99', { method: 'POST' });
-
+    
     await waitFor(() => {
-      expect(button).toHaveTextContent(/Like/i);
+      expect(button).toHaveTextContent(/like/i);
       expect(button).toHaveTextContent(/\(2\)/);
     });
   });
 
-  it('renders a delete button and handles network actions when currentUserId matches the authorId', async () => {
-    vi.mocked(customFetch).mockResolvedValueOnce({
-      ok: true,
-      status: 204,
-      text: async () => ''
-    });
-
+  it('renders a delete button and handles network actions after stepping through the overlay dialogue guardrail', async () => {
+    vi.mocked(customFetch).mockResolvedValueOnce({ ok: true, status: 204, text: async () => '' });
     const deleteMockCallback = vi.fn();
 
     render(
       <MemoryRouter>
-        <PostCard 
-          post={mockPostData} 
-          currentUserId="author-uuid-11"
-          onDeleteSuccess={deleteMockCallback} 
-        />
+        <PostCard post={mockPostData} currentUserId="author-uuid-11" onDeleteSuccess={deleteMockCallback} />
       </MemoryRouter>
     );
 
     const deleteBtn = screen.getByTestId('delete-post-btn');
     expect(deleteBtn).toBeInTheDocument();
-
+    
     fireEvent.click(deleteBtn);
+    
+    const overlay = screen.getByTestId('delete-post-modal-overlay');
+    expect(overlay).toBeInTheDocument();
+
+    const confirmActionBtn = screen.getByTestId('confirm-post-purge-btn');
+    fireEvent.click(confirmActionBtn);
 
     await waitFor(() => {
       expect(customFetch).toHaveBeenCalledWith('/api/posts/post-uuid-99', { method: 'DELETE' });

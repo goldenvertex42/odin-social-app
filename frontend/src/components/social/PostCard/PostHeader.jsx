@@ -16,43 +16,32 @@ export default function PostHeader({ post, currentUserId, onDeleteSuccess, headi
   const targetCurrentUserId = typeof currentUserId === 'object' ? currentUserId?.id : currentUserId;
   const postAuthorId = typeof post.authorId === 'object' ? post.authorId?.id : post.authorId;
   const isAuthor = String(targetCurrentUserId) === String(postAuthorId);
-
-  const isFirstRender = useRef(true);
+  const wasModalOpenRef = useRef(false);
 
   useEffect(() => {
     if (isModalOpen) {
       cancelBtnRef.current?.focus();
       document.body.style.overflow = 'hidden';
+      wasModalOpenRef.current = true;
     } else {
       document.body.style.overflow = '';
-      
-      if (isFirstRender.current) {
-        isFirstRender.current = false;
-        return;
-      }
-
-      if (!isDeleting) {
+      if (wasModalOpenRef.current && !isDeleting) {
         triggerBtnRef.current?.focus();
       }
+      wasModalOpenRef.current = false;
     }
-    
-    return () => {
-      document.body.style.overflow = '';
-    };
+    return () => { document.body.style.overflow = ''; };
   }, [isModalOpen, isDeleting]);
-
 
   const handleModalKeyDown = (e) => {
     if (e.key === 'Escape') {
       closeModal();
       return;
     }
-
     if (e.key === 'Tab' && modalRef.current) {
       const focusables = modalRef.current.querySelectorAll('button');
       const firstElement = focusables[0];
       const lastElement = focusables[focusables.length - 1];
-
       if (e.shiftKey) {
         if (document.activeElement === firstElement) {
           lastElement.focus();
@@ -73,13 +62,10 @@ export default function PostHeader({ post, currentUserId, onDeleteSuccess, headi
     setError('');
   };
 
-  const handleDeletePost = async (e) => {
-    if (e) e.stopPropagation();
+  const handleDeletePost = async () => {
     if (isDeleting) return;
-    
     setIsDeleting(true);
     setError('');
-
     try {
       const response = await customFetch(`/api/posts/${post.id}`, { method: 'DELETE' });
       if (response.ok) {
@@ -98,12 +84,7 @@ export default function PostHeader({ post, currentUserId, onDeleteSuccess, headi
   const formatFriendlyTimestamp = (dateString) => {
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString(undefined, { 
-        month: 'short', 
-        day: 'numeric', 
-        hour: '2-digit', 
-        minute: '2-digit' 
-      });
+      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     } catch {
       return 'Recent';
     }
@@ -115,7 +96,6 @@ export default function PostHeader({ post, currentUserId, onDeleteSuccess, headi
     <div className={styles.cardHeader}>
       <Link 
         to={`/users/${postAuthorId}`} 
-        onClick={(e) => e.stopPropagation()} 
         className={styles.authorProfileBlockLink} 
         aria-label={`View ${post.author?.displayName || post.author?.username || 'User'}'s profile`}
       >
@@ -125,13 +105,13 @@ export default function PostHeader({ post, currentUserId, onDeleteSuccess, headi
             alt="" 
             className={styles.authorAvatar} 
             referrerPolicy="no-referrer" 
+            data-testid="post-header-avatar"
           />
         ) : (
-          <div className={styles.authorAvatarFallback} aria-hidden="true">
+          <div className={styles.authorAvatarFallback} aria-hidden="true" data-testid="header-avatar-fallback">
             {(post.author?.displayName || post.author?.username || '?').charAt(0).toUpperCase()}
           </div>
         )}
-        
         <div className={styles.metaText}>
           <Heading className={styles.authorProfileNameText}>
             {post.author?.displayName || post.author?.username || 'Unknown User'}
@@ -144,15 +124,12 @@ export default function PostHeader({ post, currentUserId, onDeleteSuccess, headi
 
       {isAuthor && (
         <button 
-          ref={triggerBtnRef}
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsModalOpen(true);
-          }} 
+          ref={triggerBtnRef} 
+          type="button" 
+          onClick={() => setIsModalOpen(true)} 
           disabled={isDeleting} 
           className={styles.deleteButton} 
-          aria-label="Open post deletion dialogue"
+          aria-label="Open post deletion dialogue" 
           data-testid="delete-post-btn"
         >
           <Trash2 className={styles.trashIcon} size={16} aria-hidden="true" />
@@ -160,54 +137,32 @@ export default function PostHeader({ post, currentUserId, onDeleteSuccess, headi
       )}
 
       {isModalOpen && (
-        <div 
-          className={styles.modalOverlay} 
-          onClick={closeModal}
-          data-testid="delete-post-modal-overlay"
-        >
-          <div
-            ref={modalRef}
-            className={styles.modalContent}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="delete-post-dialog-title"
-            aria-describedby="delete-post-dialog-desc"
-            onKeyDown={handleModalKeyDown}
+        <div className={styles.modalOverlay} onClick={closeModal} data-testid="delete-post-modal-overlay">
+          <div 
+            ref={modalRef} 
+            className={styles.modalContent} 
+            role="dialog" 
+            aria-modal="true" 
+            aria-labelledby="delete-post-dialog-title" 
+            aria-describedby="delete-post-dialog-desc" 
+            onKeyDown={handleModalKeyDown} 
             onClick={(e) => e.stopPropagation()}
           >
             <header className={styles.modalHeader}>
               <AlertTriangle className={styles.warningIcon} size={22} aria-hidden="true" />
               <h3 id="delete-post-dialog-title" className={styles.modalHeading}>Delete Post?</h3>
             </header>
-
             <div className={styles.modalBody}>
               <p id="delete-post-dialog-desc" className={styles.modalWarningText}>
-                Are you sure you want to permanently erase this post entry? This will immediately clear attached media bundles and remove all relational comment records within your database ecosystem.
+                Are you sure you want to permanently erase this post entry? This will immediately clear attached media data bundles and drop all relational nested comment strings within your database ecosystem.
               </p>
-              {error && (
-                <p className={styles.modalErrorMsg} role="alert">
-                  {error}
-                </p>
-              )}
+              {error && <p className={styles.modalErrorMsg} role="alert">{error}</p>}
             </div>
-
             <footer className={styles.modalActionFooter}>
-              <button
-                ref={cancelBtnRef}
-                type="button"
-                onClick={closeModal}
-                disabled={isDeleting}
-                className={styles.modalCancelBtn}
-              >
+              <button ref={cancelBtnRef} type="button" onClick={closeModal} disabled={isDeleting} className={styles.modalCancelBtn}>
                 Cancel
               </button>
-              <button
-                type="button"
-                onClick={handleDeletePost}
-                disabled={isDeleting}
-                className={styles.modalConfirmDeleteBtn}
-                data-testid="confirm-post-purge-btn"
-              >
+              <button type="button" onClick={handleDeletePost} disabled={isDeleting} className={styles.modalConfirmDeleteBtn} data-testid="confirm-post-purge-btn">
                 {isDeleting ? 'Deleting...' : 'Permanently Delete'}
               </button>
             </footer>

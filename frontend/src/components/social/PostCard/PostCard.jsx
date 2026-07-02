@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import PostHeader from './PostHeader';
 import PostMedia from './PostMedia';
 import PostActions from './PostActions';
@@ -8,8 +8,8 @@ import styles from './PostCard.module.css';
 export default function PostCard({ post, currentUserId, onDeleteSuccess, headingLevel = 'h2' }) {
   const navigate = useNavigate();
   const location = useLocation();
+  
   const isStandaloneView = location.pathname === `/posts/${post.id}`;
-
   const postAuthorId = typeof post.authorId === 'object' ? post.authorId?.id : post.authorId;
 
   const handleCardNavigation = () => {
@@ -19,31 +19,36 @@ export default function PostCard({ post, currentUserId, onDeleteSuccess, heading
   };
 
   return (
-    <article 
-      onClick={handleCardNavigation} 
-      className={`${styles.cardContainer} ${!isStandaloneView ? styles.clickableCard : ''}`} 
-      data-testid="post-card"
-    >
+    <article className={styles.cardContainer} data-testid="post-card">
+      {!isStandaloneView && (
+        <button 
+          type="button" 
+          onClick={handleCardNavigation} 
+          className={styles.surfaceOverlayBlockClick}
+          aria-label={`Open full thread discussion for post by ${post.author?.displayName || 'User'}`}
+        />
+      )}
+
       <PostHeader 
         post={post} 
         currentUserId={currentUserId} 
-        onDeleteSuccess={onDeleteSuccess}
+        onDeleteSuccess={onDeleteSuccess} 
         headingLevel={headingLevel} 
       />
-
+      
       <div className={styles.cardBody}>
         <p className={styles.textContent}>{post.content}</p>
         <PostMedia imageUrl={post.imageUrl} />
       </div>
 
       <PostActions 
-        postId={post.id}
-        initialLikes={post.likes}
-        currentUserId={currentUserId}
-        isStandaloneView={isStandaloneView}
+        postId={post.id} 
+        initialLikes={post.likes} 
+        currentUserId={currentUserId} 
+        isStandaloneView={isStandaloneView} 
       />
 
-      <section className={styles.commentThreadSection} aria-label="Post replies stream" onClick={(e) => e.stopPropagation()}>
+      <section className={styles.commentThreadSection} aria-label="Post replies stream">
         <h3 className={styles.commentStreamTitle}>
           Comments ({post.comments?.length || 0})
         </h3>
@@ -51,7 +56,7 @@ export default function PostCard({ post, currentUserId, onDeleteSuccess, heading
           postId={post.id} 
           comments={post.comments} 
           currentUserId={currentUserId} 
-          postOwnerId={postAuthorId}
+          postOwnerId={postAuthorId} 
         />
       </section>
     </article>

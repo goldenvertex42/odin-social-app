@@ -1,4 +1,5 @@
 .cardContainer {
+  position: relative;
   background-color: var(--bg-surface);
   border: 2px solid var(--border-main);
   border-radius: var(--radius-md);
@@ -6,23 +7,30 @@
   margin-bottom: var(--spacing-md);
   box-sizing: border-box;
   box-shadow: 0 4px 12px var(--shadow-color);
-  outline: none;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
-.clickableCard {
+.surfaceOverlayBlockClick {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  border: none;
   cursor: pointer;
+  z-index: 5;
+  border-radius: var(--radius-md);
 }
 
-.clickableCard:hover {
-  transform: translateY(-2px);
+.cardContainer:hover {
   box-shadow: 0 6px 16px var(--shadow-color);
-  border-color: var(--border-hover, var(--color-primary));
+  border-color: var(--color-primary);
 }
 
-.clickableCard:focus-visible {
-  outline: 3px solid var(--color-primary);
-  outline-offset: 3px;
+.cardHeader, .cardBody, .cardFooter, .commentThreadSection {
+  position: relative;
+  z-index: 10;
 }
 
 .cardHeader {
@@ -41,7 +49,6 @@
   color: inherit;
   border-radius: var(--radius-sm);
   outline: none;
-  transition: box-shadow 0.15s ease;
 }
 
 .authorProfileBlockLink:focus-visible {
@@ -54,13 +61,23 @@
   color: var(--color-primary);
 }
 
-.authorAvatar {
+.authorAvatar, .authorAvatarFallback {
   width: 44px;
   height: 44px;
   border-radius: var(--radius-full, 50%);
   object-fit: cover;
   border: 2px solid var(--border-main);
   flex-shrink: 0;
+}
+
+.authorAvatarFallback {
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+  font-weight: var(--weight-bold);
+  font-size: var(--font-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .metaText {
@@ -73,7 +90,6 @@
   font-weight: var(--weight-bold);
   font-size: var(--font-base);
   color: var(--text-main);
-  transition: color 0.15s ease;
 }
 
 .postTimestamp {
@@ -98,16 +114,9 @@
 }
 
 .deleteButton:hover:not(:disabled) {
-  color: var(--color-text-critical, var(--color-error));
-  background-color: var(--color-bg-danger-zone-opaque, var(--bg-hover));
+  color: var(--color-error);
+  background-color: var(--bg-hover);
   border-color: var(--color-error);
-}
-
-.deleteButton:disabled {
-  background-color: var(--color-bg-disabled);
-  color: var(--color-text-disabled);
-  border-color: var(--color-border-disabled);
-  cursor: not-allowed;
 }
 
 .deleteButton:focus-visible {
@@ -115,8 +124,11 @@
   outline-offset: 2px;
 }
 
-.trashIcon {
-  flex-shrink: 0;
+.deleteButton:disabled {
+  background-color: var(--bg-disabled) !important;
+  color: var(--text-disabled) !important;
+  border-color: var(--border-main) !important;
+  cursor: not-allowed;
 }
 
 .cardBody {
@@ -132,16 +144,20 @@
 }
 
 .imageWrapper {
+  display: block;
+  width: 100%;
+  background: transparent;
+  padding: 0;
   margin-top: var(--spacing-sm);
   border-radius: var(--radius-sm);
   overflow: hidden;
   border: 2px solid var(--border-main);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  outline: none;
+  transition: border-color 0.2s ease;
 }
 
 .imageWrapper:hover {
-  transform: scale(1.005);
   border-color: var(--color-primary);
 }
 
@@ -163,11 +179,11 @@
   align-items: center;
   border-top: 2px solid var(--border-main);
   border-bottom: 2px solid var(--border-main);
-  padding: var(--spacing-xs) 0;
+  padding: var(--spacing-sm) 0;
   margin-bottom: var(--spacing-md);
 }
 
-.likeActionButton, .threadLinkBtn {
+.likeActionButton {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -178,27 +194,35 @@
   border-radius: var(--radius-sm);
   font-size: var(--font-sm);
   color: var(--text-main);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   outline: none;
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-.likeActionButton:hover, .threadLinkBtn:hover {
+.threadLinkBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-sm);
+  color: var(--color-text-muted-placeholder, var(--text-muted));
+  font-weight: var(--weight-bold);
+  padding: var(--spacing-xs) var(--spacing-md);
+}
+
+.likeActionButton:hover {
   background-color: var(--bg-hover);
-  color: var(--text-main);
   border-color: var(--border-main);
 }
 
-.likeActionButton:focus-visible, .threadLinkBtn:focus-visible {
+.likeActionButton:focus-visible {
   outline: 3px solid var(--color-primary);
   outline-offset: 2px;
 }
 
 .cardFooter button.activeLikedState {
   color: var(--color-primary);
-  font-weight: var(--weight-bold);
   border-color: var(--color-primary);
-  background-color: var(--color-accent, var(--bg-hover));
+  background-color: var(--bg-hover);
 }
 
 .commentThreadSection {
@@ -219,7 +243,7 @@
   transition: transform 0.15s ease;
 }
 
-.likeActionButton:hover .actionIcon, .threadLinkBtn:hover .actionIcon {
+.likeActionButton:hover .actionIcon {
   transform: scale(1.15) rotate(-5deg);
 }
 
@@ -228,6 +252,9 @@
   line-height: 1;
 }
 
+/* ==========================================================================
+   🚨 OVERLAY MODAL PERIMETER LAYOUT DEFINITIONS
+   ========================================================================== */
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -263,7 +290,7 @@
 }
 
 .warningIcon {
-  color: var(--color-text-critical);
+  color: var(--color-error);
 }
 
 .modalHeading {
@@ -288,7 +315,7 @@
 
 .modalErrorMsg {
   font-size: var(--font-sm);
-  color: var(--color-text-critical);
+  color: var(--color-error);
   font-weight: var(--weight-bold);
   margin: 0;
 }
@@ -317,13 +344,13 @@
 
 .modalConfirmDeleteBtn {
   background-color: var(--color-error);
-  color: var(--color-text-on-error, #ffffff);
+  color: var(--btn-action-text, #ffffff);
 }
 
 .modalConfirmDeleteBtn:disabled {
-  background-color: var(--color-bg-disabled-danger);
-  color: var(--color-text-disabled-danger);
-  border-color: var(--color-border-disabled-danger);
+  background-color: var(--bg-disabled) !important;
+  color: var(--text-disabled) !important;
+  border-color: var(--border-main) !important;
   cursor: not-allowed;
 }
 
@@ -335,4 +362,9 @@
 .modalConfirmDeleteBtn:focus-visible {
   outline: 3px solid var(--color-error);
   outline-offset: 2px;
+}
+
+.surfaceOverlayBlockClick:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: -4px;
 }

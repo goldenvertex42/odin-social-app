@@ -10,24 +10,24 @@ export default function PostMedia({ imageUrl }) {
 
   return (
     <>
-      <div className={styles.imageWrapper} onClick={(e) => {
-          e.stopPropagation();
-          setIsOpen(true);
-        }}>
+      <button 
+        type="button"
+        className={styles.imageWrapper} 
+        onClick={() => setIsOpen(true)}
+        aria-label="Expand image details view overlay panel"
+        data-testid="post-media-trigger-button"
+      >
         <img 
           src={imageUrl} 
-          alt="User published media asset" 
+          alt=""
           className={styles.mediaAsset} 
-          referrerPolicy="no-referrer"
+          referrerPolicy="no-referrer" 
           onError={() => setHasError(true)} 
         />
-      </div>
-
+      </button>
+      
       {isOpen && (
-        <ImageModal 
-          imageUrl={imageUrl} 
-          onClose={() => setIsOpen(false)} 
-        />
+        <ImageModal imageUrl={imageUrl} onClose={() => setIsOpen(false)} />
       )}
     </>
   );
