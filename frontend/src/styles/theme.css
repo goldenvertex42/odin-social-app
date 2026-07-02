@@ -48,6 +48,8 @@
   --bg-hover: #cbd5e1;
   --color-primary: #1d4ed8;
   --color-primary-hover: #1e40af;
+  --color-accent: #0f172a;
+  --color-text-active: #ffffff;
   --btn-action-text: #ffffff;
   --color-success: #166534;
   --color-error: #c2410c;
@@ -65,6 +67,8 @@
   --bg-hover: #151e2e;
   --color-primary: #60a5fa;
   --color-primary-hover: #93c5fd;
+  --color-accent: #1e293b;
+  --color-text-active: #3b82f6;
   --btn-action-text: #0f172a;
   --color-success: #4ade80;
   --color-error: #f87171;
@@ -84,6 +88,8 @@
   --bg-hover: #d8dee9;
   --color-primary: #2b788c;
   --color-primary-hover: #205c6d;
+  --color-accent: #2e3440;
+  --color-text-active: #ffffff;
   --btn-action-text: #ffffff;
   --color-success: #166534;
   --color-error: #be123c;
@@ -101,6 +107,8 @@
   --bg-hover: #434c5e;
   --color-primary: #88c0d0;
   --color-primary-hover: #8fbcbb;
+  --color-accent: #3b4252;
+  --color-text-active: #88c0d0;
   --btn-action-text: #2e3440;
   --color-success: #4ade80;
   --color-error: #f87171;
@@ -120,6 +128,8 @@
   --bg-hover: #fecdd3;
   --color-primary: #be123c;
   --color-primary-hover: #9f1239;
+  --color-accent: #4c0519;
+  --color-text-active: #ffffff;
   --btn-action-text: #ffffff;
   --color-success: #15803d;
   --color-error: #be123c;
@@ -137,7 +147,9 @@
   --bg-hover: #3d1d2b;
   --color-primary: #fda4af;
   --color-primary-hover: #fecdd3;
-  --btn-action-text: #2c0511; /* Corrected variable name syntax alignment pass */
+  --color-accent: #27141a;
+  --color-text-active: #fb7185;
+  --btn-action-text: #2c0511;
   --color-success: #4ade80;
   --color-error: #f87171;
   --bg-disabled: #170d12;
@@ -156,6 +168,8 @@
   --bg-hover: #ccd100;
   --color-primary: #bc003f;
   --color-primary-hover: #91002e;
+  --color-accent: #000000;
+  --color-text-active: #fffb00;
   --btn-action-text: #ffffff;
   --color-success: #15803d;
   --color-error: #bc003f;
@@ -173,6 +187,8 @@
   --bg-hover: #16162e;
   --color-primary: #ff3377;
   --color-primary-hover: #ff6699;
+  --color-accent: #151522;
+  --color-text-active: #ff0055;
   --btn-action-text: #030307;
   --color-success: #00ff66;
   --color-error: #ff0055;
@@ -192,6 +208,8 @@
   --bg-hover: #e2e8f0;
   --color-primary: #4338ca;
   --color-primary-hover: #3730a3;
+  --color-accent: #111827;
+  --color-text-active: #ffffff;
   --btn-action-text: #ffffff;
   --color-success: #15803d;
   --color-error: #ef4444;
@@ -209,6 +227,8 @@
   --bg-hover: #161f30;
   --color-primary: #a5b4fc;
   --color-primary-hover: #c7d2fe;
+  --color-accent: #1f2937;
+  --color-text-active: #60a5fa;
   --btn-action-text: #030712;
   --color-success: #10b981;
   --color-error: #f87171;
@@ -228,6 +248,8 @@
   --bg-hover: #a7f3d0;
   --color-primary: #047857;
   --color-primary-hover: #065f46;
+  --color-accent: #042f2e;
+  --color-text-active: #ffffff;
   --btn-action-text: #ffffff;
   --color-success: #15803d;
   --color-error: #ef4444;
@@ -245,6 +267,8 @@
   --bg-hover: #032b20;
   --color-primary: #52fda4;
   --color-primary-hover: #a7f3d0;
+  --color-accent: #064e3b;
+  --color-text-active: #2dd4bf;
   --btn-action-text: #022c22;
   --color-success: #10b981;
   --color-error: #f87171;
