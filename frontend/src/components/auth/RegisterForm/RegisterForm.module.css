@@ -1,17 +1,17 @@
 .wrapper {
   width: 100%;
   max-width: 400px;
-  margin: 0 auto;
+  margin: var(--spacing-xl) auto;
   padding: var(--spacing-lg);
   background-color: var(--bg-surface);
-  border: 1px solid var(--border-main);
+  border: 2px solid var(--border-main);
   border-radius: var(--radius-md);
   box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .title {
   font-size: var(--font-lg);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   color: var(--text-main);
   margin-bottom: var(--spacing-xs);
   text-align: center;
@@ -32,7 +32,7 @@
 .label {
   font-size: var(--font-sm);
   color: var(--text-main);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-bold);
 }
 
 .input {
@@ -40,10 +40,15 @@
   font-size: var(--font-base);
   background-color: var(--bg-app);
   color: var(--text-main);
-  border: 1px solid var(--border-main);
+  border: 2px solid var(--border-main);
   border-radius: var(--radius-sm);
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input::placeholder {
+  color: var(--color-text-muted-placeholder);
+  opacity: 1;
 }
 
 .input:focus {
@@ -51,18 +56,19 @@
 }
 
 .input:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 3px solid var(--color-primary);
   outline-offset: 2px;
 }
 
+/* Hardened High-Contrast Opaque Alert Banner Framework */
 .errorBanner {
   padding: var(--spacing-sm);
   font-size: var(--font-sm);
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: var(--bg-surface);
   color: var(--color-error);
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  border: 2px solid var(--color-error);
   border-radius: var(--radius-sm);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-bold);
 }
 
 .submitBtn, .oauthBtn {
@@ -70,13 +76,13 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 44px; /* Mobile ergonomics touch target parameter hook */
+  height: 44px;
   font-size: var(--font-sm);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background-color 0.2s ease, opacity 0.2s ease, outline 0.2s ease;
-  border: none;
+  border: 2px solid transparent;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .submitBtn {
@@ -84,7 +90,7 @@
   color: var(--btn-action-text);
 }
 
-.submitBtn:hover {
+.submitBtn:hover:not(:disabled) {
   background-color: var(--color-primary-hover);
 }
 
@@ -95,54 +101,46 @@
   color: var(--text-muted);
   font-size: var(--font-xs);
   margin: var(--spacing-xs) 0;
+  font-weight: var(--weight-semibold);
 }
 
 .divider::before, .divider::after {
   content: '';
   flex: 1;
-  border-bottom: 1px solid var(--border-main);
+  border-bottom: 2px solid var(--border-main);
 }
 
-.divider:not(:empty)::before {
-  margin-right: .5em;
-}
-
-.divider:not(:empty)::after {
-  margin-left: .5em;
-}
+.divider:not(:empty)::before { margin-right: .5em; }
+.divider:not(:empty)::after { margin-left: .5em; }
 
 .oauthBtn {
   background-color: var(--bg-app);
   color: var(--text-main);
-  border: 1px solid var(--border-main);
+  border: 2px solid var(--border-main);
   text-decoration: none;
   gap: var(--spacing-xs);
-  transition: background-color 0.2s ease, color 0.2s ease, outline 0.2s ease;
 }
 
-.oauthBtn:hover {
+.oauthBtn:hover:not([aria-disabled="true"]) {
   background-color: var(--bg-hover);
-  color: var(--text-main);
 }
 
 .googleIcon {
-  width: 18px;
-  height: 18px;
-  display: block;
-  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .footerText {
   text-align: center;
   font-size: var(--font-sm);
   color: var(--text-muted);
+  font-weight: var(--weight-medium);
   margin-top: var(--spacing-xs);
 }
 
 .link {
   color: var(--color-primary);
   text-decoration: none;
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-bold);
 }
 
 .link:hover {
@@ -150,12 +148,15 @@
 }
 
 .submitBtn:focus-visible, .oauthBtn:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 3px solid var(--color-primary);
   outline-offset: 2px;
 }
 
-.submitBtn:disabled, .disabledLink {
-  opacity: 0.6;
-  pointer-events: none;
+.submitBtn:disabled, .oauthBtn[aria-disabled="true"] {
+  background-color: var(--bg-disabled) !important;
+  color: var(--text-disabled) !important;
+  border-color: var(--border-main) !important;
   cursor: not-allowed;
+  opacity: 1;
+  pointer-events: none;
 }
