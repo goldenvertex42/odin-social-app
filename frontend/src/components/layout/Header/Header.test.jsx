@@ -4,12 +4,10 @@ import { MemoryRouter } from 'react-router';
 import { useAuth } from '../../../context/AuthContext/AuthContext';
 import Header from './Header';
 
-// Construct dynamic module-level variables for flexible test case overrides
 let mockUser = null;
 let mockLoading = false;
 const mockLogout = vi.fn();
 
-// Target the explicit custom hook export pathway exactly as defined in your context file
 vi.mock('../../../context/AuthContext/AuthContext', () => ({
   useAuth: () => ({
     user: mockUser,
@@ -26,15 +24,18 @@ describe('Header Feature Component Suite', () => {
   });
 
   afterEach(() => {
-    cleanup(); // Wipe JSDOM tree to prevent state bleeding
+    cleanup();
   });
 
-  it('renders branding links and fallback unauthenticated controls when session is null', () => {
+  it('renders branding links, global landmark banners, and unauthenticated controls', () => {
     render(
       <MemoryRouter>
         <Header />
       </MemoryRouter>
     );
+
+    const globalBanner = screen.getByRole('banner', { name: /global application banner/i });
+    expect(globalBanner).toBeInTheDocument();
 
     expect(screen.getByText('SocialSphere')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /sign in/i })).toBeInTheDocument();
@@ -42,11 +43,10 @@ describe('Header Feature Component Suite', () => {
   });
 
   it('renders custom avatar and displayName greeting when user object is populated', () => {
-    // Inject a simulated Prisma user model payload matching your database configuration
-    mockUser = {
-      id: 'user-uuid-111',
-      displayName: 'Bruce Wayne',
-      avatarUrl: 'https://cloudinary.com'
+    mockUser = { 
+      id: 'user-uuid-111', 
+      displayName: 'Bruce Wayne', 
+      avatarUrl: 'https://cloudinary.com' 
     };
 
     render(
@@ -56,17 +56,33 @@ describe('Header Feature Component Suite', () => {
     );
 
     expect(screen.getByText('Bruce Wayne')).toBeInTheDocument();
-    const avatar = screen.getByAltText("Bruce Wayne's profile");
-    expect(avatar).toHaveAttribute('src', 'https://cloudinary.com');
+    
+    const avatarImage = screen.getByTestId('user-avatar-image');
+    expect(avatarImage).toBeInTheDocument();
+    expect(avatarImage).toHaveAttribute('src', 'https://cloudinary.com');
+    
     expect(screen.getByRole('button', { name: /log out/i })).toBeInTheDocument();
   });
 
-  it('dispatches the context logout action sequence when the session close button is clicked', () => {
-    mockUser = {
-      id: 'user-uuid-111',
-      displayName: 'Bruce Wayne',
-      avatarUrl: null
+  it('renders an accessible fallback initial circle when the user avatarUrl returns null', () => {
+    mockUser = { 
+      id: 'user-uuid-111', 
+      displayName: 'Clark Kent', 
+      avatarUrl: null 
     };
+
+    render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('C')).toBeInTheDocument();
+    expect(screen.queryByRole('img', { hidden: true })).not.toBeInTheDocument();
+  });
+
+  it('dispatches the context logout action sequence when the session close button is clicked', () => {
+    mockUser = { id: 'user-uuid-111', displayName: 'Bruce Wayne', avatarUrl: null };
 
     render(
       <MemoryRouter>
@@ -76,7 +92,7 @@ describe('Header Feature Component Suite', () => {
 
     const logoutButton = screen.getByRole('button', { name: /log out/i });
     fireEvent.click(logoutButton);
-
+    
     expect(mockLogout).toHaveBeenCalledTimes(1);
   });
 });

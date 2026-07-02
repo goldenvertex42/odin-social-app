@@ -4,7 +4,7 @@
   align-items: center;
   padding: 0 var(--spacing-md);
   background-color: var(--bg-surface);
-  border-bottom: 1px solid var(--border-main);
+  border-bottom: 2px solid var(--border-main);
   height: var(--nav-height, 60px);
   box-sizing: border-box;
 }
@@ -19,21 +19,19 @@
   align-items: center;
   gap: var(--spacing-xs);
   text-decoration: none;
+  border-radius: var(--radius-sm);
+  outline: none;
 }
 
 .logoIcon {
-  width: 22px !important;
-  height: 22px !important;
   flex-shrink: 0;
-  stroke-width: 2.25px;
   color: var(--color-primary);
   transition: transform 0.2s ease;
 }
 
 .logoLink:hover .logoIcon {
-  transform: rotate(15deg) scale(1.05); /* Interactive subtle micro-animation hook */
+  transform: rotate(15deg) scale(1.05);
 }
-
 
 .logoText {
   display: none;
@@ -59,86 +57,98 @@
   gap: var(--spacing-xs);
 }
 
-.userAvatar {
+.userAvatar, .userAvatarFallback {
   width: 32px;
   height: 32px;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-full, 50%);
   object-fit: cover;
-  border: 1px solid var(--border-main);
+  border: 2px solid var(--border-main);
+  flex-shrink: 0;
+}
+
+.userAvatarFallback {
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+  font-weight: var(--weight-bold);
+  font-size: var(--font-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .userNameDisplay {
   display: block;
   font-size: var(--font-sm);
   color: var(--text-main);
+  font-weight: var(--weight-medium);
 }
 
 .boldName {
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
 }
 
 .logoutButton {
-  background-color: transparent;
-  border: 1px solid var(--border-main);
+  background-color: var(--bg-surface);
+  border: 2px solid var(--border-main);
   color: var(--text-main);
   padding: 6px var(--spacing-xs);
   border-radius: var(--radius-sm);
   font-size: var(--font-xs);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-bold);
   cursor: pointer;
   white-space: nowrap;
-  transition: background-color 0.2s ease, border-color 0.2s ease, outline 0.2s ease;
+  outline: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .logoutButton:hover {
   background-color: var(--bg-hover);
   border-color: var(--color-primary);
-  color: var(--text-main);
-}
-
-.logoutButton:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
 }
 
 .guestPrompts .loginLink {
   text-decoration: none;
   font-size: var(--font-sm);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   color: var(--color-primary);
   white-space: nowrap;
+  border-radius: var(--radius-sm);
+  outline: none;
 }
 
 .guestPrompts .loginLink:hover {
   text-decoration: underline;
 }
 
+.logoLink:focus-visible,
+.logoutButton:focus-visible,
+.guestPrompts .loginLink:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 4px;
+}
+
 /* ==========================================================================
-   DESKTOP VIEWPORT OVERRIDES (Restores full textual elements)
+   DESKTOP VIEWPORT OVERRIDES (Restores full textual elements via scale constants)
    ========================================================================== */
 @media (min-width: 520px) {
   .headerContainer {
-    padding: 0 var(--spacing-lg); /* Restores wide margins */
+    padding: 0 var(--spacing-lg);
   }
 
   .logoText {
-    display: block; /* Reveals brand text safely */
+    display: block;
   }
 
   .authenticatedUser {
-    gap: var(--spacing-lg); /* Restores wide desktop gaps */
+    gap: var(--spacing-lg);
   }
 
-  .userAvatar {
+  .userAvatar, .userAvatarFallback {
     width: 36px;
     height: 36px;
   }
 
-  .userNameDisplay {
-    display: block; /* Reveals username info text strings */
-  }
-
   .logoutButton {
-    padding: 6px var(--spacing-sm); /* Restores full desktop click margins */
+    padding: 6px var(--spacing-sm);
   }
 }
