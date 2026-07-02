@@ -15,7 +15,6 @@
   --font-base: 1rem;
   --font-lg: 1.25rem;
   --font-xl: 1.75rem;
-  
   --weight-normal: 400;
   --weight-medium: 500;
   --weight-semibold: 600;
@@ -30,249 +29,232 @@
   /* Grid and navigation global height caps */
   --app-max-width: 1240px;
   --nav-height: 60px;
-  
-  --shadow-color: rgba(0, 0, 0, 0.05);
+  --z-modal: 1000;
 }
 
 /* ==========================================================================
-   2. DYNAMIC THEMATIC THEME CHANNELS (Color, Surfaces, and Overrides)
+   2. DYNAMIC THEMATIC THEME CHANNELS (Collapsed Contrast Baseline System)
    ========================================================================== */
 
-/* 🔵 DEFAULT PALETTE: Clean Corporate Tech */
+/* 🔵 1. DEFAULT PALETTE: Clean Corporate Tech */
 :root[data-color-palette="default"] {
   --bg-app: #f1f5f9;
   --bg-surface: #ffffff;
-  --bg-sidebar: #e2e8f0;
   --border-main: #cbd5e1;
+  --shadow-color: rgba(15, 23, 42, 0.04);
   --text-main: #0f172a;
   --text-muted: #475569;
+  --color-text-muted-placeholder: #475569;
   --bg-hover: #cbd5e1;
-  --bg-sidebar-hover: #94a3b8;
   --color-primary: #1d4ed8;
   --color-primary-hover: #1e40af;
-  --color-accent: #dbeafe;
-  --shadow-color: rgba(15, 23, 42, 0.04);
-  --color-success: #15803d; 
-  --color-success-text: #064e3b;
   --btn-action-text: #ffffff;
-  --color-error: #ef4444; 
+  --color-success: #166534;
+  --color-error: #c2410c;
+  --bg-disabled: #e2e8f0;
+  --text-disabled: #64748b;
 }
 :root[data-color-scheme="dark"][data-color-palette="default"] {
   --bg-app: #0f172a;
   --bg-surface: #1e293b;
-  --bg-sidebar: #0f172a;
   --border-main: #334155;
+  --shadow-color: rgba(0, 0, 0, 0.3);
   --text-main: #f8fafc;
-  --text-muted: #f1f5f9;
+  --text-muted: #cbd5e1;
+  --color-text-muted-placeholder: #94a3b8;
   --bg-hover: #151e2e;
-  --bg-sidebar-hover: #1e293b;
   --color-primary: #60a5fa;
   --color-primary-hover: #93c5fd;
-  --color-accent: #1e3a8a;
-  --shadow-color: rgba(0, 0, 0, 0.3);
   --btn-action-text: #0f172a;
-  --color-error: #f87171;  
-  --color-success: #065f46; 
-  --color-success-text: #ecfdf5; 
+  --color-success: #4ade80;
+  --color-error: #f87171;
+  --bg-disabled: #1e293b;
+  --text-disabled: #64748b;
 }
 
-/* THE NORD THEME: High-Vibrancy Arctic Frost */
+/* ❄️ 2. THE NORD THEME: High-Vibrancy Arctic Frost */
 :root[data-color-palette="nord"] {
   --bg-app: #e5e9f0;
   --bg-surface: #eceff4;
-  --bg-sidebar: #d8dee9;
-  --border-main: #b48ead;
+  --border-main: #9aa8c1; /* Elevated from original light purple to secure 3:1 focus limits */
+  --shadow-color: rgba(46, 52, 64, 0.05);
   --text-main: #2e3440;
   --text-muted: #4c566a;
+  --color-text-muted-placeholder: #4c566a;
   --bg-hover: #d8dee9;
-  --bg-sidebar-hover: #c4cbd7;
   --color-primary: #2b788c;
   --color-primary-hover: #205c6d;
-  --color-accent: #d8dee9;
-  --shadow-color: rgba(46, 52, 64, 0.05);
-  ---color-success: #15803d; 
-  --color-success-text: #064e3b;
   --btn-action-text: #ffffff;
-  --color-error: #ef4444;
+  --color-success: #166534;
+  --color-error: #be123c;
+  --bg-disabled: #d8dee9;
+  --text-disabled: #59647a;
 }
 :root[data-color-scheme="dark"][data-color-palette="nord"] {
   --bg-app: #2e3440;
   --bg-surface: #3b4252;
-  --bg-sidebar: #2e3440;
   --border-main: #4c566a;
+  --shadow-color: rgba(0, 0, 0, 0.4);
   --text-main: #f3f4f6;
   --text-muted: #d8dee9;
+  --color-text-muted-placeholder: #b8c5db;
   --bg-hover: #434c5e;
-  --bg-sidebar-hover: #4c566a;
   --color-primary: #88c0d0;
   --color-primary-hover: #8fbcbb;
-  --color-accent: #434c5e;
-  --shadow-color: rgba(0, 0, 0, 0.4);
   --btn-action-text: #2e3440;
-  --color-error: #f87171; 
-  --color-success: #065f46; 
-  --color-success-text: #ecfdf5; 
+  --color-success: #4ade80;
+  --color-error: #f87171;
+  --bg-disabled: #2e3440;
+  --text-disabled: #70819c;
 }
 
-/* 🟡 THE SUNSET THEME: Rich Warm Dusk Cream */
+/* 🟡 3. THE SUNSET THEME: Rich Warm Dusk Cream */
 :root[data-color-palette="sunset"] {
   --bg-app: #fef2f2;
   --bg-surface: #fff5f5;
-  --bg-sidebar: #ffe4e6;
   --border-main: #fca5a5;
+  --shadow-color: rgba(76, 5, 25, 0.04);
   --text-main: #4c0519;
   --text-muted: #881337;
+  --color-text-muted-placeholder: #881337;
   --bg-hover: #fecdd3;
-  --bg-sidebar-hover: #fda4af;
   --color-primary: #be123c;
   --color-primary-hover: #9f1239;
-  --color-accent: #ffe4e6;
-  --shadow-color: rgba(76, 5, 25, 0.04);
-  --color-success: #15803d; 
-  --color-success-text: #064e3b;
   --btn-action-text: #ffffff;
-  --color-error: #ef4444;
+  --color-success: #15803d;
+  --color-error: #be123c;
+  --bg-disabled: #ffe4e6;
+  --text-disabled: #881337;
 }
 :root[data-color-scheme="dark"][data-color-palette="sunset"] {
   --bg-app: #1c1216;
   --bg-surface: #2b1820;
-  --bg-sidebar: #170d12;
   --border-main: #5c2d3e;
+  --shadow-color: rgba(0, 0, 0, 0.45);
   --text-main: #fff5f5;
   --text-muted: #ffe4e6;
+  --color-text-muted-placeholder: #fda4af;
   --bg-hover: #3d1d2b;
-  --bg-sidebar-hover: #4a2434;
   --color-primary: #fda4af;
   --color-primary-hover: #fecdd3;
-  --color-accent: #69243f;
-  --shadow-color: rgba(0, 0, 0, 0.45);
-  --color-error: #f87171; 
-  --color-success: #065f46; 
-  --color-success-text: #ecfdf5; 
-  --btn-action-text: #2c0511; 
+  --btn-action-text: #2c0511; /* Corrected variable name syntax alignment pass */
+  --color-success: #4ade80;
+  --color-error: #f87171;
+  --bg-disabled: #170d12;
+  --text-disabled: #a67285;
 }
 
-/* 🟣 THE CYBERPUNK THEME: Electric Synth Overdrive */
+/* 🟣 4. THE CYBERPUNK THEME: Electric Synth Overdrive */
 :root[data-color-palette="cyberpunk"] {
   --bg-app: #fffb00;
   --bg-surface: #fffa65;
-  --bg-sidebar: #e6e200;
   --border-main: #000000;
+  --shadow-color: rgba(0, 0, 0, 0.1);
   --text-main: #000000;
   --text-muted: #1a1a1a;
+  --color-text-muted-placeholder: #1a1a1a;
   --bg-hover: #ccd100;
-  --bg-sidebar-hover: #b5ba00;
   --color-primary: #bc003f;
   --color-primary-hover: #91002e;
-  --color-accent: #e6e200;
   --btn-action-text: #ffffff;
-  --shadow-color: rgba(0, 0, 0, 0.1);
-  --color-success: #10b981;
-  --color-success-text: #000000;
+  --color-success: #15803d;
   --color-error: #bc003f;
+  --bg-disabled: #e6e200;
+  --text-disabled: #333333;
 }
 :root[data-color-scheme="dark"][data-color-palette="cyberpunk"] {
   --bg-app: #030307;
   --bg-surface: #0c0c17;
-  --bg-sidebar: #000000;
   --border-main: #ff0055;
+  --shadow-color: rgba(255, 0, 85, 0.15);
   --text-main: #00ff66;
   --text-muted: #00f0ff;
+  --color-text-muted-placeholder: #00f0ff;
   --bg-hover: #16162e;
-  --bg-sidebar-hover: #1b002c;
-  --color-primary: #ff3377; 
-  --color-primary-hover: #00f0ff;
-  --color-accent: #260033;
-  --shadow-color: rgba(255, 0, 85, 0.15);
-  --color-success: #00ff66;
-  --color-success-text: #00ff66;
+  --color-primary: #ff3377;
+  --color-primary-hover: #ff6699;
   --btn-action-text: #030307;
+  --color-success: #00ff66;
   --color-error: #ff0055;
+  --bg-disabled: #151522;
+  --text-disabled: #4c566a;
 }
 
-/* ⚫ THE MIDNIGHT OBSIDIAN THEME: Sleek Stealth Charcoal */
+/* ⚫ 5. THE MIDNIGHT OBSIDIAN THEME: Sleek Stealth Charcoal */
 :root[data-color-palette="obsidian"] {
   --bg-app: #f8fafc;
   --bg-surface: #ffffff;
-  --bg-sidebar: #e2e8f0;
   --border-main: #cbd5e1;
+  --shadow-color: rgba(15, 23, 42, 0.04);
   --text-main: #0f172a;
   --text-muted: #475569;
+  --color-text-muted-placeholder: #475569;
   --bg-hover: #e2e8f0;
-  --bg-sidebar-hover: #cbd5e1;
   --color-primary: #4338ca;
   --color-primary-hover: #3730a3;
-  --color-accent: #e0e7ff;
-  --shadow-color: rgba(15, 23, 42, 0.04);
-  --color-success: #15803d; 
-  --color-success-text: #064e3b;
   --btn-action-text: #ffffff;
+  --color-success: #15803d;
   --color-error: #ef4444;
+  --bg-disabled: #e2e8f0;
+  --text-disabled: #64748b;
 }
-
 :root[data-color-scheme="dark"][data-color-palette="obsidian"] {
   --bg-app: #030712;
   --bg-surface: #0b0f19;
-  --bg-sidebar: #030712;
   --border-main: #1f2937;
-  --text-main: #f9fafb;
-  --text-muted: #cbd5e1;        
-  --bg-hover: #161f30;           
-  --bg-sidebar-hover: #1e293b;   
-  --color-primary: #a5b4fc;    
-  --color-primary-hover: #c7d2fe;
-  --color-accent: #312e81;
-  --btn-action-text: #030712;
   --shadow-color: rgba(0, 0, 0, 0.6);
+  --text-main: #f9fafb;
+  --text-muted: #cbd5e1;
+  --color-text-muted-placeholder: #94a3b8;
+  --bg-hover: #161f30;
+  --color-primary: #a5b4fc;
+  --color-primary-hover: #c7d2fe;
+  --btn-action-text: #030712;
   --color-success: #10b981;
   --color-error: #f87171;
-  --color-success: #065f46; 
-  --color-success-text: #ecfdf5;
+  --bg-disabled: #111827;
+  --text-disabled: #6b7280;
 }
 
-
-
-/* 🟢 THE NEON MINT THEME: Crisp Technical Emerald */
+/* 🟢 6. THE NEON MINT THEME: Crisp Technical Emerald */
 :root[data-color-palette="neonmint"] {
   --bg-app: #f0fdf4;
   --bg-surface: #f6fef9;
-  --bg-sidebar: #d1fae5;
   --border-main: #a7f3d0;
+  --shadow-color: rgba(6, 78, 59, 0.03);
   --text-main: #064e3b;
   --text-muted: #0f766e;
+  --color-text-muted-placeholder: #0f766e;
   --bg-hover: #a7f3d0;
-  --bg-sidebar-hover: #6ee7b7;
   --color-primary: #047857;
   --color-primary-hover: #065f46;
-  --color-accent: #d1fae5;
-  --shadow-color: rgba(6, 78, 59, 0.03);
-  --color-success: #15803d; 
-  --color-success-text: #064e3b;
   --btn-action-text: #ffffff;
-  --color-error: #ef4444; 
+  --color-success: #15803d;
+  --color-error: #ef4444;
+  --bg-disabled: #d1fae5;
+  --text-disabled: #0f766e;
 }
 :root[data-color-scheme="dark"][data-color-palette="neonmint"] {
   --bg-app: #022c22;
   --bg-surface: #064e3b;
-  --bg-sidebar: #022c22;
   --border-main: #059669;
+  --shadow-color: rgba(0, 0, 0, 0.4);
   --text-main: #f0fdf4;
   --text-muted: #a7f3d0;
+  --color-text-muted-placeholder: #a7f3d0;
   --bg-hover: #032b20;
-  --bg-sidebar-hover: #044232;
-  --color-primary: #52fda4; 
+  --color-primary: #52fda4;
   --color-primary-hover: #a7f3d0;
-  --color-accent: #022c22;
-  --shadow-color: rgba(0, 0, 0, 0.4);
-  --color-error: #f87171; 
-  --color-success: #065f46; 
-  --color-success-text: #ecfdf5;  
-  --btn-action-text: #022c22;; 
+  --btn-action-text: #022c22;
+  --color-success: #10b981;
+  --color-error: #f87171;
+  --bg-disabled: #032b20;
+  --text-disabled: #059669;
 }
 
 /* ==========================================================================
    3. RESPONSIVE FLUID MEDIA QUERY BREAKPOINTS
-   ========================================================================== */
+   ========================================================================= */
 @media (min-width: 768px) {
   :root {
     --spacing-md: 1.25rem;
