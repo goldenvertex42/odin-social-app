@@ -1,19 +1,18 @@
 import { useEffect } from 'react';
 import styles from './ThemePreview.module.css';
+import { Sun, Moon, Palette, ChevronDown } from 'lucide-react';
 
-import { Sun, Moon, Palette } from 'lucide-react';
-
-export default function ThemePreviewFields({ scheme, palette, onSchemeChange, onPaletteChange }) {
+export default function ThemePreview({ scheme, palette, onSchemeChange, onPaletteChange }) {
   useEffect(() => {
     document.documentElement.setAttribute('data-color-scheme', scheme);
     document.documentElement.setAttribute('data-color-palette', palette);
   }, [scheme, palette]);
 
   return (
-    <section className={styles.sectionContainer}>
-      <h2 className={styles.heading}>Design Configuration</h2>
+    <section className={styles.sectionContainer} aria-labelledby="theme-config-heading">
+      <h2 id="theme-config-heading" className={styles.heading}>Design Configuration</h2>
+      
       <div className={styles.gridSplitter}>
-        
         <div className={styles.inputGroup}>
           <label htmlFor="colorScheme" className={styles.label}>Luminosity Preference</label>
           <div className={styles.selectWrapper}>
@@ -22,16 +21,19 @@ export default function ThemePreviewFields({ scheme, palette, onSchemeChange, on
             ) : (
               <Sun className={styles.fieldIcon} size={16} aria-hidden="true" />
             )}
-            <select
-              id="colorScheme"
-              value={scheme}
-              onChange={(e) => onSchemeChange(e.target.value)}
-              className={styles.select}
+            
+            <select 
+              id="colorScheme" 
+              value={scheme} 
+              onChange={(e) => onSchemeChange(e.target.value)} 
+              className={styles.select} 
               data-testid="scheme-select"
             >
               <option value="light">Light Mode</option>
               <option value="dark">Dark Mode</option>
             </select>
+            
+            <ChevronDown className={styles.dropdownArrowIcon} size={16} aria-hidden="true" />
           </div>
         </div>
 
@@ -39,11 +41,12 @@ export default function ThemePreviewFields({ scheme, palette, onSchemeChange, on
           <label htmlFor="colorPalette" className={styles.label}>Color Palette Theme</label>
           <div className={styles.selectWrapper}>
             <Palette className={styles.fieldIcon} size={16} aria-hidden="true" />
-            <select
-              id="colorPalette"
-              value={palette}
-              onChange={(e) => onPaletteChange(e.target.value)}
-              className={styles.select}
+            
+            <select 
+              id="colorPalette" 
+              value={palette} 
+              onChange={(e) => onPaletteChange(e.target.value)} 
+              className={styles.select} 
               data-testid="palette-select"
             >
               <option value="default">Default Blue</option>
@@ -53,9 +56,10 @@ export default function ThemePreviewFields({ scheme, palette, onSchemeChange, on
               <option value="obsidian">Obsidian Shadow</option>
               <option value="neonmint">Neon Mint</option>
             </select>
+            
+            <ChevronDown className={styles.dropdownArrowIcon} size={16} aria-hidden="true" />
           </div>
         </div>
-
       </div>
     </section>
   );

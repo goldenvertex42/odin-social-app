@@ -1,13 +1,13 @@
 .sectionContainer {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-main);
+  background-color: var(--bg-surface);
+  border: 2px solid var(--border-main);
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-  box-shadow: 0 4px 12px var(--shadow-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
 }
 
 .heading {
@@ -15,7 +15,7 @@
   font-weight: var(--weight-bold);
   margin: 0;
   color: var(--text-main);
-  border-bottom: 1px solid var(--border-main);
+  border-bottom: 2px solid var(--border-main);
   padding-bottom: var(--spacing-xs);
 }
 
@@ -35,13 +35,13 @@
 .inputGroup {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   width: 100%;
 }
 
 .label {
   font-size: var(--font-sm);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   color: var(--text-main);
 }
 
@@ -61,24 +61,34 @@
   transition: color 0.2s ease;
 }
 
+.dropdownArrowIcon {
+  position: absolute;
+  right: var(--spacing-sm);
+  color: var(--text-main);
+  pointer-events: none;
+  z-index: 10;
+  transition: transform 0.2s ease;
+}
+
 .select {
   width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) 38px;
-  border: 1px solid var(--border-main);
+  padding: var(--spacing-sm) 38px var(--spacing-sm) 38px;
+  border: 2px solid var(--border-main);
   border-radius: var(--radius-sm);
   background-color: var(--bg-app);
   color: var(--text-main);
   font-family: inherit;
   font-size: var(--font-sm);
+  font-weight: var(--weight-medium);
   outline: none;
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
 }
 
 .select option {
-  background-color: var(--bg-surface);
+  background-color: var(--bg-app);
   color: var(--text-main);
 }
 
@@ -87,6 +97,11 @@
 }
 
 .select:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 3px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+.selectWrapper:focus-within .dropdownArrowIcon {
+  transform: rotate(180deg);
+  color: var(--color-primary);
 }

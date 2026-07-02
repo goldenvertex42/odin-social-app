@@ -10,29 +10,38 @@ describe('ThemePreview Component Module', () => {
     vi.restoreAllMocks();
     mockOnSchemeChange.mockClear();
     mockOnPaletteChange.mockClear();
+    
+    document.documentElement.removeAttribute('data-color-scheme');
+    document.documentElement.removeAttribute('data-color-palette');
   });
 
-  it('renders dropdown controls with current active option weights', () => {
+  it('renders dropdown controls, landmark headings, and synchronizes document data attributes on mount', () => {
     render(
-      <ThemePreview
-        scheme="dark"
-        palette="nord"
-        onSchemeChange={mockOnSchemeChange}
-        onPaletteChange={mockOnPaletteChange}
+      <ThemePreview 
+        scheme="dark" 
+        palette="nord" 
+        onSchemeChange={mockOnSchemeChange} 
+        onPaletteChange={mockOnPaletteChange} 
       />
     );
 
+    const heading = screen.getByRole('heading', { name: /design configuration/i, level: 2 });
+    expect(heading).toBeInTheDocument();
+
     expect(screen.getByTestId('scheme-select').value).toBe('dark');
     expect(screen.getByTestId('palette-select').value).toBe('nord');
+
+    expect(document.documentElement.getAttribute('data-color-scheme')).toBe('dark');
+    expect(document.documentElement.getAttribute('data-color-palette')).toBe('nord');
   });
 
-  it('triggers real-time visual change handlers when selecting options', () => {
+  it('triggers real-time visual change handlers when selecting alternative options', () => {
     render(
-      <ThemePreview
-        scheme="light"
-        palette="default"
-        onSchemeChange={mockOnSchemeChange}
-        onPaletteChange={mockOnPaletteChange}
+      <ThemePreview 
+        scheme="light" 
+        palette="default" 
+        onSchemeChange={mockOnSchemeChange} 
+        onPaletteChange={mockOnPaletteChange} 
       />
     );
 
