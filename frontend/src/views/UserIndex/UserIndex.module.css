@@ -6,6 +6,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xl);
+  box-sizing: border-box;
 }
 
 .visuallyHidden {
@@ -21,10 +22,11 @@
 }
 
 .traySection {
-  background-color: var(--bg-app);
-  border: 1px dashed var(--border-main);
+  background-color: var(--bg-surface);
+  border: 2px solid var(--border-main); 
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
+  box-sizing: border-box;
 }
 
 .sectionHeading {
@@ -45,10 +47,9 @@
 .centeredState, .emptyMessage {
   text-align: center;
   padding: var(--spacing-xl) var(--spacing-lg);
-  color: var(--text-main);
-  opacity: 0.85;
+  color: var(--text-muted);
   font-size: var(--font-base);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-bold);
 }
 
 .emptyMessage {
@@ -58,16 +59,17 @@
 }
 
 .centeredState.error {
-  color: var(--text-main);
+  color: var(--color-error);
   background-color: var(--bg-surface);
-  border: 1px solid var(--border-main);
-  border-left: 4px solid var(--color-error);
+  border: 2px solid var(--border-main); 
+  border-left: 6px solid var(--color-error);
   border-radius: var(--radius-sm);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   box-shadow: 0 4px 12px var(--shadow-color);
   max-width: 600px;
   margin: 0 auto;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .trayLayoutSubgrid {
@@ -86,20 +88,18 @@
 
 .subHeading {
   font-size: var(--font-sm);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   color: var(--text-main);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin: 0;
 }
 
-/* Desktop Viewport Alignment Override Enhancement */
 @media (min-width: 860px) {
   .trayLayoutSubgrid {
     flex-direction: row;
     align-items: flex-start;
   }
-  
   .subTray {
     flex: 1;
   }
