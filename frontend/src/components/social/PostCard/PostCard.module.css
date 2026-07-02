@@ -209,7 +209,7 @@
   padding: var(--spacing-xs) var(--spacing-md);
   border-radius: var(--radius-sm);
   font-size: var(--font-sm);
-  color: var(--color-text-active) !important; 
+  color: var(--text-main); 
   font-weight: var(--weight-bold);
   text-decoration: none;
   outline: none;
@@ -221,7 +221,7 @@
 
 .threadLinkBtn:hover {
   background-color: var(--color-primary-hover) !important;
-  color: var(--btn-action-text, #ffffff) !important;
+  color: var(--color-action-text, #ffffff) !important;
   border-color: var(--color-primary-hover) !important;
 }
 
