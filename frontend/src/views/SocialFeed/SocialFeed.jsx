@@ -76,7 +76,7 @@ export default function SocialFeed() {
 
   return (
     <main className={styles.feedContainer} data-testid="feed-canvas">
-      <h1 className={styles.visuallyHidden}>Chronological Social Dashboard Feed</h1>
+      <h2 className={styles.visuallyHidden}>Chronological Social Dashboard Feed</h2>
       
       <NewPostForm onPostCreated={handlePostCreated} />
       
@@ -92,7 +92,7 @@ export default function SocialFeed() {
               post={post} 
               currentUserId={currentUser?.id} 
               onDeleteSuccess={handlePostDeleted} 
-              headingLevel="h2"
+              headingLevel="h3"
             />
           ))
         )}
