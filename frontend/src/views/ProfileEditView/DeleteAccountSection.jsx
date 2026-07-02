@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../../context/AuthContext/AuthContext';
 import { customFetch } from '../../utils/api/api';
@@ -13,49 +14,7 @@ export default function DeleteAccountSection({ isGuest }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState('');
 
-  const modalRef = useRef(null);
-  const triggerBtnRef = useRef(null);
-  const initialFocusRef = useRef(null);
-
-  useEffect(() => {
-    if (isModalOpen) {
-      initialFocusRef.current?.focus();
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-      triggerBtnRef.current?.focus();
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [isModalOpen]);
-
   if (isGuest) return null;
-
-  const handleModalKeyDown = (e) => {
-    if (e.key === 'Escape') {
-      closeModal();
-      return;
-    }
-
-    if (e.key === 'Tab' && modalRef.current) {
-      const focusables = modalRef.current.querySelectorAll('input, button');
-      if (focusables.length === 0) return;
-      
-      const firstElement = focusables[0];
-      const lastElement = focusables[focusables.length - 1];
-
-      if (e.shiftKey) {
-        if (document.activeElement === firstElement) {
-          lastElement.focus();
-          e.preventDefault();
-        }
-      } else {
-        if (document.activeElement === lastElement) {
-          firstElement.focus();
-          e.preventDefault();
-        }
-      }
-    }
-  };
 
   const closeModal = () => {
     if (isDeleting) return;
@@ -91,7 +50,6 @@ export default function DeleteAccountSection({ isGuest }) {
       </p>
       
       <button 
-        ref={triggerBtnRef}
         type="button" 
         onClick={() => setIsModalOpen(true)} 
         className={styles.triggerDeleteBtn} 
@@ -101,25 +59,22 @@ export default function DeleteAccountSection({ isGuest }) {
         <span>Delete Account</span>
       </button>
 
-      {isModalOpen && (
+      {isModalOpen && createPortal(
         <div 
           className={styles.modalOverlay} 
-          onClick={closeModal}
+          role="dialog" 
+          aria-modal="true" 
           data-testid="delete-modal"
+          aria-labelledby="delete-account-dialog-title"
+          aria-describedby="delete-account-dialog-desc"
+          onClick={closeModal}
         >
-          <div 
-            ref={modalRef}
-            className={styles.modalContent}
-            role="dialog" 
-            aria-modal="true" 
-            aria-labelledby="delete-account-dialog-title"
-            aria-describedby="delete-account-dialog-desc"
-            onKeyDown={handleModalKeyDown}
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <header className={styles.modalHeader}>
               <AlertTriangle className={styles.warningIcon} size={24} aria-hidden="true" />
-              <h3 id="delete-account-dialog-title" className={styles.modalHeading}>Absolute Action Required</h3>
+              <h3 id="delete-account-dialog-title" className={styles.modalHeading}>
+                Absolute Action Required
+              </h3>
             </header>
             
             <div className={styles.modalBody}>
@@ -131,7 +86,6 @@ export default function DeleteAccountSection({ isGuest }) {
                 Type your username <strong>{user?.username}</strong> to confirm:
               </label>
               <input 
-                ref={initialFocusRef}
                 id="confirmUsername" 
                 type="text" 
                 value={confirmationText} 
@@ -145,12 +99,7 @@ export default function DeleteAccountSection({ isGuest }) {
             </div>
             
             <footer className={styles.modalActionFooter}>
-              <button 
-                type="button" 
-                onClick={closeModal} 
-                disabled={isDeleting} 
-                className={styles.modalCancelBtn}
-              >
+              <button type="button" onClick={closeModal} disabled={isDeleting} className={styles.modalCancelBtn}>
                 Cancel
               </button>
               <button 
@@ -164,7 +113,8 @@ export default function DeleteAccountSection({ isGuest }) {
               </button>
             </footer>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </section>
   );
