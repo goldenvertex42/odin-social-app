@@ -58,7 +58,6 @@ export default function SocialFeed() {
 
 
   const handlePostDeleted = (deletedPostId) => {
-    // Pure state modification: filters out the dropped post from the array container instantly
     setPosts((prevPosts) => 
       prevPosts.filter((post) => post.id !== deletedPostId)
     );
