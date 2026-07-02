@@ -3,11 +3,12 @@
   margin: 0 auto;
   padding: var(--spacing-md);
   width: 100%;
+  box-sizing: border-box;
 }
 
 .profileHeader {
   background: var(--bg-surface);
-  border: 1px solid var(--border-main);
+  border: 2px solid var(--border-main);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   box-shadow: 0 4px 12px var(--shadow-color);
@@ -17,15 +18,26 @@
   text-align: center;
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-lg);
+  box-sizing: border-box;
 }
 
-.avatarBig {
+.avatarBig, .avatarBigFallback {
   width: 90px;
   height: 90px;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-full, 50%);
   object-fit: cover;
-  background-color: var(--bg-app);
-  border: 1px solid var(--border-main);
+  border: 2px solid var(--border-main);
+  flex-shrink: 0;
+}
+
+.avatarBigFallback {
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+  font-weight: var(--weight-bold);
+  font-size: var(--font-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .headerDetails {
@@ -43,6 +55,7 @@
 .username {
   font-size: var(--font-sm);
   color: var(--text-muted);
+  font-weight: var(--weight-semibold);
   margin: 0 0 var(--spacing-xs) 0;
 }
 
@@ -62,10 +75,10 @@
 .actionBtn, .editProfileBtn {
   padding: var(--spacing-xs) var(--spacing-lg);
   border-radius: var(--radius-sm);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   font-size: var(--font-sm);
   cursor: pointer;
-  border: none;
+  border: 2px solid transparent;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -76,19 +89,14 @@
   max-width: 240px;
   min-width: 140px;
   height: 40px;
-  transition: background-color 0.2s ease, opacity 0.2s ease, outline 0.2s ease, color 0.2s ease;
+  box-sizing: border-box;
+  outline: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .btnIcon {
-  width: 16px !important;
-  height: 16px !important;
   flex-shrink: 0;
-  stroke-width: 2.25px;
   display: inline-block;
-}
-
-.btnIcon:global {
-  transition: transform 0.2s ease;
 }
 
 .btnText {
@@ -96,15 +104,14 @@
   line-height: 1;
 }
 
-.editProfileBtn {
-  background-color: var(--bg-app);
+.editProfileBtn, .cancelBtn, .rejectBtn {
+  background-color: var(--bg-surface);
   color: var(--text-main);
-  border: 1px solid var(--border-main);
+  border-color: var(--border-main);
 }
 
-.editProfileBtn:hover {
+.editProfileBtn:hover, .cancelBtn:hover:not(:disabled), .rejectBtn:hover:not(:disabled) {
   background-color: var(--bg-hover);
-  color: var(--text-main);
 }
 
 .editProfileBtn:hover .btnIcon {
@@ -116,63 +123,36 @@
   color: var(--btn-action-text, #ffffff);
 }
 
-.connectBtn:hover {
+.connectBtn:hover:not(:disabled) {
   background-color: var(--color-primary-hover);
 }
 
-.cancelBtn {
-  background-color: var(--bg-app);
-  color: var(--text-main);
-  border: 1px solid var(--border-main);
-}
-
-.cancelBtn:hover {
-  background-color: var(--bg-hover);
-  color: var(--text-main);
-}
-
 .acceptBtn {
-  background-color: var(--bg-app);
-  color: var(--color-success-text);
-  border: 1px solid var(--color-success);
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
-.acceptBtn:hover {
-  opacity: 0.9;
+  background-color: var(--bg-surface);
+  color: var(--color-success);
+  border-color: var(--color-success);
 }
 
 .acceptBtn:hover:not(:disabled) {
   background-color: var(--color-success);
-  color: var(--text-main);
-  border-color: var(--color-success);
-}
-
-.rejectBtn {
-  background-color: var(--bg-app);
-  color: var(--text-main);
-  opacity: 0.85;
-  border: 1px solid var(--border-main);
-}
-
-.rejectBtn:hover {
-  background-color: var(--bg-hover);
-  color: var(--text-main);
-  opacity: 1;
+  color: var(--btn-action-text, #ffffff);
 }
 
 .disconnectBtn {
-  background-color: transparent;
+  background-color: var(--bg-surface);
   color: var(--color-error);
-  border: 1px solid var(--color-error);
+  border-color: var(--color-error);
 }
 
-.disconnectBtn:hover {
-  background-color: rgba(239, 68, 68, 0.08);
+.disconnectBtn:hover:not(:disabled) {
+  background-color: var(--color-error);
+  color: var(--btn-action-text, #ffffff);
 }
 
-.actionBtn:focus-visible, .editProfileBtn:focus-visible {
-  outline: 2px solid var(--color-primary);
+.actionBtn:focus-visible, 
+.editProfileBtn:focus-visible, 
+.imageWrapper:focus-visible {
+  outline: 3px solid var(--color-primary);
   outline-offset: 2px;
 }
 
@@ -201,39 +181,63 @@
   text-align: center;
   padding: var(--spacing-xl);
   color: var(--text-main);
-  opacity: 0.85;
-  font-size: var(--font-base);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-bold);
+}
+
+.emptyTimeline {
+  color: var(--text-muted);
 }
 
 .error {
   color: var(--color-error);
-  opacity: 1;
 }
 
 .imageWrapper {
+  background: transparent;
+  border: none;
+  padding: 0;
   cursor: pointer;
   border-radius: var(--radius-full);
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease;
   width: fit-content;
   height: fit-content;
+  display: block;
+  outline: none;
 }
 
 .imageWrapper:hover {
   transform: scale(1.02);
-  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .imageWrapper:focus-visible {
-  outline: 2px solid var(--color-primary);
   outline-offset: 4px;
 }
 
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.actionBtn:disabled {
+  background-color: var(--bg-disabled) !important;
+  color: var(--text-disabled) !important;
+  border-color: var(--border-main) !important;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
 /* ==========================================================================
-   DESKTOP ADAPTIVE VIEWPORT OVERRIDES
+   DESKTOP ADAPTIVE VIEWPORT OVERRIDES via layout scale constants
    ========================================================================== */
-@media (min-width: 520px) {
+@media (min-width: 769px) {
   .profileContainer {
     padding: var(--spacing-lg);
   }
@@ -247,7 +251,7 @@
     margin-bottom: var(--spacing-xl);
   }
 
-  .avatarBig {
+  .avatarBig, .avatarBigFallback {
     width: 110px;
     height: 110px;
   }

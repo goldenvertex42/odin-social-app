@@ -12,14 +12,8 @@ export default function ProfileView() {
   const { id: profileId } = useParams();
   const { user: currentUser } = useAuth();
   const { setProfileOverridePalette } = useTheme();
-
-  const {
-    relationship,
-    setRelationship,
-    isProcessing,
-    executeRelationshipAction
-  } = useRelationship(profileId, 'NOT_FOLLOWING');
-
+  
+  const { relationship, setRelationship, isProcessing, executeRelationshipAction } = useRelationship(profileId, 'NOT_FOLLOWING');
   const [profileData, setProfileData] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -43,20 +37,18 @@ export default function ProfileView() {
     try {
       setLoading(true);
       setError(null);
-      
       const userRes = await customFetch(`/api/users/${profileId}`);
       if (!userRes.ok) throw new Error('Could not resolve profile information.');
-      const userData = await userRes.json();
       
+      const userData = await userRes.json();
       setProfileData(userData);
       setRelationship(userData.relationshipStatus || 'NOT_FOLLOWING');
 
       const postsRes = await customFetch(`/api/posts/user/${profileId}`);
       if (postsRes.ok) {
         const postsData = await postsRes.json();
-        const cleanPostsArray = Array.isArray(postsData) 
-          ? postsData 
-          : (postsData.posts && Array.isArray(postsData.posts) ? postsData.posts : []);
+        const cleanPostsArray = Array.isArray(postsData) ? postsData : 
+                             (postsData.posts && Array.isArray(postsData.posts) ? postsData.posts : []);
         setPosts(cleanPostsArray);
       }
     } catch (err) {
@@ -74,17 +66,21 @@ export default function ProfileView() {
     setPosts(prevPosts => prevPosts.filter(post => post.id !== deletedPostId));
   };
 
-  if (loading) return <div className={styles.centeredState}>Loading member timeline...</div>;
-  if (error) return <div className={`${styles.centeredState} ${styles.error}`}>{error}</div>;
+  if (loading) return <div className={styles.centeredState} role="status" aria-live="polite">Loading member timeline...</div>;
+  if (error) return <div className={`${styles.centeredState} ${styles.error}`} role="alert">{error}</div>;
 
   return (
-    <div className={styles.profileContainer} data-testid="profile-view-canvas">
+    <main className={styles.profileContainer} data-testid="profile-view-canvas">
+      <h1 className={styles.visuallyHidden}>
+        {profileData?.displayName || profileData?.username}'s Member Profile Hub
+      </h1>
+
       <ProfileHeader 
-        profileData={profileData}
-        isSelf={isSelf}
-        relationship={relationship}
-        isProcessing={isProcessing}
-        onAction={handleAction}
+        profileData={profileData} 
+        isSelf={isSelf} 
+        relationship={relationship} 
+        isProcessing={isProcessing} 
+        onAction={handleAction} 
       />
 
       <div className={styles.timelineSection}>
@@ -98,13 +94,13 @@ export default function ProfileView() {
                 key={post.id} 
                 post={post} 
                 currentUserId={currentUser?.id} 
-                onDeleteSuccess={handlePostDeleted}
-                headingLevel='h3' 
+                onDeleteSuccess={handlePostDeleted} 
+                headingLevel="h3" 
               />
             ))}
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 }

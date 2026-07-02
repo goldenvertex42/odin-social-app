@@ -20,6 +20,7 @@ export default function ProfileActions({ isSelf, relationship, isProcessing, onA
     case 'NOT_FOLLOWING':
       return (
         <button 
+          type="button"
           onClick={() => onAction('POST', 'REQUEST_SENT')} 
           disabled={isProcessing} 
           className={`${styles.actionBtn} ${styles.connectBtn}`} 
@@ -32,6 +33,7 @@ export default function ProfileActions({ isSelf, relationship, isProcessing, onA
     case 'REQUEST_SENT':
       return (
         <button 
+          type="button"
           onClick={() => onAction('DELETE', 'NOT_FOLLOWING')} 
           disabled={isProcessing} 
           className={`${styles.actionBtn} ${styles.cancelBtn}`} 
@@ -43,8 +45,9 @@ export default function ProfileActions({ isSelf, relationship, isProcessing, onA
       );
     case 'REQUEST_RECEIVED':
       return (
-        <div className={styles.btnGroup}>
+        <div className={styles.btnGroup} role="group" aria-label="Respond to follow request">
           <button 
+            type="button"
             onClick={() => onAction('PATCH', 'FOLLOWING')} 
             disabled={isProcessing} 
             className={`${styles.actionBtn} ${styles.acceptBtn}`} 
@@ -54,17 +57,21 @@ export default function ProfileActions({ isSelf, relationship, isProcessing, onA
             <span className={styles.btnText}>Accept</span>
           </button>
           <button 
+            type="button"
             onClick={() => onAction('DELETE', 'NOT_FOLLOWING')} 
             disabled={isProcessing} 
             className={`${styles.actionBtn} ${styles.rejectBtn}`}
+            data-testid="profile-reject-btn"
           >
-            Ignore
+            <UserX className={styles.btnIcon} aria-hidden="true" size={16} />
+            <span className={styles.btnText}>Ignore</span>
           </button>
         </div>
       );
     case 'FOLLOWING':
       return (
         <button 
+          type="button"
           onClick={() => onAction('DELETE', 'NOT_FOLLOWING')} 
           disabled={isProcessing} 
           className={`${styles.actionBtn} ${styles.disconnectBtn}`} 
@@ -76,5 +83,5 @@ export default function ProfileActions({ isSelf, relationship, isProcessing, onA
       );
     default:
       return null;
-  }
+    }
 }
