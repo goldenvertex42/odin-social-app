@@ -1,13 +1,13 @@
 .cardContainer {
   background-color: var(--bg-surface);
-  border: 1px solid var(--border-main);
+  border: 2px solid var(--border-main);
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-md);
   box-sizing: border-box;
   box-shadow: 0 4px 12px var(--shadow-color);
   outline: none;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, outline 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .clickableCard {
@@ -17,11 +17,12 @@
 .clickableCard:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px var(--shadow-color);
+  border-color: var(--border-hover, var(--color-primary));
 }
 
 .clickableCard:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
 }
 
 .cardHeader {
@@ -40,11 +41,11 @@
   color: inherit;
   border-radius: var(--radius-sm);
   outline: none;
-  transition: outline 0.15s ease;
+  transition: box-shadow 0.15s ease;
 }
 
 .authorProfileBlockLink:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 3px solid var(--color-primary);
   outline-offset: 4px;
 }
 
@@ -56,9 +57,9 @@
 .authorAvatar {
   width: 44px;
   height: 44px;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-full, 50%);
   object-fit: cover;
-  border: 1px solid var(--border-main);
+  border: 2px solid var(--border-main);
   flex-shrink: 0;
 }
 
@@ -69,7 +70,7 @@
 }
 
 .authorProfileNameText {
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   font-size: var(--font-base);
   color: var(--text-main);
   transition: color 0.15s ease;
@@ -77,39 +78,40 @@
 
 .postTimestamp {
   font-size: var(--font-xs);
-  color: var(--text-main);
-  opacity: 0.8;
+  color: var(--color-text-muted-placeholder, var(--text-muted));
+  font-weight: var(--weight-medium);
 }
 
 .deleteButton {
-  background: transparent;
-  border: none;
+  background: var(--bg-surface);
+  border: 2px solid var(--border-main);
   cursor: pointer;
   padding: var(--spacing-xs);
   border-radius: var(--radius-sm);
   color: var(--text-main);
-  opacity: 0.7;
   display: flex;
   align-items: center;
   justify-content: center;
   height: 36px;
   width: 36px;
-  transition: color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .deleteButton:hover:not(:disabled) {
-  color: var(--color-error);
-  background-color: rgba(239, 68, 68, 0.08);
-  opacity: 1;
+  color: var(--color-text-critical, var(--color-error));
+  background-color: var(--color-bg-danger-zone-opaque, var(--bg-hover));
+  border-color: var(--color-error);
 }
 
 .deleteButton:disabled {
-  opacity: 0.4;
+  background-color: var(--color-bg-disabled);
+  color: var(--color-text-disabled);
+  border-color: var(--color-border-disabled);
   cursor: not-allowed;
 }
 
 .deleteButton:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 3px solid var(--color-error);
   outline-offset: 2px;
 }
 
@@ -125,6 +127,7 @@
   white-space: pre-wrap;
   line-height: 1.5;
   color: var(--text-main);
+  font-size: var(--font-base);
   margin: 0;
 }
 
@@ -132,13 +135,19 @@
   margin-top: var(--spacing-sm);
   border-radius: var(--radius-sm);
   overflow: hidden;
-  border: 1px solid var(--border-main);
+  border: 2px solid var(--border-main);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .imageWrapper:hover {
-  transform: scale(1.01);
+  transform: scale(1.005);
+  border-color: var(--color-primary);
+}
+
+.imageWrapper:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .mediaAsset {
@@ -152,8 +161,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid var(--border-main);
-  border-bottom: 1px solid var(--border-main);
+  border-top: 2px solid var(--border-main);
+  border-bottom: 2px solid var(--border-main);
   padding: var(--spacing-xs) 0;
   margin-bottom: var(--spacing-md);
 }
@@ -161,34 +170,35 @@
 .likeActionButton, .threadLinkBtn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: transparent;
-  border: none;
+  gap: 8px;
+  background: var(--bg-surface);
+  border: 2px solid transparent;
   cursor: pointer;
   padding: var(--spacing-xs) var(--spacing-md);
   border-radius: var(--radius-sm);
   font-size: var(--font-sm);
   color: var(--text-main);
-  opacity: 0.8;
+  font-weight: var(--weight-semibold);
   outline: none;
-  transition: background-color 0.2s ease, color 0.2s ease, outline 0.2s ease, opacity 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .likeActionButton:hover, .threadLinkBtn:hover {
   background-color: var(--bg-hover);
   color: var(--text-main);
-  opacity: 1;
+  border-color: var(--border-main);
 }
 
 .likeActionButton:focus-visible, .threadLinkBtn:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 3px solid var(--color-primary);
   outline-offset: 2px;
 }
 
-.activeLikedState {
-  color: var(--color-primary) !important;
+.cardFooter button.activeLikedState {
+  color: var(--color-primary);
   font-weight: var(--weight-bold);
-  opacity: 1;
+  border-color: var(--color-primary);
+  background-color: var(--color-accent, var(--bg-hover));
 }
 
 .commentThreadSection {
@@ -197,14 +207,12 @@
 
 .commentStreamTitle {
   font-size: var(--font-sm);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   color: var(--text-main);
   margin: 0 0 var(--spacing-sm) 0;
 }
 
 .actionIcon {
-  width: 16px !important;
-  height: 16px !important;
   flex-shrink: 0;
   stroke-width: 2.25px;
   display: inline-block;
@@ -218,4 +226,113 @@
 .actionLabel {
   font-size: var(--font-sm);
   line-height: 1;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-modal-backdrop, rgba(0, 0, 0, 0.75));
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal, 1000);
+  padding: var(--spacing-md);
+}
+
+.modalContent {
+  background-color: var(--bg-surface);
+  border: 2px solid var(--border-main);
+  border-radius: var(--radius-lg);
+  max-width: 440px;
+  width: 100%;
+  padding: var(--spacing-xl);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.warningIcon {
+  color: var(--color-text-critical);
+}
+
+.modalHeading {
+  font-size: var(--font-lg);
+  font-weight: var(--weight-bold);
+  color: var(--text-main);
+  margin: 0;
+}
+
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.modalWarningText {
+  font-size: var(--font-sm);
+  color: var(--text-main);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.modalErrorMsg {
+  font-size: var(--font-sm);
+  color: var(--color-text-critical);
+  font-weight: var(--weight-bold);
+  margin: 0;
+}
+
+.modalActionFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+
+.modalCancelBtn, .modalConfirmDeleteBtn {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
+  font-weight: var(--weight-bold);
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.modalCancelBtn {
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+  border-color: var(--border-main);
+}
+
+.modalConfirmDeleteBtn {
+  background-color: var(--color-error);
+  color: var(--color-text-on-error, #ffffff);
+}
+
+.modalConfirmDeleteBtn:disabled {
+  background-color: var(--color-bg-disabled-danger);
+  color: var(--color-text-disabled-danger);
+  border-color: var(--color-border-disabled-danger);
+  cursor: not-allowed;
+}
+
+.modalCancelBtn:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.modalConfirmDeleteBtn:focus-visible {
+  outline: 3px solid var(--color-error);
+  outline-offset: 2px;
 }
