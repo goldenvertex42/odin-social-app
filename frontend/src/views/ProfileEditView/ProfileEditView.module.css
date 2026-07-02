@@ -3,6 +3,7 @@
   margin: 0 auto;
   padding: var(--spacing-xl) var(--spacing-md);
   width: 100%;
+  box-sizing: border-box;
 }
 
 .pageTitle {
@@ -14,7 +15,7 @@
 
 .formSection {
   background: var(--bg-surface);
-  border: 1px solid var(--border-main);
+  border: 2px solid var(--border-main);
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
@@ -29,43 +30,52 @@
   font-weight: var(--weight-bold);
   margin: 0;
   color: var(--text-main);
-  border-bottom: 1px solid var(--border-main);
+  border-bottom: 2px solid var(--border-main);
   padding-bottom: var(--spacing-xs);
 }
 
 .inputGroup {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   width: 100%;
 }
 
-.fieldLabel {
+.fieldLabel, .modalLabel {
   font-size: var(--font-sm);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   color: var(--text-main);
 }
 
-.textField, .textareaField {
+.textField, .textareaField, .modalInputField {
   width: 100%;
   padding: var(--spacing-sm) var(--spacing-md);
-  border: 1px solid var(--border-main);
+  border: 2px solid var(--border-main);
   border-radius: var(--radius-sm);
   background-color: var(--bg-app);
   color: var(--text-main);
   font-family: inherit;
   font-size: var(--font-sm);
   outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
 }
 
 .textField:focus, .textareaField:focus {
   border-color: var(--color-primary);
 }
 
-.textField:focus-visible, .textareaField:focus-visible {
-  outline: 2px solid var(--color-primary);
+.modalInputField:focus {
+  border-color: var(--color-error);
+}
+
+.textField:focus-visible, .textareaField:focus-visible, .modalInputField:focus-visible {
+  outline: 3px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+.modalInputField:focus-visible {
+  outline-color: var(--color-error);
 }
 
 .textareaField {
@@ -73,35 +83,36 @@
   resize: vertical;
 }
 
-.formActionFooter {
+.formActionFooter, .modalActionFooter {
   display: flex;
   justify-content: flex-end;
   gap: var(--spacing-md);
   margin-top: var(--spacing-md);
 }
 
-.cancelBtn, .saveBtn {
+.cancelBtn, .saveBtn, .modalCancelBtn, .modalConfirmDeleteBtn {
   padding: var(--spacing-sm) var(--spacing-xl);
   border-radius: var(--radius-sm);
   font-size: var(--font-sm);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   cursor: pointer;
-  border: none;
+  border: 2px solid transparent;
   outline: none;
-  transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, outline 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.cancelBtn {
-  background-color: var(--bg-app);
+.cancelBtn, .modalCancelBtn {
+  background-color: var(--bg-surface);
   color: var(--text-main);
-  opacity: 0.85;
-  border: 1px solid var(--border-main);
+  border-color: var(--border-main);
 }
 
-.cancelBtn:hover {
+.cancelBtn:hover, .modalCancelBtn:hover:not(:disabled) {
   background-color: var(--bg-hover);
-  color: var(--text-main);
-  opacity: 1;
 }
 
 .saveBtn {
@@ -113,42 +124,49 @@
   background-color: var(--color-primary-hover);
 }
 
-.cancelBtn:focus-visible, .saveBtn:focus-visible {
-  outline: 2px solid var(--color-primary);
+.modalConfirmDeleteBtn {
+  background-color: var(--color-error);
+  color: var(--btn-action-text, #ffffff);
+}
+
+.cancelBtn:focus-visible, .saveBtn:focus-visible, .modalCancelBtn:focus-visible {
+  outline: 3px solid var(--color-primary);
   outline-offset: 2px;
 }
 
-.cancelBtn:disabled, .saveBtn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+.modalConfirmDeleteBtn:focus-visible {
+  outline: 3px solid var(--color-error);
+  outline-offset: 2px;
 }
 
 .statusAlert {
   padding: var(--spacing-md);
   border-radius: var(--radius-sm);
   font-size: var(--font-sm);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-bold);
   margin-bottom: var(--spacing-lg);
+  background-color: var(--bg-surface);
+  border: 2px solid var(--border-main);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .errorAlert {
-  background-color: rgba(239, 68, 68, 0.1);
+  border-color: var(--color-error);
   color: var(--color-error);
-  border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
 .successAlert {
-  background-color: rgba(34, 197, 94, 0.1);
+  border-color: var(--color-success);
   color: var(--color-success);
-  border: 1px solid rgba(34, 197, 94, 0.2);
 }
 
 .dangerZoneSection {
   margin-top: var(--spacing-xl);
-  border: 1px solid var(--color-error);
-  background-color: rgba(239, 68, 68, 0.02);
+  border: 2px solid var(--color-error);
+  background-color: var(--bg-surface);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
+  box-sizing: border-box;
 }
 
 .dangerHeading {
@@ -160,8 +178,7 @@
 
 .dangerDescription {
   font-size: var(--font-sm);
-  color: var(--text-main);
-  opacity: 0.85;
+  color: var(--text-muted);
   line-height: 1.5;
   margin: 0 0 var(--spacing-md) 0;
 }
@@ -172,10 +189,10 @@
   gap: var(--spacing-xs);
   background-color: var(--bg-app);
   color: var(--text-main);
-  border: 1px solid var(--color-error);
+  border: 2px solid var(--color-error);
   padding: var(--spacing-sm) var(--spacing-lg);
   border-radius: var(--radius-md);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   font-size: var(--font-sm);
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
@@ -183,11 +200,11 @@
 
 .triggerDeleteBtn:hover {
   background-color: var(--color-error);
-  color: #ffffff;
+  color: var(--btn-action-text, #ffffff);
 }
 
 .triggerDeleteBtn:focus-visible {
-  outline: 2px solid var(--color-error);
+  outline: 3px solid var(--color-error);
   outline-offset: 2px;
 }
 
@@ -197,7 +214,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.75);
+  background-color: var(--color-modal-backdrop, rgba(0, 0, 0, 0.75));
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -206,120 +223,22 @@
   padding: var(--spacing-md);
 }
 
-.modalContent {
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-main);
-  border-radius: var(--radius-lg);
-  max-width: 480px;
-  width: 100%;
-  padding: var(--spacing-xl);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-.modalHeader {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.warningIcon {
-  color: var(--color-error);
-}
-
-.modalContent .modalHeading {
-  font-size: var(--font-lg);
-  font-weight: var(--weight-bold);
-  color: var(--text-main);
-  margin: 0;
-}
-
-.modalBody {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.modalWarningText {
-  font-size: var(--font-sm);
-  color: var(--text-main);
-  line-height: 1.5;
-  margin: 0;
-}
-
-.modalLabel {
-  font-size: var(--font-sm);
-  color: var(--text-main);
-  opacity: 0.9;
-}
-
-.modalInputField {
-  background-color: var(--bg-app);
-  border: 1px solid var(--border-main);
-  border-radius: var(--radius-sm);
-  padding: var(--spacing-sm);
-  color: var(--text-main);
-  font-size: var(--font-base);
-  outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
 .modalInputField::placeholder {
-  color: var(--text-muted);
+  color: var(--color-text-muted-placeholder);
   opacity: 1;
-}
-
-.modalInputField:focus {
-  border-color: var(--color-error);
-  box-shadow: 0 0 0 1px var(--color-error);
 }
 
 .modalErrorMsg {
   font-size: var(--font-sm);
   color: var(--color-error);
+  font-weight: var(--weight-bold);
   margin: 0;
 }
 
-.modalActionFooter {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-sm);
-  margin-top: var(--spacing-sm);
-}
-
-.modalCancelBtn, .modalConfirmDeleteBtn {
-  padding: var(--spacing-sm) var(--spacing-lg);
-  border-radius: var(--radius-md);
-  font-size: var(--font-sm);
-  font-weight: var(--weight-semibold);
-  cursor: pointer;
-  border: none;
-  transition: background-color 0.2s ease, opacity 0.2s ease;
-}
-
-.modalCancelBtn {
-  background-color: var(--bg-hover);
-  color: var(--text-main);
-}
-
-.modalConfirmDeleteBtn {
-  background-color: var(--color-error);
-  color: #ffffff;
-}
-
-.modalConfirmDeleteBtn:disabled {
-  background-color: var(--bg-app);
-  color: var(--text-muted);
-  border: 1px solid var(--border-main);
+.cancelBtn:disabled, .saveBtn:disabled, .modalCancelBtn:disabled, .modalConfirmDeleteBtn:disabled {
+  background-color: var(--bg-disabled) !important;
+  color: var(--text-disabled) !important;
+  border-color: var(--border-main) !important;
   cursor: not-allowed;
-}
-
-.modalCancelBtn:focus-visible {
-  outline: 2px solid var(--color-primary);
-}
-
-.modalConfirmDeleteBtn:focus-visible {
-  outline: 2px solid var(--color-error);
+  opacity: 1;
 }

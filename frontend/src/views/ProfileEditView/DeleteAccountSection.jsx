@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../../context/AuthContext/AuthContext';
 import { customFetch } from '../../utils/api/api';
@@ -13,16 +13,63 @@ export default function DeleteAccountSection({ isGuest }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState('');
 
+  const modalRef = useRef(null);
+  const triggerBtnRef = useRef(null);
+  const initialFocusRef = useRef(null);
+
+  useEffect(() => {
+    if (isModalOpen) {
+      initialFocusRef.current?.focus();
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+      triggerBtnRef.current?.focus();
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isModalOpen]);
+
   if (isGuest) return null;
+
+  const handleModalKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      closeModal();
+      return;
+    }
+
+    if (e.key === 'Tab' && modalRef.current) {
+      const focusables = modalRef.current.querySelectorAll('input, button');
+      if (focusables.length === 0) return;
+      
+      const firstElement = focusables[0];
+      const lastElement = focusables[focusables.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          lastElement.focus();
+          e.preventDefault();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          firstElement.focus();
+          e.preventDefault();
+        }
+      }
+    }
+  };
+
+  const closeModal = () => {
+    if (isDeleting) return;
+    setIsModalOpen(false);
+    setConfirmationText('');
+    setError('');
+  };
 
   const handleDeleteAccount = async () => {
     if (confirmationText !== user?.username || isDeleting) return;
     setIsDeleting(true);
     setError('');
-
     try {
       const response = await customFetch('/api/users/profile', { method: 'DELETE' });
-      
       if (response.ok) {
         logout();
         navigate('/login?message=account_deleted');
@@ -37,16 +84,17 @@ export default function DeleteAccountSection({ isGuest }) {
   };
 
   return (
-    <section className={styles.dangerZoneSection} data-testid="danger-zone-panel">
-      <h2 className={styles.dangerHeading}>Danger Zone</h2>
+    <section className={styles.dangerZoneSection} data-testid="danger-zone-panel" aria-labelledby="danger-zone-heading">
+      <h2 id="danger-zone-heading" className={styles.dangerHeading}>Danger Zone</h2>
       <p className={styles.dangerDescription}>
         Permanently delete your profile workspace, authored posts, comment threads, and relational connection links from the platform registry. This action is irreversible.
       </p>
-
-      <button
-        type="button"
-        onClick={() => setIsModalOpen(true)}
-        className={styles.triggerDeleteBtn}
+      
+      <button 
+        ref={triggerBtnRef}
+        type="button" 
+        onClick={() => setIsModalOpen(true)} 
+        className={styles.triggerDeleteBtn} 
         data-testid="trigger-delete-modal-btn"
       >
         <Trash2 size={16} aria-hidden="true" />
@@ -54,54 +102,62 @@ export default function DeleteAccountSection({ isGuest }) {
       </button>
 
       {isModalOpen && (
-        <div className={styles.modalOverlay} role="dialog" aria-modal="true" data-testid="delete-modal">
-          <div className={styles.modalContent}>
+        <div 
+          className={styles.modalOverlay} 
+          onClick={closeModal}
+          data-testid="delete-modal"
+        >
+          <div 
+            ref={modalRef}
+            className={styles.modalContent}
+            role="dialog" 
+            aria-modal="true" 
+            aria-labelledby="delete-account-dialog-title"
+            aria-describedby="delete-account-dialog-desc"
+            onKeyDown={handleModalKeyDown}
+            onClick={(e) => e.stopPropagation()}
+          >
             <header className={styles.modalHeader}>
               <AlertTriangle className={styles.warningIcon} size={24} aria-hidden="true" />
-              <h3 className={styles.modalHeading}>Absolute Action Required</h3>
+              <h3 id="delete-account-dialog-title" className={styles.modalHeading}>Absolute Action Required</h3>
             </header>
-
+            
             <div className={styles.modalBody}>
-              <p className={styles.modalWarningText}>
+              <p id="delete-account-dialog-desc" className={styles.modalWarningText}>
                 This will permanently delete the identity node linked to <strong>@{user?.username}</strong>. All data will be immediately cleared from our PostgreSQL cluster and cloud binary sub-folders.
               </p>
               
               <label htmlFor="confirmUsername" className={styles.modalLabel}>
                 Type your username <strong>{user?.username}</strong> to confirm:
               </label>
-              
-              <input
-                id="confirmUsername"
-                type="text"
-                value={confirmationText}
-                onChange={(e) => setConfirmationText(e.target.value)}
-                placeholder={user?.username}
-                className={styles.modalInputField}
-                disabled={isDeleting}
-                autoComplete="off"
+              <input 
+                ref={initialFocusRef}
+                id="confirmUsername" 
+                type="text" 
+                value={confirmationText} 
+                onChange={(e) => setConfirmationText(e.target.value)} 
+                placeholder={user?.username} 
+                className={styles.modalInputField} 
+                disabled={isDeleting} 
+                autoComplete="off" 
               />
-
-              {error && <p className={styles.modalErrorMsg}>{error}</p>}
+              {error && <p className={styles.modalErrorMsg} role="alert">{error}</p>}
             </div>
-
+            
             <footer className={styles.modalActionFooter}>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsModalOpen(false);
-                  setConfirmationText('');
-                  setError('');
-                }}
-                disabled={isDeleting}
+              <button 
+                type="button" 
+                onClick={closeModal} 
+                disabled={isDeleting} 
                 className={styles.modalCancelBtn}
               >
                 Cancel
               </button>
-              <button
-                type="button"
-                onClick={handleDeleteAccount}
-                disabled={confirmationText !== user?.username || isDeleting}
-                className={styles.modalConfirmDeleteBtn}
+              <button 
+                type="button" 
+                onClick={handleDeleteAccount} 
+                disabled={confirmationText !== user?.username || isDeleting} 
+                className={styles.modalConfirmDeleteBtn} 
                 data-testid="confirm-account-purge-btn"
               >
                 {isDeleting ? 'Purging Systems...' : 'Permanently Delete'}

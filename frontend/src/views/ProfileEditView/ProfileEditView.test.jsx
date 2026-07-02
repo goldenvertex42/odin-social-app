@@ -17,20 +17,15 @@ let mockActiveUserContext = {
 vi.mock('../../utils/api/api', () => ({
   customFetch: vi.fn((url, options = {}) => {
     if (url.includes('/api/auth/me')) {
-      return Promise.resolve({
-        ok: true,
-        json: async () => mockActiveUserContext
-      });
+      return Promise.resolve({ ok: true, json: async () => mockActiveUserContext });
     }
     if (url.includes('/api/users/profile')) {
-      return Promise.resolve({
-        ok: true,
-        json: async () => ({ message: 'Changes saved successfully!', user: mockActiveUserContext })
-      });
+      return Promise.resolve({ ok: true, json: async () => ({ message: 'Changes saved successfully!', user: mockActiveUserContext }) });
     }
     return Promise.reject(new Error(`Unhandled URL path: ${url}`));
   })
 }));
+
 import { customFetch } from '../../utils/api/api';
 
 const mockOnSchemeChangeSpy = vi.fn();
@@ -38,12 +33,12 @@ const mockOnPaletteChangeSpy = vi.fn();
 
 vi.mock('../../components/profile/AvatarUpload/AvatarUpload', () => ({
   default: ({ onFileSelected }) => (
-    <button
-      data-testid="stub-file-trigger"
+    <button 
+      data-testid="stub-file-trigger" 
       onClick={(e) => {
         e.preventDefault();
         onFileSelected(new File([''], 'test.png'));
-      }}
+      }} 
     >
       Mock Upload File
     </button>
@@ -53,24 +48,24 @@ vi.mock('../../components/profile/AvatarUpload/AvatarUpload', () => ({
 vi.mock('../../components/profile/ThemePreview/ThemePreview', () => ({
   default: ({ scheme, palette, onSchemeChange, onPaletteChange }) => (
     <div>
-      <select
-        data-testid="stub-scheme-select"
-        value={scheme}
+      <select 
+        data-testid="stub-scheme-select" 
+        value={scheme} 
         onChange={(e) => {
           onSchemeChange(e.target.value);
           mockOnSchemeChangeSpy(e.target.value);
-        }}
+        }} 
       >
         <option value="light">light</option>
         <option value="dark">dark</option>
       </select>
-      <select
-        data-testid="stub-palette-select"
-        value={palette}
+      <select 
+        data-testid="stub-palette-select" 
+        value={palette} 
         onChange={(e) => {
           onPaletteChange(e.target.value);
           mockOnPaletteChangeSpy(e.target.value);
-        }}
+        }} 
       >
         <option value="default">default</option>
         <option value="cyberpunk">cyberpunk</option>
@@ -81,11 +76,11 @@ vi.mock('../../components/profile/ThemePreview/ThemePreview', () => ({
 
 vi.mock('../../components/profile/PasswordUpdate/PasswordUpdate', () => ({
   default: ({ values, onChange }) => (
-    <input
-      data-testid="stub-new-password-input"
-      type="password"
-      value={values.newPassword}
-      onChange={(e) => onChange('newPassword', e.target.value)}
+    <input 
+      data-testid="stub-new-password-input" 
+      type="password" 
+      value={values.newPassword} 
+      onChange={(e) => onChange('newPassword', e.target.value)} 
     />
   )
 }));
@@ -93,7 +88,7 @@ vi.mock('../../components/profile/PasswordUpdate/PasswordUpdate', () => ({
 import { AuthProvider } from '../../context/AuthContext/AuthContext';
 import { ThemeProvider } from '../../context/ThemeContext/ThemeContext';
 
-describe('ProfileEditView Integration Layout Test Suite', () => {
+describe('ProfileEdit Orchestrator Layout Test Suite', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
@@ -102,8 +97,7 @@ describe('ProfileEditView Integration Layout Test Suite', () => {
     mockOnPaletteChangeSpy.mockClear();
     document.documentElement.removeAttribute('data-color-palette');
     document.documentElement.removeAttribute('data-color-scheme');
-
-    // Reset default user details context
+    
     mockActiveUserContext = {
       id: 'user-001',
       username: 'odin_warrior',
@@ -116,7 +110,7 @@ describe('ProfileEditView Integration Layout Test Suite', () => {
     };
   });
 
-  it('populates initial user dataset and handles live visual theme updates', async () => {
+  it('populates initial user dataset, locks document main landmark titles, and handles live visual theme updates', async () => {
     render(
       <MemoryRouter>
         <AuthProvider>
@@ -127,13 +121,15 @@ describe('ProfileEditView Integration Layout Test Suite', () => {
       </MemoryRouter>
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('profile-edit-canvas')).toBeInTheDocument();
-    });
+    const mainViewContainer = await screen.findByRole('main');
+    expect(mainViewContainer).toBeInTheDocument();
+    expect(screen.getByTestId('profile-edit-canvas')).toBe(mainViewContainer);
+
+    expect(screen.getByRole('heading', { level: 1, name: /account settings/i })).toBeInTheDocument();
 
     const nameInput = screen.getByLabelText(/display name/i);
     await waitFor(() => {
-      expect(nameInput.value).toBe('Odin Old');
+      expect(nameInput).toHaveValue('Odin Old');
     });
 
     const paletteDropdown = screen.getByTestId('stub-palette-select');
@@ -141,17 +137,13 @@ describe('ProfileEditView Integration Layout Test Suite', () => {
     expect(mockOnPaletteChangeSpy).toHaveBeenCalledWith('cyberpunk');
   });
 
-  it('submits valid text payloads cleanly and presents a success alert status badge', async () => {
-    // Aligned: Track submission executions securely using your verified customFetch spy layer
+  it('submits valid text payloads cleanly and presents an assertive live feedback success alert', async () => {
     vi.mocked(customFetch).mockImplementation((url, options) => {
       if (url.includes('/api/auth/me')) {
         return Promise.resolve({ ok: true, json: async () => mockActiveUserContext });
       }
       if (url.includes('/api/users/profile') && options.method === 'PUT') {
-        return Promise.resolve({
-          ok: true,
-          json: async () => ({ message: 'Changes saved successfully!', user: mockActiveUserContext })
-        });
+        return Promise.resolve({ ok: true, json: async () => ({ message: 'Changes saved successfully!', user: mockActiveUserContext }) });
       }
       return Promise.resolve({ ok: true, json: async () => ({}) });
     });
@@ -172,7 +164,7 @@ describe('ProfileEditView Integration Layout Test Suite', () => {
 
     const nameInput = screen.getByLabelText(/display name/i);
     await waitFor(() => {
-      expect(nameInput.value).toBe('Odin Old');
+      expect(nameInput).toHaveValue('Odin Old');
     });
 
     fireEvent.change(nameInput, { target: { value: 'Odin Refactored Prime' } });
@@ -181,7 +173,9 @@ describe('ProfileEditView Integration Layout Test Suite', () => {
     fireEvent.click(saveBtn);
 
     await waitFor(() => {
-      expect(screen.getByText('Changes saved successfully!')).toBeInTheDocument();
+      const liveAlertSuccess = screen.getByRole('alert');
+      expect(liveAlertSuccess).toBeInTheDocument();
+      expect(liveAlertSuccess).toHaveTextContent(/changes saved successfully/i);
     });
   });
 
@@ -208,7 +202,7 @@ describe('ProfileEditView Integration Layout Test Suite', () => {
     fireEvent.click(cancelBtn);
 
     await waitFor(() => {
-      expect(screen.queryByText('Changes saved successfully!')).not.toBeInTheDocument();
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     });
   });
 
@@ -223,9 +217,10 @@ describe('ProfileEditView Integration Layout Test Suite', () => {
       </MemoryRouter>
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('danger-zone-panel')).toBeInTheDocument();
-    });
+    const dangerZoneRegion = await screen.findByRole('region', { name: /danger zone/i });
+    expect(dangerZoneRegion).toBeInTheDocument();
+    expect(screen.getByTestId('danger-zone-panel')).toBe(dangerZoneRegion);
+
     expect(screen.getByRole('button', { name: /delete account/i })).toBeInTheDocument();
   });
 
@@ -247,6 +242,7 @@ describe('ProfileEditView Integration Layout Test Suite', () => {
     });
 
     expect(screen.queryByTestId('danger-zone-panel')).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: /danger zone/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /delete account/i })).not.toBeInTheDocument();
   });
 });
