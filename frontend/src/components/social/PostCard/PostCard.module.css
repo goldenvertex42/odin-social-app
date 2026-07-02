@@ -203,10 +203,35 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: var(--font-sm);
-  color: var(--color-text-muted-placeholder, var(--text-muted));
-  font-weight: var(--weight-bold);
+  background-color: var(--bg-surface);
+  border: 2px solid transparent;
+  cursor: pointer;
   padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-sm);
+  color: var(--color-text-active) !important; 
+  font-weight: var(--weight-bold);
+  text-decoration: none;
+  outline: none;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 15;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.threadLinkBtn:hover {
+  background-color: var(--color-primary-hover) !important;
+  color: var(--btn-action-text, #ffffff) !important;
+  border-color: var(--color-primary-hover) !important;
+}
+
+.threadLinkBtn:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.threadLinkBtn:hover .actionIcon {
+  transform: scale(1.15) rotate(-5deg);
 }
 
 .likeActionButton:hover {
@@ -219,10 +244,19 @@
   outline-offset: 2px;
 }
 
+/* ==========================================================================
+   🌟 HARDENED ACCESSIBLE ACTIVE LIKE INTERACTION STATE SCRIPTS
+   ========================================================================== */
 .cardFooter button.activeLikedState {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
-  background-color: var(--bg-hover);
+  background-color: var(--color-accent) !important;
+  color: var(--color-text-active, #ffffff) !important;
+  border-color: var(--color-primary) !important;
+}
+
+.cardFooter button.activeLikedState:hover:not(:disabled) {
+  background-color: var(--color-primary-hover) !important;
+  color: var(--btn-action-text, #ffffff) !important;
+  border-color: var(--color-primary-hover) !important;
 }
 
 .commentThreadSection {
@@ -261,12 +295,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--color-modal-backdrop, rgba(0, 0, 0, 0.75));
+  background-color: var(--color-modal-backdrop, rgba(0, 0, 0, 0.85));
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: var(--z-modal, 1000);
+  z-index: 9999 !important;
   padding: var(--spacing-md);
 }
 

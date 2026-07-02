@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router';
-import { Trash2, AlertTriangle } from 'lucide-react';
 import { customFetch } from '../../../utils/api/api';
+import { Trash2, AlertTriangle } from 'lucide-react';
 import styles from './PostCard.module.css';
 
 export default function PostHeader({ post, currentUserId, onDeleteSuccess, headingLevel = 'h2' }) {
@@ -40,6 +41,7 @@ export default function PostHeader({ post, currentUserId, onDeleteSuccess, headi
     }
     if (e.key === 'Tab' && modalRef.current) {
       const focusables = modalRef.current.querySelectorAll('button');
+      if (focusables.length === 0) return;
       const firstElement = focusables[0];
       const lastElement = focusables[focusables.length - 1];
       if (e.shiftKey) {
@@ -136,7 +138,7 @@ export default function PostHeader({ post, currentUserId, onDeleteSuccess, headi
         </button>
       )}
 
-      {isModalOpen && (
+      {isModalOpen && createPortal(
         <div className={styles.modalOverlay} onClick={closeModal} data-testid="delete-post-modal-overlay">
           <div 
             ref={modalRef} 
@@ -154,7 +156,7 @@ export default function PostHeader({ post, currentUserId, onDeleteSuccess, headi
             </header>
             <div className={styles.modalBody}>
               <p id="delete-post-dialog-desc" className={styles.modalWarningText}>
-                Are you sure you want to permanently erase this post entry? This will immediately clear attached media data bundles and drop all relational nested comment strings within your database ecosystem.
+                Are you sure you want to permanently delete this post? This will immediately clear attached media and comments.
               </p>
               {error && <p className={styles.modalErrorMsg} role="alert">{error}</p>}
             </div>
@@ -167,7 +169,8 @@ export default function PostHeader({ post, currentUserId, onDeleteSuccess, headi
               </button>
             </footer>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -1,4 +1,5 @@
-import { useNavigate, useLocation } from 'react-router';
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import PostHeader from './PostHeader';
 import PostMedia from './PostMedia';
 import PostActions from './PostActions';
@@ -12,10 +13,24 @@ export default function PostCard({ post, currentUserId, onDeleteSuccess, heading
   const isStandaloneView = location.pathname === `/posts/${post.id}`;
   const postAuthorId = typeof post.authorId === 'object' ? post.authorId?.id : post.authorId;
 
+  const [comments, setComments] = useState(Array.isArray(post.comments) ? post.comments : []);
+
+  useEffect(() => {
+    setComments(Array.isArray(post.comments) ? post.comments : []);
+  }, [post.comments]);
+
   const handleCardNavigation = () => {
     if (!isStandaloneView) {
       navigate(`/posts/${post.id}`);
     }
+  };
+
+  const handleCommentDeleted = (deletedCommentId) => {
+    setComments((prevComments) => prevComments.filter(c => c.id !== deletedCommentId));
+  };
+
+  const handleCommentCreated = (newComment) => {
+    setComments((prevComments) => [newComment, ...prevComments]);
   };
 
   return (
@@ -49,14 +64,16 @@ export default function PostCard({ post, currentUserId, onDeleteSuccess, heading
       />
 
       <section className={styles.commentThreadSection} aria-label="Post replies stream">
-        <h3 className={styles.commentStreamTitle}>
-          Comments ({post.comments?.length || 0})
+        <h3 className={styles.commentStreamTitle} data-testid="post-comment-counter">
+          Comments ({comments.length})
         </h3>
         <CommentThread 
           postId={post.id} 
-          comments={post.comments} 
+          comments={comments} 
           currentUserId={currentUserId} 
-          postOwnerId={postAuthorId} 
+          postOwnerId={postAuthorId}
+          onCommentDeleted={handleCommentDeleted}
+          onCommentCreated={handleCommentCreated} 
         />
       </section>
     </article>

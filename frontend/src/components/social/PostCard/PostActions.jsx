@@ -1,3 +1,4 @@
+import { Link } from 'react-router'; 
 import { usePostInteraction } from '../../../hooks/usePostInteraction/usePostInteraction';
 import { ThumbsUp, MessageSquare } from 'lucide-react';
 import styles from './PostCard.module.css';
@@ -21,10 +22,15 @@ export default function PostActions({ postId, initialLikes, currentUserId, isSta
       </button>
 
       {!isStandaloneView && (
-        <div className={styles.threadLinkBtn} aria-hidden="true">
-          <MessageSquare className={styles.actionIcon} size={16} />
+        <Link 
+          to={`/posts/${postId}`}
+          className={styles.threadLinkBtn} 
+          aria-label="View full thread discussion and comments"
+          onClick={(e) => e.stopPropagation()} /* 🛡️ Stop propagation prevents outer overlay click bugs */
+        >
+          <MessageSquare className={styles.actionIcon} size={16} aria-hidden="true" />
           <span className={styles.actionLabel}>View Full Thread</span>
-        </div>
+        </Link>
       )}
     </div>
   );
