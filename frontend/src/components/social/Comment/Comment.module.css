@@ -202,10 +202,19 @@
   cursor: not-allowed;
 }
 
+/* ==========================================================================
+   🌟 HARDENED ACCESSIBLE ACTIVE LIKE INTERACTION STATE SCRIPTS
+   ========================================================================== */
 .commentFooter button.activeLikedState {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
-  background-color: var(--bg-hover);
+  background-color: var(--color-accent) !important;
+  color: var(--color-text-active, #ffffff) !important;
+  border-color: var(--color-primary) !important;
+}
+
+.commentFooter button.activeLikedState:hover:not(:disabled) {
+  background-color: var(--color-primary-hover) !important;
+  color: var(--btn-action-text, #ffffff) !important;
+  border-color: var(--color-primary-hover) !important;
 }
 
 .heartIcon {
