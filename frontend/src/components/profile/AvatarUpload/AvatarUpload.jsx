@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import styles from './AvatarUpload.module.css';
 import heic2any from 'heic2any';
 
-export default function AvatarUploadField({ initialAvatar, onFileSelected }) {
+export default function AvatarUpload({ initialAvatar, onFileSelected, username = 'Odin' }) {
   const [preview, setPreview] = useState(initialAvatar);
   const [isConverting, setIsConverting] = useState(false);
   const fileInputRef = useRef(null);
@@ -31,16 +31,13 @@ export default function AvatarUploadField({ initialAvatar, onFileSelected }) {
     if (isHeic) {
       try {
         setIsConverting(true);
-        
         const convertedBlob = await heic2any({
           blob: singleFileBlob,
           toType: 'image/jpeg',
           quality: 0.8
         });
-
         const newFileName = singleFileBlob.name.replace(/\.(heic|heif)$/i, '.jpg');
         singleFileBlob = new File([convertedBlob], newFileName, { type: 'image/jpeg' });
-        
       } catch (err) {
         console.error('Avatar HEIC processing pipeline failure:', err);
         alert('Failed to process Apple HEIC avatar format. Please use standard JPEG or PNG.');
@@ -52,7 +49,6 @@ export default function AvatarUploadField({ initialAvatar, onFileSelected }) {
     }
 
     onFileSelected(singleFileBlob);
-
     const originObjectURL = URL.createObjectURL(singleFileBlob);
     setPreview(originObjectURL);
   };
@@ -63,12 +59,20 @@ export default function AvatarUploadField({ initialAvatar, onFileSelected }) {
       
       <div className={styles.flexWrapper}>
         <div className={styles.avatarImgBoundary}>
-          <img 
-            src={preview} 
-            alt="Avatar preview" 
-            className={styles.avatarImage} 
-            referrerPolicy="no-referrer" 
-          />
+          {preview ? (
+            <img 
+              src={preview} 
+              alt=""
+              className={styles.avatarImage} 
+              referrerPolicy="no-referrer" 
+              data-testid="user-avatar-preview"
+            />
+          ) : (
+            <div className={styles.avatarFallback} aria-hidden="true" data-testid="avatar-fallback-initial">
+              {username.charAt(0).toUpperCase()}
+            </div>
+          )}
+
           {isConverting && (
             <div className={styles.loadingSpinnerMask} role="status" aria-live="polite">
               <span className={styles.visuallyHidden}>Converting Apple HEIC photo...</span>
@@ -80,6 +84,7 @@ export default function AvatarUploadField({ initialAvatar, onFileSelected }) {
           <label 
             htmlFor="avatar-file-upload-node" 
             className={`${styles.uploadLabel} ${isConverting ? styles.disabledLabel : ''}`}
+            data-testid="avatar-upload-trigger-label"
           >
             {isConverting ? 'Processing HEIC...' : 'Change Picture'}
           </label>
@@ -94,6 +99,7 @@ export default function AvatarUploadField({ initialAvatar, onFileSelected }) {
             disabled={isConverting}
             data-testid="edit-avatar-input" 
             aria-label="Upload a new profile avatar image" 
+            aria-describedby="avatar-format-hint"
           />
           
           <p className={styles.hint} id="avatar-format-hint">

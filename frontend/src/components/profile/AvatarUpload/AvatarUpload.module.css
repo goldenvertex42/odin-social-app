@@ -34,14 +34,29 @@
   overflow: hidden;
   flex-shrink: 0;
   background-color: var(--bg-app);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .avatarImage {
   width: 100%;
-  height: 100%; 
-  object-fit: cover; 
+  height: 100%;
+  object-fit: cover;
   display: block;
   border: none;
+}
+
+.avatarFallback {
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+  font-weight: var(--weight-bold);
+  font-size: var(--font-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .loadingSpinnerMask {
@@ -50,11 +65,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.65);
   backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 10;
 }
 
 .loadingSpinnerMask::after {
@@ -62,7 +78,7 @@
   width: 24px;
   height: 24px;
   border: 3px solid transparent;
-  border-top-color: #ffffff;
+  border-top-color: var(--color-primary); 
   border-radius: 50%;
   animation: rotationSpin 0.8s linear infinite;
 }
@@ -84,7 +100,7 @@
   display: inline-block;
   text-align: center;
   border: 2px solid var(--border-main);
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .uploadLabel:hover:not(.disabledLabel) {
@@ -94,15 +110,17 @@
 
 .hiddenInput:focus-visible + .uploadLabel {
   outline: 3px solid var(--color-primary);
-  outline-offset: 2px;
+  outline-offset: 4px;
   border-color: var(--color-primary);
+  background-color: var(--bg-hover);
 }
 
 .disabledLabel {
-  background-color: var(--color-bg-disabled);
-  color: var(--color-text-disabled);
-  border-color: var(--color-border-disabled);
+  background-color: var(--bg-disabled) !important;
+  color: var(--text-disabled) !important;
+  border-color: var(--border-main) !important;
   cursor: not-allowed;
+  opacity: 1;
 }
 
 .hint {
