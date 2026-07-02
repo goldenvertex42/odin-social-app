@@ -4,41 +4,25 @@ import Comment from '../Comment/Comment';
 import NewCommentForm from '../NewCommentForm/NewCommentForm';
 import styles from './CommentThread.module.css';
 
-export default function CommentThread({ comments: initialComments, postId, currentUserId, postOwnerId }) {
+export default function CommentThread({ comments = [], postId, currentUserId, postOwnerId, onCommentCreated, onCommentDeleted }) {
   const location = useLocation();
 
-  const [comments, setComments] = useState(() => {
-    const rawComments = Array.isArray(initialComments) ? initialComments : [];
-    return [...rawComments].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  });
-
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  useEffect(() => {
-    const rawComments = Array.isArray(initialComments) ? initialComments : [];
-    setComments([...rawComments].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
-  }, [initialComments]);
-
-  const handleCommentCreated = (newComment) => {
-    setComments((prevComments) => [newComment, ...prevComments]);
-  };
-
-  const handleCommentDeleted = (deletedCommentId) => {
-    setComments((prevComments) => prevComments.filter((comment) => comment.id !== deletedCommentId));
-  };
+  const sortedComments = [...comments].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const shouldRenderCommentForm = location.pathname.startsWith('/posts/');
   const hasHiddenComments = comments.length > 1;
   const hiddenCount = comments.length - 1;
-  const visibleComments = isExpanded ? comments : comments.slice(0, 1);
+
+  const [isExpanded, setIsExpanded] = useState(false);
+  const visibleComments = isExpanded ? sortedComments : sortedComments.slice(0, 1);
 
   return (
     <div className={styles.threadContainer} data-testid="comment-thread">
       {shouldRenderCommentForm && (
-        <NewCommentForm postId={postId} onCommentCreated={handleCommentCreated} />
+        <NewCommentForm postId={postId} onCommentCreated={onCommentCreated} />
       )}
 
-      {comments.length === 0 ? (
+      {sortedComments.length === 0 ? (
         <p className={styles.emptyMessage} data-testid="empty-comments-msg">
           No comments yet.
         </p>
@@ -50,7 +34,7 @@ export default function CommentThread({ comments: initialComments, postId, curre
               comment={comment}
               currentUserId={currentUserId}
               postOwnerId={postOwnerId}
-              onDeleteSuccess={handleCommentDeleted}
+              onDeleteSuccess={onCommentDeleted}
             />
           ))}
         </div>
