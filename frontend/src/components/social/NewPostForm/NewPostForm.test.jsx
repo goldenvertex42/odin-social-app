@@ -16,6 +16,16 @@ describe('NewPostForm Component', () => {
     mockOnPostCreated.mockClear();
     localStorage.clear();
     localStorage.setItem('token', 'mock-valid-jwt');
+
+    Object.defineProperty(URL, 'createObjectURL', {
+      writable: true,
+      value: vi.fn(() => 'blob:preview-test')
+    });
+
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      writable: true,
+      value: vi.fn()
+    });
   });
 
   it('renders input elements, actions layout, and submittal states correctly', () => {
@@ -30,6 +40,18 @@ describe('NewPostForm Component', () => {
     const input = screen.getByTestId('new-post-input');
     fireEvent.change(input, { target: { value: 'Valid input content string' } });
     expect(screen.getByTestId('new-post-submit')).not.toBeDisabled();
+  });
+
+  it('shows a preview when a file is selected from a FileList-like input', async () => {
+    render(<NewPostForm onPostCreated={mockOnPostCreated} />);
+
+    const file = new File(['image-bits'], 'preview-photo.png', { type: 'image/png' });
+    const fileInput = screen.getByTestId('image-file-input');
+
+    fireEvent.change(fileInput, { target: { files: { 0: file, length: 1 } } });
+
+    expect(await screen.findByTestId('image-preview-wrapper')).toBeInTheDocument();
+    expect(screen.getByAltText('Upload preview')).toHaveAttribute('src', 'blob:preview-test');
   });
 
   it('submits multi-part FormData layout payload tracking attached file fields successfully', async () => {
