@@ -1,6 +1,6 @@
 .card {
   background: var(--bg-surface);
-  border: 1px solid var(--border-main);
+  border: 2px solid var(--border-main);
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
   display: flex;
@@ -10,6 +10,7 @@
   gap: var(--spacing-sm);
   position: relative;
   box-shadow: 0 4px 12px var(--shadow-color);
+  box-sizing: border-box;
 }
 
 .profileLinkBlock {
@@ -23,11 +24,11 @@
   width: 100%;
   border-radius: var(--radius-md);
   outline: none;
-  transition: outline 0.15s ease;
+  transition: border-color 0.15s ease;
 }
 
 .profileLinkBlock:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 3px solid var(--color-primary);
   outline-offset: 4px;
 }
 
@@ -36,14 +37,26 @@
   text-decoration: underline;
 }
 
-.avatar {
+.avatar, .avatarFallback {
   width: 80px;
   height: 80px;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-full, 50%);
   object-fit: cover;
   background-color: var(--bg-app);
   margin-bottom: var(--spacing-xs);
   transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.avatarFallback {
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+  font-weight: var(--weight-bold);
+  font-size: var(--font-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--border-main);
 }
 
 .profileLinkBlock:hover .avatar {
@@ -59,7 +72,7 @@
 
 .displayName {
   font-size: var(--font-base);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   margin: 0;
   color: var(--text-main);
   transition: color 0.2s ease;
@@ -68,6 +81,7 @@
 .username {
   font-size: var(--font-xs);
   color: var(--text-muted);
+  font-weight: var(--weight-semibold);
   margin: 0;
 }
 
@@ -98,23 +112,19 @@
   padding: var(--spacing-xs);
   border-radius: var(--radius-sm);
   font-size: var(--font-sm);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   cursor: pointer;
-  border: none;
-  display: flex;
+  border: 2px solid transparent;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--spacing-xs);
-  transition: opacity 0.2s ease, background-color 0.2s ease, outline 0.2s ease;
-}
-
-.actionBtn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .actionBtn:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 3px solid var(--color-primary);
   outline-offset: 2px;
 }
 
@@ -134,53 +144,46 @@
   color: var(--btn-action-text);
 }
 
-.connectBtn:hover {
+.connectBtn:hover:not(:disabled) {
   background-color: var(--color-primary-hover);
 }
 
-.cancelBtn {
+.cancelBtn, .rejectBtn {
   background-color: var(--bg-app);
   color: var(--text-main);
-  border: 1px solid var(--border-main);
+  border-color: var(--border-main);
 }
 
-.cancelBtn:hover {
+.cancelBtn:hover:not(:disabled), .rejectBtn:hover:not(:disabled) {
   background-color: var(--bg-hover);
 }
 
 .acceptBtn {
   background-color: var(--bg-app);
-  color: var(--color-success-text);
-  border: 1px solid var(--color-success);
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
-.acceptBtn:hover {
-  opacity: 0.9;
+  color: var(--color-success);
+  border-color: var(--color-success);
 }
 
 .acceptBtn:hover:not(:disabled) {
   background-color: var(--color-success);
-  color: var(--text-main);
-  border-color: var(--color-success);
-}
-
-.rejectBtn {
-  background-color: var(--bg-app);
-  color: var(--text-muted);
-  border: 1px solid var(--border-main);
-}
-
-.rejectBtn:hover {
-  background-color: var(--bg-hover);
+  color: var(--btn-action-text, #ffffff);
 }
 
 .disconnectBtn {
-  background-color: transparent;
+  background-color: var(--bg-app);
   color: var(--color-error);
-  border: 1px solid var(--color-error);
+  border-color: var(--color-error);
 }
 
-.disconnectBtn:hover {
-  background-color: rgba(239, 68, 68, 0.08);
+.disconnectBtn:hover:not(:disabled) {
+  background-color: var(--color-error);
+  color: var(--btn-action-text, #ffffff);
+}
+
+.actionBtn:disabled {
+  background-color: var(--bg-disabled) !important;
+  color: var(--text-disabled) !important;
+  border-color: var(--border-main) !important;
+  cursor: not-allowed;
+  opacity: 1;
 }

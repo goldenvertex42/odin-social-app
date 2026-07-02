@@ -6,13 +6,7 @@ import { UserPlus, UserCheck, UserX, UserMinus } from 'lucide-react';
 
 export default function FollowCard({ member, initialStatus, onStatusChange }) {
   const defaultStatus = initialStatus || member.followStatus || 'NOT_FOLLOWING';
-
-  const {
-    relationship,
-    setRelationship,
-    isProcessing,
-    executeRelationshipAction
-  } = useRelationship(member.id, defaultStatus);
+  const { relationship, setRelationship, isProcessing, executeRelationshipAction } = useRelationship(member.id, defaultStatus);
 
   useEffect(() => {
     setRelationship(defaultStatus);
@@ -29,10 +23,11 @@ export default function FollowCard({ member, initialStatus, onStatusChange }) {
     switch (relationship) {
       case 'NOT_FOLLOWING':
         return (
-          <button
-            onClick={() => handleAction('POST', 'REQUEST_SENT')}
-            disabled={isProcessing}
-            className={`${styles.actionBtn} ${styles.connectBtn}`}
+          <button 
+            type="button"
+            onClick={() => handleAction('POST', 'REQUEST_SENT')} 
+            disabled={isProcessing} 
+            className={`${styles.actionBtn} ${styles.connectBtn}`} 
             data-testid="follow-btn"
           >
             <UserPlus className={styles.btnIcon} aria-hidden="true" size={16} />
@@ -41,10 +36,11 @@ export default function FollowCard({ member, initialStatus, onStatusChange }) {
         );
       case 'REQUEST_SENT':
         return (
-          <button
-            onClick={() => handleAction('DELETE', 'NOT_FOLLOWING')}
-            disabled={isProcessing}
-            className={`${styles.actionBtn} ${styles.cancelBtn}`}
+          <button 
+            type="button"
+            onClick={() => handleAction('DELETE', 'NOT_FOLLOWING')} 
+            disabled={isProcessing} 
+            className={`${styles.actionBtn} ${styles.cancelBtn}`} 
             data-testid="cancel-request-btn"
           >
             <UserX className={styles.btnIcon} aria-hidden="true" size={16} />
@@ -53,20 +49,22 @@ export default function FollowCard({ member, initialStatus, onStatusChange }) {
         );
       case 'REQUEST_RECEIVED':
         return (
-          <div className={styles.btnGroup}>
-            <button
-              onClick={() => handleAction('PATCH', 'FOLLOWING')}
-              disabled={isProcessing}
-              className={`${styles.actionBtn} ${styles.acceptBtn}`}
+          <div className={styles.btnGroup} role="group" aria-label="Respond to connection request">
+            <button 
+              type="button"
+              onClick={() => handleAction('PATCH', 'FOLLOWING')} 
+              disabled={isProcessing} 
+              className={`${styles.actionBtn} ${styles.acceptBtn}`} 
               data-testid="accept-btn"
             >
               <UserCheck className={styles.btnIcon} aria-hidden="true" size={16} />
               <span className={styles.btnText}>Accept</span>
             </button>
-            <button
-              onClick={() => handleAction('DELETE', 'NOT_FOLLOWING')}
-              disabled={isProcessing}
-              className={`${styles.actionBtn} ${styles.rejectBtn}`}
+            <button 
+              type="button"
+              onClick={() => handleAction('DELETE', 'NOT_FOLLOWING')} 
+              disabled={isProcessing} 
+              className={`${styles.actionBtn} ${styles.rejectBtn}`} 
               data-testid="reject-btn"
             >
               <UserX className={styles.btnIcon} aria-hidden="true" size={16} />
@@ -76,10 +74,11 @@ export default function FollowCard({ member, initialStatus, onStatusChange }) {
         );
       case 'FOLLOWING':
         return (
-          <button
-            onClick={() => handleAction('DELETE', 'NOT_FOLLOWING')}
-            disabled={isProcessing}
-            className={`${styles.actionBtn} ${styles.disconnectBtn}`}
+          <button 
+            type="button"
+            onClick={() => handleAction('DELETE', 'NOT_FOLLOWING')} 
+            disabled={isProcessing} 
+            className={`${styles.actionBtn} ${styles.disconnectBtn}`} 
             data-testid="unfollow-btn"
           >
             <UserMinus className={styles.btnIcon} aria-hidden="true" size={16} />
@@ -93,18 +92,18 @@ export default function FollowCard({ member, initialStatus, onStatusChange }) {
 
   return (
     <div className={styles.card} data-testid={`follow-card-${member.id}`}>
-      
       <Link 
         to={`/users/${member.id}`} 
-        className={styles.profileLinkBlock}
+        className={styles.profileLinkBlock} 
         aria-label={`View ${member.displayName || member.username}'s profile configuration`}
       >
-        <img
-          src={member.avatarUrl}
-          alt="" 
-          className={styles.avatar}
-          referrerPolicy="no-referrer"
-        />
+        {member.avatarUrl ? (
+          <img src={member.avatarUrl} alt="" className={styles.avatar} referrerPolicy="no-referrer" />
+        ) : (
+          <div className={styles.avatarFallback} aria-hidden="true">
+            {(member.displayName || member.username || '?').charAt(0).toUpperCase()}
+          </div>
+        )}
         <div className={styles.info}>
           <h3 className={styles.displayName}>
             {member.displayName || member.username}
@@ -113,7 +112,6 @@ export default function FollowCard({ member, initialStatus, onStatusChange }) {
           {member.bio && <p className={styles.bio}>{member.bio}</p>}
         </div>
       </Link>
-
       <div className={styles.actions}>
         {renderActionControl()}
       </div>
