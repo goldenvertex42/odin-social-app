@@ -36,7 +36,7 @@
 }
 
 .backLink:hover {
-  color: var(--text-main);
+  color: var(--color-primary-hover);
 }
 
 .backLink:focus-visible {
