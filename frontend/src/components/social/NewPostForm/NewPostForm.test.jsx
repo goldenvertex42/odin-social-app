@@ -1,14 +1,18 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import NewPostForm from './NewPostForm';
+
+vi.mock('heic2any', () => ({
+  default: vi.fn(() => Promise.resolve(new Blob(['mock-converted-jpg-bits'], { type: 'image/jpeg' })))
+}));
 
 vi.mock('../../../utils/api/api', () => ({
   customFetch: vi.fn()
 }));
 import { customFetch } from '../../../utils/api/api';
+import NewPostForm from './NewPostForm';
 
-describe('NewPostForm Component', () => {
+describe('NewPostForm Component Suite', () => {
   const mockOnPostCreated = vi.fn();
 
   beforeEach(() => {
@@ -16,16 +20,9 @@ describe('NewPostForm Component', () => {
     mockOnPostCreated.mockClear();
     localStorage.clear();
     localStorage.setItem('token', 'mock-valid-jwt');
-
-    Object.defineProperty(URL, 'createObjectURL', {
-      writable: true,
-      value: vi.fn(() => 'blob:preview-test')
-    });
-
-    Object.defineProperty(URL, 'revokeObjectURL', {
-      writable: true,
-      value: vi.fn()
-    });
+    
+    Object.defineProperty(URL, 'createObjectURL', { writable: true, value: vi.fn(() => 'blob:preview-test') });
+    Object.defineProperty(URL, 'revokeObjectURL', { writable: true, value: vi.fn() });
   });
 
   it('renders input elements, actions layout, and submittal states correctly', () => {
@@ -42,43 +39,46 @@ describe('NewPostForm Component', () => {
     expect(screen.getByTestId('new-post-submit')).not.toBeDisabled();
   });
 
-  it('shows a preview when a file is selected from a FileList-like input', async () => {
+  it('shows a preview when a file is selected from a FileList-like input using native array methods', async () => {
     render(<NewPostForm onPostCreated={mockOnPostCreated} />);
-
     const file = new File(['image-bits'], 'preview-photo.png', { type: 'image/png' });
     const fileInput = screen.getByTestId('image-file-input');
-
-    fireEvent.change(fileInput, { target: { files: { 0: file, length: 1 } } });
+    
+    fireEvent.change(fileInput, { 
+      target: { 
+        files: { 
+          item: (index) => file, 
+          length: 1 
+        } 
+      } 
+    });
 
     expect(await screen.findByTestId('image-preview-wrapper')).toBeInTheDocument();
-    expect(screen.getByAltText('Upload preview')).toHaveAttribute('src', 'blob:preview-test');
+    
+    const previewNode = screen.getByTestId('image-upload-preview-node');
+    expect(previewNode).toHaveAttribute('src', 'blob:preview-test');
   });
 
   it('submits multi-part FormData layout payload tracking attached file fields successfully', async () => {
-    const mockPostResponse = { 
-      id: 'post-99', 
-      content: 'Form testing text input', 
-      imageUrl: 'http://cloudinary.url' 
-    };
-
-    vi.mocked(customFetch).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        message: 'Post published successfully.',
-        post: mockPostResponse
-      })
-    });
+    const mockPostResponse = { id: 'post-99', content: 'Form testing text input', imageUrl: 'http://cloudinary.url' };
+    vi.mocked(customFetch).mockResolvedValueOnce({ ok: true, json: async () => ({ message: 'Post published successfully.', post: mockPostResponse }) });
 
     render(<NewPostForm onPostCreated={mockOnPostCreated} />);
-    
     const input = screen.getByTestId('new-post-input');
     fireEvent.change(input, { target: { value: 'Form testing text input' } });
-    
+
     const file = new File(['image-bits'], 'test-photo.png', { type: 'image/png' });
     const fileInput = screen.getByTestId('image-file-input');
     
-    fireEvent.change(fileInput, { target: { files: [file] } });
-    
+    fireEvent.change(fileInput, { 
+      target: { 
+        files: { 
+          item: (index) => file, 
+          length: 1 
+        } 
+      } 
+    });
+
     const form = screen.getByTestId('new-post-form');
     fireEvent.submit(form);
 

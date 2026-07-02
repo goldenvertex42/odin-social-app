@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { customFetch } from '../../../utils/api/api';
 import styles from './NewPostForm.module.css';
-import { Image, X } from 'lucide-react';
+import { Image, X, Loader2 } from 'lucide-react';
 import heic2any from 'heic2any';
 
 export default function NewPostForm({ onPostCreated }) {
@@ -36,20 +36,16 @@ export default function NewPostForm({ onPostCreated }) {
     if (isHeic) {
       try {
         setIsConverting(true);
-        
         const convertedBlob = await heic2any({
           blob: singleFileBlob,
           toType: 'image/jpeg',
           quality: 0.8
         });
-
         const newFileName = singleFileBlob.name.replace(/\.(heic|heif)$/i, '.jpg');
         singleFileBlob = new File([convertedBlob], newFileName, { type: 'image/jpeg' });
-        
-      } catch (conversionError) {
-        console.error('HEIC pipeline translation exception:', conversionError);
-        alert('Failed to process Apple HEIC image format. Please use JPEG or PNG.');
-        setIsConverting(false);
+      } catch (err) {
+        console.error('HEIC parsing failure:', err);
+        alert('Failed to process HEIC file structure. Please use JPEG or PNG.');
         return;
       } finally {
         setIsConverting(false);
@@ -80,31 +76,30 @@ export default function NewPostForm({ onPostCreated }) {
       setIsSubmitting(true);
       const formData = new FormData();
       formData.append('content', content);
-      
       if (imageFile) {
         formData.append('image', imageFile);
       }
 
       const response = await customFetch('/api/posts', { method: 'POST', body: formData });
       if (!response.ok) throw new Error('Failed to publish your post.');
-      
+
       const data = await response.json();
       onPostCreated(data.post);
       setContent('');
       handleRemoveImage();
     } catch (err) {
-      alert(err.message);
+      console.error('Post composition failure:', err);
+      alert(err.message || 'Failed to publish post. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className={styles.formContainer} data-testid="new-post-form">
+    <form onSubmit={handleSubmit} className={styles.formContainer} data-testid="new-post-form" noValidate>
       <label htmlFor="main-post-content" className={styles.visuallyHidden}>
         What's on your mind? Write a new community post
       </label>
-      
       <textarea
         id="main-post-content"
         value={content}
@@ -113,47 +108,30 @@ export default function NewPostForm({ onPostCreated }) {
         className={styles.textarea}
         data-testid="new-post-input"
         rows={3}
+        disabled={isSubmitting}
       />
 
-      {imagePreview && (
-        <div className={styles.previewContainer} data-testid="image-preview-wrapper">
-          <img 
-            src={imagePreview} 
-            alt="Upload preview" 
-            className={styles.previewImage}
-          />
-          <button
-            type="button"
-            onClick={handleRemoveImage}
-            className={styles.removeImageBtn}
-            data-testid="remove-image-btn"
-            aria-label="Remove uploaded image"
-            disabled={isSubmitting || isConverting}
-          >
-            <X size={14} aria-hidden="true" />
-          </button>
-        </div>
-      )}
-
       <div className={styles.actionBar}>
-        <label htmlFor="post-image-upload" className={styles.uploadLabel} data-testid="upload-label">
-          <Image size={16} aria-hidden="true" />
+        <label 
+          htmlFor="post-image-upload" 
+          className={`${styles.uploadLabel} ${isConverting ? styles.convertingLabel : ''}`} 
+          data-testid="upload-label"
+        >
+          {isConverting ? <Loader2 className={styles.spinner} size={16} /> : <Image size={16} aria-hidden="true" />}
           <span className={styles.uploadLabelText}>
-            {isConverting ? 'Processing HEIC...' : 'Add Image'}
+            {isConverting ? 'Processing Image...' : 'Add Image'}
           </span>
         </label>
-        
         <input
           type="file"
           id="post-image-upload"
           ref={fileInputRef}
           onChange={handleImageChange}
-          accept="image/*,.heic,.heif" /* 🌟 Update accept rules to intercept HEIC files */
+          accept="image/*,.heic,.heif"
           className={styles.fileInput}
-          data-testid="image-file-input"
           disabled={isSubmitting || isConverting}
+          data-testid="image-file-input"
         />
-
         <button
           type="submit"
           className={styles.submitBtn}
@@ -163,6 +141,27 @@ export default function NewPostForm({ onPostCreated }) {
           {isSubmitting ? 'Posting...' : 'Share'}
         </button>
       </div>
+
+      {imagePreview && (
+        <div className={styles.previewContainer} data-testid="image-preview-wrapper">
+          <img 
+            src={imagePreview} 
+            alt=""
+            className={styles.previewImage} 
+            data-testid="image-upload-preview-node"
+          />
+          <button
+            type="button"
+            onClick={handleRemoveImage}
+            className={styles.removeImageBtn}
+            data-testid="remove-image-btn"
+            aria-label="Remove uploaded image from post"
+            disabled={isSubmitting}
+          >
+            <X size={14} aria-hidden="true" />
+          </button>
+        </div>
+      )}
     </form>
   );
 }

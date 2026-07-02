@@ -8,6 +8,7 @@
   flex-direction: column;
   gap: var(--spacing-sm);
   box-shadow: 0 4px 12px var(--shadow-color);
+  box-sizing: border-box;
 }
 
 .textarea {
@@ -18,21 +19,20 @@
   border-radius: var(--radius-sm);
   background-color: var(--bg-app);
   color: var(--text-main);
-  resize: vertical;
   font-family: inherit;
   font-size: var(--font-base);
   outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  resize: vertical;
+  transition: border-color 0.2s ease;
 }
 
 .textarea::placeholder {
-  color: var(--color-text-muted-placeholder, var(--text-muted));
+  color: var(--color-text-muted-placeholder);
   opacity: 1;
 }
 
 .textarea:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-focus-ring-alpha, rgba(29, 78, 216, 0.15));
 }
 
 .textarea:focus-visible {
@@ -40,17 +40,29 @@
   outline-offset: 2px;
 }
 
+.spinner {
+  flex-shrink: 0;
+  animation: rotationSpin 1s linear infinite;
+}
+
+.convertingLabel {
+  background-color: var(--bg-disabled) !important;
+  color: var(--text-disabled) !important;
+  border-color: var(--border-main) !important;
+  cursor: wait;
+}
+
 .previewContainer {
   position: relative;
   display: block;
   width: 100%;
-  max-width: 320px;
-  min-height: 120px;
-  background-color: var(--bg-app);
-  border: 2px solid var(--border-main);
+  max-width: 100%;
+  max-height: 280px;
   border-radius: var(--radius-sm);
-  margin-top: var(--spacing-xs);
   overflow: hidden;
+  border: 2px solid var(--border-main);
+  background-color: var(--bg-app);
+  margin-top: var(--spacing-sm);
 }
 
 .previewImage {
@@ -80,9 +92,9 @@
   z-index: 20;
 }
 
-.removeImageBtn:hover {
-  background-color: var(--color-bg-disabled-danger, var(--bg-hover));
-  color: var(--color-text-critical, var(--color-error));
+.removeImageBtn:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+  color: var(--color-error);
   border-color: var(--color-error);
   transform: scale(1.05);
 }
@@ -114,12 +126,12 @@
   transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-.uploadLabel:hover {
+.uploadLabel:hover:not(.convertingLabel) {
   background-color: var(--bg-hover);
   border-color: var(--color-primary);
 }
 
-.fileInput:focus-visible + .uploadLabel,
+.fileInput:focus-visible + .uploadLabel, 
 .uploadLabel:focus-within {
   outline: 3px solid var(--color-primary);
   outline-offset: 2px;
@@ -172,11 +184,13 @@
   outline-offset: 2px;
 }
 
+.textarea:disabled,
 .submitBtn:disabled {
-  background-color: var(--color-bg-disabled, var(--bg-app));
-  color: var(--color-text-disabled, var(--text-muted));
-  border: 2px solid var(--color-border-disabled, var(--border-main));
+  background-color: var(--bg-disabled) !important;
+  color: var(--text-disabled) !important;
+  border-color: var(--border-main) !important;
   cursor: not-allowed;
+  opacity: 1;
 }
 
 .visuallyHidden {
@@ -189,4 +203,9 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+@keyframes rotationSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
