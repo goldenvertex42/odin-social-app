@@ -68,6 +68,7 @@
   margin-top: var(--spacing-xs);
 }
 
+/* 🎯 1. BASE STATIC BUTTON STATES */
 .likeButton, .deleteButton {
   background: transparent;
   border: none;
@@ -89,15 +90,22 @@
 }
 
 .activeLikedState {
-  color: var(--color-error);
+  color: var(--text-main) !important;
   font-weight: var(--weight-bold);
   opacity: 1;
 }
 
 .activeLikedState .heartIcon {
-  color: var(--color-error);
-  fill: currentColor;
+  color: var(--color-error) !important;
+  fill: var(--color-error) !important;
 }
+
+.likeButton .likeCounter,
+.activeLikedState .likeCounter {
+  color: var(--text-main) !important;
+  font-weight: var(--weight-semibold);
+}
+
 
 .deleteButton {
   justify-content: center;
