@@ -9,14 +9,11 @@ export default function AuthSuccess() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // 1. Extract the secure JWT string passed from the Express redirect
     const token = searchParams.get('token');
-
+    
     if (token) {
-      // 2. Commit it to LocalStorage so customFetch can read it downstream
       localStorage.setItem('token', token);
       
-      // 3. Force AuthContext to immediately pull the profile properties
       refreshUser().then(() => {
         navigate('/feed', { replace: true });
       });
@@ -26,9 +23,16 @@ export default function AuthSuccess() {
   }, [searchParams, refreshUser, navigate]);
 
   return (
-    <div className={styles.container}>
-      <div className={styles.spinner}></div>
-      <h2 className={styles.title}>Securing your workspace profile...</h2>
-    </div>
+    <main className={styles.container} aria-busy="true">
+      <div className={styles.spinner} role="presentation"></div>
+      
+      <h1 
+        className={styles.title} 
+        role="status" 
+        aria-live="polite"
+      >
+        Securing your workspace profile...
+      </h1>
+    </main>
   );
 }

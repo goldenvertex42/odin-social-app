@@ -4,15 +4,12 @@ import { MemoryRouter, Routes, Route } from 'react-router';
 import AuthSuccess from './AuthSuccess';
 import { AuthProvider } from '../../../context/AuthContext/AuthContext';
 
-// Mock the AuthContext values directly to observe inner synchronization hooks cleanly
 const mockRefreshUser = vi.fn(() => Promise.resolve());
 vi.mock('../../../context/AuthContext/AuthContext', async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
-    useAuth: () => ({
-      refreshUser: mockRefreshUser
-    })
+    useAuth: () => ({ refreshUser: mockRefreshUser })
   };
 });
 
@@ -34,13 +31,12 @@ describe('AuthSuccess Redirect Capture Component Suite', () => {
       </AuthProvider>
     );
 
-    // 1. Verify loading interface renders immediately
-    expect(screen.getByText('Securing your workspace profile...')).toBeInTheDocument();
+    const liveHeading = screen.getByRole('status');
+    expect(liveHeading).toBeInTheDocument();
+    expect(liveHeading).toHaveTextContent(/Securing your workspace profile/i);
 
-    // 2. Expect token parameter extraction to have written into storage parameters
     expect(localStorage.getItem('token')).toBe('mock-oauth-google-jwt-token');
 
-    // 3. Verify downstream dashboard route navigation successfully renders
     await waitFor(() => {
       expect(mockRefreshUser).toHaveBeenCalled();
       expect(screen.getByText('Social Feed Dashboard Screen')).toBeInTheDocument();
@@ -62,6 +58,7 @@ describe('AuthSuccess Redirect Capture Component Suite', () => {
     await waitFor(() => {
       expect(screen.getByText('Login Access Form Screen')).toBeInTheDocument();
     });
+
     expect(localStorage.getItem('token')).toBeNull();
   });
 });
