@@ -3,7 +3,7 @@ import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import ImageModal from './ImageModal';
 
-describe('ImageModal Component Module', () => {
+describe('ImageModal Component Module Suite', () => {
   const mockImageUrl = 'https://cloudinary.com';
   const mockAltText = 'Enlarged photography preview sample asset';
   const mockCloseCallback = vi.fn();
@@ -29,25 +29,27 @@ describe('ImageModal Component Module', () => {
     render(
       <ImageModal imageUrl={mockImageUrl} altText={mockAltText} onClose={mockCloseCallback} />
     );
-
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    
+    const dialog = screen.getByRole('dialog', { name: /image preview modal/i });
+    expect(dialog).toBeInTheDocument();
     
     const renderedImage = screen.getByRole('img');
     expect(renderedImage).toHaveAttribute('src', mockImageUrl);
     expect(renderedImage).toHaveAttribute('alt', mockAltText);
     expect(renderedImage).toHaveAttribute('referrerPolicy', 'no-referrer');
     
-    expect(screen.getByTestId('close-modal-btn')).toBeInTheDocument();
+    const closeBtn = screen.getByTestId('close-modal-btn');
+    expect(closeBtn).toBeInTheDocument();
+
+    expect(document.activeElement).toBe(closeBtn);
   });
 
   it('triggers the closure callback when selecting the close action button', () => {
     render(
       <ImageModal imageUrl={mockImageUrl} onClose={mockCloseCallback} />
     );
-
     const closeBtn = screen.getByTestId('close-modal-btn');
     fireEvent.click(closeBtn);
-
     expect(mockCloseCallback).toHaveBeenCalledTimes(1);
   });
 
@@ -55,10 +57,8 @@ describe('ImageModal Component Module', () => {
     render(
       <ImageModal imageUrl={mockImageUrl} onClose={mockCloseCallback} />
     );
-
     const backdropOverlay = screen.getByTestId('modal-backdrop');
     fireEvent.click(backdropOverlay);
-
     expect(mockCloseCallback).toHaveBeenCalledTimes(1);
   });
 
@@ -66,20 +66,18 @@ describe('ImageModal Component Module', () => {
     render(
       <ImageModal imageUrl={mockImageUrl} onClose={mockCloseCallback} />
     );
-
     fireEvent.keyDown(window, { key: 'Escape', code: 'Escape' });
-
     expect(mockCloseCallback).toHaveBeenCalledTimes(1);
   });
 
   it('locks background document layout scroll bars on mount phase, then restores them on cleanup unmount', () => {
     expect(document.body.style.overflow).toBe('visible');
-
+    
     const { unmount } = render(
       <ImageModal imageUrl={mockImageUrl} onClose={mockCloseCallback} />
     );
     expect(document.body.style.overflow).toBe('hidden');
-
+    
     unmount();
     expect(document.body.style.overflow).toBe('visible');
   });

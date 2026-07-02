@@ -4,12 +4,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.85);
+  background-color: var(--color-modal-backdrop, rgba(0, 0, 0, 0.85));
   backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: var(--z-modal-max, 2000);
+  z-index: 2000;
   padding: var(--spacing-md);
   animation: fadeIn 0.2s ease-out forwards;
 }
@@ -39,35 +39,31 @@
   right: var(--spacing-sm);
   background-color: rgba(0, 0, 0, 0.6);
   color: #ffffff;
-  border: none;
+  border: 2px solid transparent;
   cursor: pointer;
   padding: var(--spacing-xs);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-full, 50%);
   display: flex;
   align-items: center;
   justify-content: center;
   outline: none;
-  transition: background-color 0.2s ease, transform 0.15s ease, outline 0.2s ease, box-shadow 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
   z-index: 10;
 }
 
 .closeButton:hover {
   background-color: var(--color-error);
-  color: var(--text-main);
+  color: var(--btn-action-text, #ffffff); 
+  border-color: var(--color-error);
   transform: scale(1.05);
 }
 
 .closeButton:focus-visible {
-  outline: 2px solid #ffffff;
+  outline: 3px solid var(--color-primary);
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.5);
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
