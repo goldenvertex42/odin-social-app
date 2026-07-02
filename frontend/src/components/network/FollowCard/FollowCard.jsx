@@ -105,9 +105,9 @@ export default function FollowCard({ member, initialStatus, onStatusChange }) {
           </div>
         )}
         <div className={styles.info}>
-          <h3 className={styles.displayName}>
+          <h4 className={styles.displayName}>
             {member.displayName || member.username}
-          </h3>
+          </h4>
           <p className={styles.username}>@{member.username}</p>
           {member.bio && <p className={styles.bio}>{member.bio}</p>}
         </div>
