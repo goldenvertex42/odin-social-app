@@ -61,7 +61,7 @@ Handles user images by connecting the Express backend to Cloudinary cloud storag
 Built with native web standards and web accessibility guidelines (WCAG AA) in mind:
 * **Forms:** Every input field uses a semantic <label> tag. Screen-reader-only labels use a .visuallyHidden CSS class to stay invisible to sighted users while remaining readable for assistive tech.
 * **Clean Navigation:** Combined redundant links on post cards to cut keyboard tab-navigation time in half.
-* **Structure:**  Pages strictly follow HTML landmark rules, using exactly one <main> tag per view and keeping headings (<h1> to <h2>) in sequential order.
+* **Structure:**  Pages strictly follow HTML landmark rules, using exactly one <main> tag per view and keeping headings (```html<h1>``` to ```html<h2>```) in sequential order.
 * **High Contrast:** Uses CSS variables tied to HTML data- attributes for switching themes. Every palette meets accessible color contrast standards.
 
 ## System Requirements
