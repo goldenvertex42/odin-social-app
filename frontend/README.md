@@ -1,45 +1,47 @@
-# Frontend Architecture: High-Performance Single-Page React Application
+# Frontend: React User Interface
 
-The SocialSphere frontend is a highly responsive, enterprise-ready client user interface engineered using modern React Router v7 paradigms, decoupled UI state context providers, themeable component sheets, and declarative custom hooks.
+This is the frontend client for SocialSphere. It is a highly responsive, single-page web application built with React, React Router v7, and custom CSS themes. 
 
-## Technical Architecture Highlights
+## Core Architecture & Features
 
-### 1. Custom Hook Business Logic Isolation (DRY Design)
-The client application completely separates visual layout rendering from imperative business logic and network mutation lifecycles. By engineering reusable, encapsulated custom state machines, component view files remain completely thin and declarative:
-* `useRelationship`: Universal social graph mutation engine handling `POST` (follow), `PATCH` (accept), and `DELETE` (cancel/unfollow) REST operations with built-in processing lockouts across profile screens and discovery grids.
-* `usePostInteraction` / `useCommentInteraction`: Isolated interaction hooks that natively manage numerical engagement counters and evaluate session arrays to calculate user liking states dynamically.
+### 1. Separation of Logic (Custom Hooks)
+To keep the visual components clean and easy to read, all complex business logic and API requests are extracted into reusable custom hooks:
+* `useRelationship`: Handles follow requests, accepting requests, and unfollowing. It includes built-in loading states to prevent double-clicks.
+* `usePostInteraction` & `useCommentInteraction`: Manage likes, comments, and real-time counter updates across the application.
 
-### 2. Anti-Loop Network Interceptor Layer
-The core custom `customFetch` interceptor engine automates token injection and eliminates unhandled rendering crashes. 
-* **Spec Compliance:** Natively intercepts HTTP `204 No Content` and `205 Reset Content` server codes, generating a safe `Response` structure using explicit `null` body streams to comply with native Fetch API guidelines and prevent browser engine crashes.
-* **Redirection Protection:** Catches `401 Unauthorized` token expiration triggers, purges invalid session parameters, and invokes non-cyclic `window.location.replace` history transitions to completely cut off recursive network request loops at the perimeter.
+### 2. Smart API Request Wrapper (`customFetch`)
+Our custom fetch utility automates authentication and protects the application from common network crashes:
+* **Handles Empty Responses:** Safely processes HTTP `204 No Content` and `205 Reset Content` responses without throwing syntax errors.
+* **Auto-Logout Security:** Catches `401 Unauthorized` errors (like an expired session), clears local login tokens, and securely redirects the user to the login screen without causing infinite page-reload loops.
 
-### 3. Dynamic Heading Pattern
-To maintain a valid, strict sequential heading outline across fluid layouts, component headers utilize a dynamic heading wrapper pattern. Instead of hardcoding layout elements, components accept a `headingLevel` parameter property (e.g., `"h2"`, `"h3"`), mapping the string parameter directly to a capitalized element reference variable (`const Heading = headingLevel;`). This guarantees compliance regardless of whether a card component is mounted inside a primary feed container or nested inside a profile timeline section.
+### 3. Flexible Layout Headings (`headingLevel`)
+To keep our HTML structured properly for accessibility, components use a dynamic heading property. Instead of hardcoding an `<h2>` or `<h3>`, components accept a `headingLevel` prop (e.g., `headingLevel="h3"`). This ensures heading tags remain sequential whether a component is used on the main dashboard or inside a small profile card.
 
-### 4. React Portals Stacking Context Isolation
-Overlay windows and dialog trees like `<ImageModal />` utilize React Portals (`createPortal`) to physically detach their HTML nodes from their rendering parents and mount them directly to `document.body`. This breaks through any parent CSS stacking context layout traps caused by `transform`, `filter`, or `will-change` animations, ensuring `position: fixed` overlays cover 100% of the screen viewport across all feeds.
+### 4. Clean Popups & Modals (React Portals)
+Modals like `<ImageModal />` use React Portals (`createPortal`) to render directly into the HTML `<body>` tag. This keeps modal windows physically separate from their parent layout elements, preventing background CSS styles, animations, or layout constraints from accidentally cutting off or misaligning the popup overlays.
 
-### 5. Semantic Native HTML Accessibility (WCAG AA Compliance)
-The application adheres strictly to the First Rule of ARIA by preferring native HTML semantics over artificial attributes wherever possible:
-* **Programmatic Association:** Inputs and textareas utilize explicit native `<label>` tags with matching `htmlFor` and `id` properties to guarantee screen-reader (VoiceOver, NVDA) traversal.
-* **Visual Clipping:** Hidden fields utilize an off-screen clipping utility class (`.visuallyHidden`) to retain clear semantic labeling for screen readers while preserving a clean user experience.
-* **Link Consolidation:** Combined redundant, double-tab profile link targets (such as individual avatar and name links) into single, semantic keyboard-focusable blocks, reducing tab-navigation overhead by 50%.
-* **Landmark Purity:** Restructured layout outlines to ensure exactly one primary `<main>` landmark exists per route.
+### 5. Accessibility (a11y)
+Built from the ground up to support assistive technologies like screen readers:
+* **Form Labels:** Every input and textarea is explicitly connected to a native `<label>` tag using matching `id` and `htmlFor` attributes.
+* **Hidden Labels:** Labels that are hidden visually for design reasons use a `.visuallyHidden` CSS class, ensuring screen readers can still read them.
+* **Keyboard Navigation:** Redundant links (like clicking a profile picture vs. clicking a profile name) are grouped into a single focusable element, cutting keyboard tab-navigation time in half.
+* **Clear Landmarks:** Each page layout ensures exactly one `<main>` HTML tag exists per view.
 
-### 6. Fluid CSS Tokenization and Contrast Management
-The interface features six unique design configurations driven entirely by CSS Custom Properties tied to `data-` HTML attributes, including a high-contrast Cyberpunk Dark theme. All active hover text states are mathematically optimized against background variables using sRGB relative luminance checks to ensure they maintain a contrast ratio exceeding the WCAG 4.5:1 AA minimum threshold (achieving up to a 11.23:1 ratio on core panels).
+### 6. Themes & Color Contrast
+The app includes six unique visual themea controlled entirely via CSS variables and HTML `data-` attributes. All color palettes are optimized to guarantee clear readability, meeting or exceeding standard accessibility contrast ratios (4.5:1).
 
-## 🧪 Comprehensive Mock Service Worker (MSW) Testing Framework
+## 🧪 Testing & Building the App
 
-Client features are tested using **Vitest** and **React Testing Library**. By using global Mock Service Worker (MSW) server configurations, the test suites target genuine, un-mocked application contexts and `customFetch` modules. The components make real asynchronous requests against an isolated network sandbox (`handlers.js`), verifying true integration parity.
+We use **Vitest** and **React Testing Library** alongside **Mock Service Worker (MSW)**. MSW intercepts our network requests and feeds mock data to our components, allowing us to test our frontend exactly how it behaves in production.
 
-To run the frontend testing and assertion registry suite:
+### Run the Test Suite
+Launch the interactive test runner to check component functionality:
 ```bash
 npm run test
 ```
 
-To run a local production build pass to audit minified manual asset chunk splits (`rollup-plugin-visualizer` maps will generate under `dist/stats.html`):
+### Build and Preview for Production
+To create an optimized production build and preview it locally (this also generates a visual file-size report at `dist/stats.html`):
 ```bash
 npm run build
 npm run preview

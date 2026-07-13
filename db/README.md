@@ -1,23 +1,23 @@
-# Relational Database Layer: Schema Modeling and Migration Engine
+# Database Layer: Prisma & PostgreSQL
 
-This directory contains the domain logic layer responsible for data persistence, schema mutations, and constraint mapping using Prisma ORM.
+This directory handles everything related to our database. We use **Prisma ORM** to connect our backend server to a **PostgreSQL** database, manage our data tables, and handle database updates.
 
-## Relational Schema Architecture
+## Database Tables (Schema)
 
-The database is built on top of a highly optimized PostgreSQL relational instance, enforcing data integrity through relational keys, cascading deletion handlers, and unique indexing strategies.
+Our database is built with clear relationships between tables. It includes built-in safety rules (cascading deletes) to clean up related data automatically and index rules to prevent duplicate entries.
 
-### Core Entity Definitions
+### Core Tables
+* **User:** Stores user account details, profile info, and application settings.
+* **Post:** Contains text, links to uploaded images, creation timestamps, and a connection to the user who wrote it.
+* **Comment:** Stores text responses linked directly to specific posts and authors.
+* **PostLike / CommentLike:** Small helper tables that connect users to the posts or comments they like. They make sure a user can only like an item once.
+* **Follow:** Tracks friend requests and connections between users using a status field (`PENDING` or `ACCEPTED`).
 
-* **User**: Tracks member credentials, profile content, active workspace preferences, and application session presence parameters.
-* **Post**: Contains text bodies, generated image references, author relational bindings, and timestamp markers.
-* **Comment**: Embedded transactional strings linked to posts, managing chronological discussion tracks.
-* **PostLike / CommentLike**: Junction tables utilizing composite primary indexing models to map engagement fields cleanly while eliminating duplicate entry overflows.
-* **Follow**: Tracks multi-stage social connection networks, managing an internal status state array (`PENDING`, `ACCEPTED`).
+## Performance & Data Safety
 
-## Performance and Optimization Strategies
+### 1. Smart Duplication Prevention (Composite Keys)
+To make sure a user cannot like the exact same post multiple times, we use composite IDs. This combines the `postId` and `userId` into a single unique identifier, allowing the database to instantly find or reject records:
 
-### 1. Composite Unique Indexing
-Engagement toggles map queries through multi-column indexes to look up values instantly without exhausting the system's runtime resources:
 ```prisma
 model PostLike {
   postId String
@@ -29,10 +29,12 @@ model PostLike {
 }
 ```
 
-### 2. Cascading Deletion Safety Chains
-To prevent database row bloat and orphan references, post modifications automatically handle nested dependency data wipes down the cascade line whenever a post or comment node is purged by its creator.
+### 2. Automatic Cleanup (Cascading Deletes)
+To keep the database clean and prevent broken data trails, we use `onDelete: Cascade`. If a user deletes a post, the database automatically deletes every comment and like attached to that specific post at the exact same time.
 
-## Available Utility Commands
+## Database Commands
 
-* `npm run migrate:dev`: Generates SQL tracking sheets and updates the active developer PostgreSQL container structure.
-* `npm run studio`: Fires up a visual browser client dashboard to inspect local tables and database seeds directly.
+Run these commands inside the `db/` directory to manage your local database:
+
+* `npm run migrate:dev` – Saves changes made to your schema file and updates your local PostgreSQL database tables.
+* `npm run studio` – Opens a visual dashboard in your browser to view, add, or edit data inside your local database tables.

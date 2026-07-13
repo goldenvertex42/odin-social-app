@@ -1,43 +1,41 @@
-# Stateless REST API Engine and Routing Layer
+# Backend: Express REST API Server
 
-The SocialSphere backend is an Express-driven, stateless REST API server focused on asynchronous request processing, session token translation, cascading data erasure pipelines, and multipart cloud media binary streaming.
+This is the backend server for SocialSphere. It is a stateless REST API built with Node.js and Express that connects our React frontend to our PostgreSQL database, manages user authentication, and handles image uploads.
 
-## Technical Execution Matrix
+## Core Architecture & Features
 
-* **Security Guardrails**: Enforces secure Cross-Origin Resource Sharing (CORS) policies matching dynamic production environment domains. The server features an automated, anti-loop proxy layer that immediately halts invalid requests, blocking malicious traffic or corrupted sessions at the perimeter.
-* **Stateless Authentication Pipelines**: Implements Passport.js and JSON Web Tokens (JWT) to secure user endpoints. It runs extraction scripts that verify request cryptographics on every endpoint hit without managing heavy, state-bloated session objects on the server.
-* **Media Stream Handling**: Streams files directly to Cloudinary cloud nodes using chunked binary multipart streams via Multer storage memory buffers, eliminating local temporary file storage overhead entirely.
+* **Security Guardrails:** Uses CORS to control which web domains can talk to our API. It includes middleware to quickly catch and stop invalid or corrupted requests before they strain the server.
+* **Simple Authentication (JWT):** Uses Passport.js and JSON Web Tokens (JWT). When a user logs in, they get a secure token. The server checks this token on protected routes instead of storing heavy user session data in the server's memory.
+* **Cloud Image Uploads:** Processes user images using Multer and streams them directly to Cloudinary cloud storage. This means the server never saves permanent files onto its own local hard drive.
 
-## 🔌 Tested Endpoints Protocol
+## API Endpoints
 
-### 1. Authentication Contexts (`/api/auth`)
-* `POST /register`: Accepts payload strings, maps fallback user identities using Gravatar, and generates signed access tokens.
-* `POST /login`: Validates local text credentials and activates user network availability visibility parameters.
-* `POST /logout`: Terminates active user tracking sessions and resets presence markers back to false.
-* `POST /guest`: Generates an ephemeral recruiter session using pre-configured color presets.
+### 1. Authentication (`/api/auth`)
+* `POST /register` – Creates a new user account, assigns a default Gravatar profile picture if none is provided, and logs them in.
+* `POST /login` – Checks user credentials and issues a secure login token.
+* `POST /logout` – Logs the user out and clears their active session.
+* `POST /guest` – Creates a temporary guest account with pre-set data so recruiters can easily test the app.
 
-### 2. Social Feeds & Media Deletion Contexts (`/api/posts`)
-* `GET /feed`: Aggregates posts published by the user and their accepted follow connections, sorted descending chronologically.
-* `GET /user/:id`: Compiles an individual user's published history stack.
-* `POST /`: Validates and writes fresh content blocks with optional multi-part media attachments.
-* `DELETE /:id`: **[Cascade Pipeline]** Deletes a post, drops all nested relational comment nodes, and triggers an immediate remote binary media destruction sequence on Cloudinary to prevent orphan storage leaks.
+### 2. Social Feeds & Posts (`/api/posts`)
+* `GET /feed` – Fetches a chronological feed of posts from the user and the people they follow.
+* `GET /user/:id` – Fetches a specific user's post history.
+* `POST /` – Creates a new post with text and optional image uploads.
+* `DELETE /:id` – Deletes a post, all of its comments, and automatically removes the attached image from Cloudinary.
 
-### 3. Comment Thread Contexts (`/api/comments`)
-* `POST /post/:postId`: Appends threaded replies onto active post canvas layers.
-* `GET /post/:postId`: Pulls chronological discussion streams in descending order.
-* `DELETE /:commentId`: **[Asymmetric Moderation Guard]** Validates whether the executing `currentUserId` matches the comment author OR the parent post author, authorizing post authors to moderate third-party comments on their own canvas.
+### 3. Comments (`/api/comments`)
+* `POST /post/:postId` – Adds a new comment to a specific post.
+* `GET /post/:postId` – Fetches all comments for a post, sorted from newest to oldest.
+* `DELETE /:commentId` – Deletes a comment. To make moderation easy, a comment can be deleted by either the person who wrote the comment OR the owner of the post.
 
-### 4. Account Destruction Contexts (`/api/users`)
-* `PUT /profile`: Updates basic user metadata text fields and theme configuration presets.
-* `DELETE /profile`: **[Total Platform Purge]** Irreversibly purges a user's entire identity profile row. This action triggers a database cascade that wipes their authored posts, comment threads, likes, and relational connection rows, followed by a total cloud media asset clear. Features a protection shield (`isGuest`) to lock down the core recruiter sandbox profile.
+### 4. User Profiles & Account Deletion (`/api/users`)
+* `PUT /profile` – Updates profile details and user theme preferences.
+* `DELETE /profile` – Permanently deletes a user's account. This deletes their profile, posts, comments, likes, and all of their uploaded images from Cloudinary. A safety check prevents the public guest account from being deleted.
 
-## 🧪 Continuous Integration Verification Testing
+## Testing the API
 
-The API uses **Jest** and **Supertest** to evaluate integration behavior against an isolated PostgreSQL test database instance. 
+We use **Jest** and **Supertest** to test our API endpoints against a separate, isolated test database. The test runner automatically resets the database tables before each test runs to make sure results are accurate.
 
-To run the full backend testing suite:
+To run the backend test suite:
 ```bash
 npm run test
 ```
-
-The test runner boots cleanly, resets tables dynamically via centralized cleanup helpers before each hook execution, and clears connections silently post-evaluation to prevent open loop hangs.
